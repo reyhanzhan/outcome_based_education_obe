@@ -1,6 +1,21 @@
 @extends('layouts.app')
-@section('title', 'Edit Profil Lulusan')
+@section('title', 'Daftar Capaian Pembelajaran Lulusan')
 @section('content')
+    <style>
+        .custom-table thead {
+            color: #ffffff !important;
+            background-color: #0052A2 !important;
+        }
+
+        .custom-table thead th {
+            color: #ffffff !important;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
+
+
+
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="form-card">
             <h2 class="text-primary text-center mb-4">Edit CPL</h2>
@@ -91,4 +106,6 @@
     .custom-btn:active {
         transform: translateY(1px);
     }
+
+    
 </style>

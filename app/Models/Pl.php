@@ -16,5 +16,10 @@ class Pl extends Model
         'deskripsi',
         'unsur',
     ];
+
+    public function cpl()
+    {
+        return $this->belongsToMany(Cpl::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+    }
 }
 

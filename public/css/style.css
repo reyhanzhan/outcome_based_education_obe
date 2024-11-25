@@ -1,0 +1,10 @@
+.custom-table thead {
+    color: #ffffff !important;
+    background-color: #0052A2 !important;
+}
+
+.custom-table thead th {
+    color: #ffffff !important;
+    text-align: center;
+    padding: 1rem;
+}

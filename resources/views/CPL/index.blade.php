@@ -1,14 +1,30 @@
 @extends('layouts.app')
 @section('title', 'Daftar Capaian Pembelajaran Lulusan')
 @section('content')
+    <style>
+        .custom-table thead {
+            color: #ffffff !important;
+            background-color: #0052A2 !important;
+        }
+
+        .custom-table thead th {
+            color: #ffffff !important;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
+
+
     <div class="container">
+        {{-- ini agar tabel tidak terlalu ke atas, ganti dengan  --}}
         <div class="container-title mb-4">
             <h1 class="display-5">Daftar CPL</h1>
             <p class="lead text-muted">Lihat informasi kode CPL dan deskripsi di bawah ini.</p>
         </div>
 
         <!-- Pembungkus kotak dengan shadow -->
-        <div class="card p-4 shadow-lg border-0 mb-5 border-top" style="background-color: #ffffff; border-radius: 15px;">
+        <div class="card p-4 shadow-lg border-0 mb-5 border-top"
+            style="background-color: #ffffff; border-radius: 15px; border-top: 3px solid #198754!important;">
             <div class="d-flex justify-content-between mb-3">
                 <!-- Tombol Tambah -->
                 <a href="{{ url('/CPL/create') }}" type="button" class="btn btn-success custom-btn-green">
@@ -17,13 +33,19 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-striped" style="background-color: #004d00">
-                    <thead class="table-primary">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="custom-thead">
                         <tr>
-                            <th scope="col" style="width: 5%">NO</th>
-                            <th scope="col">CPL</th>
-                            <th scope="col" style="width: 20%">SINGKATAN CPL</th>
-                            <th scope="col" style="width: 20%">AKSI</th>
+                            <th scope="col"
+                                style="color: #ffffff !important; background-color: #0052A2 !important; width: 5%;">NO</th>
+                            <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important;">CPL
+                            </th>
+                            <th scope="col"
+                                style="color: #ffffff !important; background-color: #0052A2 !important; width: 20%;">
+                                SINGKATAN CPL</th>
+                            <th scope="col"
+                                style="color: #ffffff !important; background-color: #0052A2 !important; width: 20%;">AKSI
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,8 +80,6 @@
 @endsection
 
 <style>
-
-
     .table th,
     .table td {
         text-align: center;

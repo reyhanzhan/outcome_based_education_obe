@@ -15,4 +15,9 @@ class Cpl extends Model
         'kode_cpl',
         'deskripsi',
     ];
+
+    public function pl()
+    {
+        return $this->belongsToMany(Pl::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+    }
 }

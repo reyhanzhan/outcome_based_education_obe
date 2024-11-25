@@ -3,6 +3,7 @@
 use App\Http\Controllers\CplController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PlController;
+use App\Http\Controllers\PemetaanController;
 use App\Models\Pl;
 use Illuminate\Support\Facades\Route;
 
@@ -79,3 +80,7 @@ Route::put('/v/member/update/{name}', [CplController::class, 'update'])->name('c
 
 // Route untuk menghapus kartu bisnis
 Route::delete('/v/{name}', [CplController::class, 'destroy'])->name('cpl.destroy')->middleware('auth');
+
+// Routing pemetaan
+Route::get('/pemetaan', [PemetaanController::class, 'index'])->name('pemetaan.index');
+Route::post('/pemetaan/update', [PemetaanController::class, 'update'])->name('pemetaan.update');
