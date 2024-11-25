@@ -14,6 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="vendor/fontawesome-free-6.5.1-web/css/all.min.css">
     <link rel="stylesheet" href="fonts/HelveticaNeue/HelveticaNeue.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
     <link rel="icon" href="/img/logo-uwp1.png" type="image/x-icon">
 
     <!-- Custom Styles -->
@@ -22,7 +25,7 @@
             font-family: 'Roboto', sans-serif;
             background-color: #f4f4f9;
             overflow-x: hidden;
-
+           
             /* iki gawe scrol sing horizontal e catatt */
         }
 
@@ -102,7 +105,7 @@
             /* Ukuran e width */
             z-index: 1000;
             /* border-right: 2px solid #ffffff; */
-        
+
         }
 
         .sidebar.show {
@@ -169,15 +172,17 @@
             }
         }
 
+
         /* Styles for main content */
         .main-content {
             transition: margin-left 0.3s ease;
-            padding: 20px;
+            /* padding: 20px; */
             background-color: #ffffff;
             min-height: 100vh;
-            /* Ensure it takes full height */
             margin-left: 0;
-            /* Reset margin */
+            /* buat hilangkan jarak navbar dengann sidebar */
+            padding-left: 0;
+            /* buat hilangkan jarak navbar dengann sidebar */
         }
 
         /* Menyembunyikan tombol close pada layar besar */
@@ -281,22 +286,41 @@
 
 
             <!-- Main Content -->
-            <div class="col-12 col-lg main-content" id="mainContent" style="background-image: url('/img/texture.jpg'); background-repeat:round;"
-                style="overflow-x: hidden">
+            <div class="col-12 col-lg main-content" id="mainContent"
+                style="background-image: url('/img/texture.jpg'); background-repeat:round;" style="overflow-x: hidden">
                 <nav class="navbar navbar-expand-lg bg-body-secondary mb-4">
                     <div class="container-fluid">
                         <button class="navbar-toggler" type="button" id="toggleSidebar">
                             <span class="navbar-toggler-icon"></span>
                         </button>
+
                         <a href="#" class="navbar-brand ms-auto d-none d-lg-inline">
-                            <img src="{{ asset('img/logo-uwp.jpg') }}" alt="LOGO" width="50">
+                            {{-- <img src="{{ asset('img/logo-uwp.jpg') }}" alt="LOGO" width="50"> --}}
                         </a>
+
+
+                        <!-- Cek jika pengguna sudah login -->
+                        @if (Auth::check())
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa-regular fa-circle-user" style="font-size: 30px;"></i>
+                                    <div class="ms-2">
+                                        <span class="welcome-text"
+                                            style="display: block; font-weight: bold;">Welcome</span>
+                                        <span>{{ Auth::user()->name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+
+
                     </div>
                 </nav>
                 <!-- Content Section -->
 
                 @yield('content')
-                
+
                 {{-- end section --}}
             </div>
             <!-- End Main Content -->

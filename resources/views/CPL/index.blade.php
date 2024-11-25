@@ -8,7 +8,7 @@
         </div>
 
         <!-- Pembungkus kotak dengan shadow -->
-        <div class="card p-4 shadow-lg border-0 mb-5" style="background-color: #ffffff; border-radius: 15px;">
+        <div class="card p-4 shadow-lg border-0 mb-5 border-top" style="background-color: #ffffff; border-radius: 15px;">
             <div class="d-flex justify-content-between mb-3">
                 <!-- Tombol Tambah -->
                 <a href="{{ url('/CPL/create') }}" type="button" class="btn btn-success custom-btn-green">
@@ -58,7 +58,10 @@
 @endsection
 
 <style>
-    .table th, .table td {
+
+
+    .table th,
+    .table td {
         text-align: center;
         vertical-align: middle;
         padding: 1rem;
@@ -85,12 +88,16 @@
     }
 
     .card {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Shadow lebih tebal */
-        transition: all 0.3s ease; /* Animasi saat hover */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        /* Shadow lebih tebal */
+        transition: all 0.3s ease;
+        /* Animasi saat hover */
     }
 
     .card:hover {
-        transform: translateY(-5px); /* Efek mengangkat saat di-hover */
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); /* Shadow lebih besar */
+        transform: translateY(-5px);
+        /* Efek mengangkat saat di-hover */
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        /* Shadow lebih besar */
     }
 </style>
