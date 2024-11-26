@@ -4,6 +4,8 @@ use App\Http\Controllers\CplController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PlController;
 use App\Http\Controllers\PemetaanController;
+use App\Http\Controllers\CpmkController;
+use App\Http\Controllers\BkController;
 use App\Models\Pl;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +42,7 @@ Route::get('/', [LoginController::class,  'showLoginForm'])->name('login');
 
 
 
-// Route untuk menampilkan form tambah kartu nama
+// Route untuk menampilkan PL index
 Route::get('/PL/index', [PlController::class, 'index'])->name('pl.index')->middleware('auth');
 
 // Route untuk menampilkan form tambah kartu nama
@@ -60,10 +62,49 @@ Route::delete('/pl/{id}', [PlController::class, 'destroy'])->name('pl.destroy')-
 
 
 
-
-
+// Route untuk menampilkan CPMK index
+Route::get('/CPMK/index', [CpmkController::class, 'index'])->name('cpmk.index')->middleware('auth');
 
 // Route untuk menampilkan form tambah kartu nama
+Route::get('/CPMK/create', [CpmkController::class, 'create'])->name('cpmk.create')->middleware('auth');
+
+// Route untuk menyimpan kartu nama yang baru dibuat
+Route::post('/CPMK/index', [CpmkController::class, 'store'])->name('cpmk.store')->middleware('auth');
+
+Route::get('/cpmk/{id}/edit', [CpmkController::class, 'edit'])->name('cpmk.edit')->middleware('auth');
+
+// Route untuk mengupdate kartu bisnis
+Route::put('/cpmk/{id}', [CpmkController::class, 'update'])->name('cpmk.update')->middleware('auth');
+
+// Route untuk menghapus kartu bisnis
+Route::delete('/cpmk/{id}', [CpmkController::class, 'destroy'])->name('cpmk.destroy')->middleware('auth');
+
+
+
+// Route untuk menampilkan CPMK index
+Route::get('/BK/index', [BkController::class, 'index'])->name('bk.index')->middleware('auth');
+
+// Route untuk menampilkan form tambah kartu nama
+Route::get('/BK/create', [BkController::class, 'create'])->name('bk.create')->middleware('auth');
+
+// Route untuk menyimpan kartu nama yang baru dibuat
+Route::post('/BK/index', [BkController::class, 'store'])->name('bk.store')->middleware('auth');
+
+Route::get('/bk/{id}/edit', [BkController::class, 'edit'])->name('bk.edit')->middleware('auth');
+
+// Route untuk mengupdate kartu bisnis
+Route::put('/bk/{id}', [BkController::class, 'update'])->name('bk.update')->middleware('auth');
+
+// Route untuk menghapus kartu bisnis
+Route::delete('/bk/{id}', [BkController::class, 'destroy'])->name('bk.destroy')->middleware('auth');
+
+
+
+
+
+
+
+// Route untuk menampilkan CPL index
 Route::get('/CPL/index', [CplController::class, 'index'])->name('cpl.index')->middleware('auth');
 
 // Route untuk menampilkan form tambah kartu nama
@@ -80,6 +121,10 @@ Route::put('/v/member/update/{name}', [CplController::class, 'update'])->name('c
 
 // Route untuk menghapus kartu bisnis
 Route::delete('/v/{name}', [CplController::class, 'destroy'])->name('cpl.destroy')->middleware('auth');
+
+
+
+
 
 // Routing pemetaan
 Route::get('/pemetaan', [PemetaanController::class, 'index'])->name('pemetaan.index');

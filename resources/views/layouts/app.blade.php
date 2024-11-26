@@ -85,7 +85,7 @@
             /* Hover effect for icons */
         }
 
-        
+
         .sidebar {
             background-color: #2C3E50;
             color: #ffffff;
@@ -545,37 +545,37 @@
         }
 
         @media (max-width: 768px) {
-        .navbar-custom {
-            flex-direction: column;
-            padding: 15px;
+            .navbar-custom {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .navbar-brand-logo {
+                margin-bottom: 10px;
+            }
+
+            .navbar-brand-logo img {
+                width: 40px;
+            }
+
+
+
+            .dropdown-menu {
+                max-width: 100%;
+                left: 0;
+                right: 0;
+            }
+
+            .dropdown-menu .profile-header {
+                padding: 10px;
+            }
+
+            .profile-header .profile-img {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
         }
-
-        .navbar-brand-logo {
-            margin-bottom: 10px;
-        }
-
-        .navbar-brand-logo img {
-            width: 40px;
-        }
-
-
-
-        .dropdown-menu {
-            max-width: 100%;
-            left: 0;
-            right: 0;
-        }
-
-        .dropdown-menu .profile-header {
-            padding: 10px;
-        }
-
-        .profile-header .profile-img {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-        }
-    }
     </style>
 </head>
 
@@ -626,14 +626,16 @@
                                 <a href="#" class="btn profile-menu-btn">
                                     <i class="bi bi-person"></i> Profil
                                 </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                    style="display: none;">
                                     @csrf
                                 </form>
-                                <a href="#" class="btn profile-menu-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <a href="#" class="btn profile-menu-btn"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                     <i class="bi bi-box-arrow-right"></i> Keluar
                                 </a>
                             </div>
-                            
+
                         </ul>
                     </div>
                 </div>
@@ -663,10 +665,28 @@
                         </li>
                         <li class="breadcrumb-item dropdown">
                             <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">Pemetaan CPL-PL</a>
+                                aria-expanded="false">CPMK</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/pemetaan">Daftar Pemetaan</a></li>
-                                {{-- <li><a class="dropdown-item" href="/PL/create">Tambah PL</a></li> --}}
+                                <li><a class="dropdown-item" href="/CPMK/index">Daftar CPMK</a></li>
+                                <li><a class="dropdown-item" href="/CPMK/create">Tambah CPMK</a></li>
+                            </ul>
+                        </li>
+                        <li class="breadcrumb-item dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false">BK</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/BK/index">Daftar BK</a></li>
+                                <li><a class="dropdown-item" href="/BK/create">Tambah BK</a></li>
+                            </ul>
+                        </li>
+                        <li class="breadcrumb-item dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false">Pemetaan</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('pemetaan.index') }}">Pemetaan CPL-BK</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('pemetaan.index') }}">Pemetaan CPL-PL</a>
+                                </li>
                             </ul>
                         </li>
                     </ol>
@@ -702,7 +722,6 @@
                             </li>
                         </ul>
                     </div>
-
                 </nav>
             </div>
 

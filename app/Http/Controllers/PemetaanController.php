@@ -13,17 +13,23 @@ class PemetaanController extends Controller
     {
         $cpl = Cpl::with('pl')->get();
         $pl = Pl::all();
-        return view('pemetaan.index', compact('cpl', 'pl'));
+        return view('pemetaan_CPL-PL.index', compact('cpl', 'pl'));
     }
 
     public function update(Request $request)
     {
         $data = $request->input('mapping'); // Data dari form
+        // dd($data);
+        // Perulangan untuk memperbarui data CPL ke PL
         foreach ($data as $cplId => $plIds) {
+            $cpl = Cpl::find($cplId);
+
+            // Simpan data yang baru dicentang
+            $syncData = [];
             foreach ($plIds as $plId => $checked) {
-                $cpl = Cpl::find($cplId);
-                $cpl->pls()->syncWithoutDetaching([$plId => ['checked' => $checked]]);
+                $syncData[$plId] = ['checked' => $checked];
             }
+            $cpl->pl()->sync($syncData); // Menghapus yang tidak dicentang, menambahkan yang baru
         }
 
         return redirect()->route('pemetaan.index')->with('success', 'Pemetaan berhasil diperbarui!');
