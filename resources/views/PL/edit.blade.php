@@ -25,8 +25,8 @@
 
                 <!-- Input untuk unsur -->
                 <div class="mb-3">
-                    <label for="unsur" class="form-label">Unsur</label>
-                    <textarea id="unsur" name="unsur" class="custom-input" rows="3" required>{{ $pl->unsur }}</textarea>
+                    <label for="kategori" class="form-label">Kategori</label>
+                    <textarea id="kategori" name="kategori" class="custom-input" rows="3" required>{{ $pl->kategori }}</textarea>
                 </div>
 
                 <!-- Tombol Kembali dan Simpan -->

@@ -14,10 +14,16 @@ class Cpl extends Model
     protected $fillable = [
         'kode_cpl',
         'deskripsi',
+        'kategori',
     ];
 
     public function pl()
     {
         return $this->belongsToMany(Pl::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+    }
+
+    public function pl2()
+    {
+        return $this->belongsToMany(Pl::class, 'pemetaan_cpmkpl')->withPivot('checked')->withTimestamps();
     }
 }

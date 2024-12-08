@@ -108,7 +108,7 @@
         <form action="/login" method="POST">
             @csrf
             <div class="form-floating">
-                <input type="text" name="email" class="form-control @error('email') is-invalid @enderror" 
+                <input type="text" name="email" class="form-control @error('email') is-invalid @enderror"
                        id="email" placeholder="email" required value="{{ old('email') }}">
                 <label for="email">Email</label>
                 @error('email')

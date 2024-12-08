@@ -26,7 +26,7 @@
                                 style="color: #ffffff !important; background-color: #0052A2 !important; width: 1px;">NO</th>
                             <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important; width: 5px;">PL</th>
                             <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important; width: 2px;">SINGKATAN PL</th>
-                            <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important; width: 5px;">UNSUR</th>
+                            <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important; width: 5px;">KATEGORI</th>
                             <th scope="col" style="color: #ffffff !important; background-color: #0052A2 !important; width: 5px;">AKSI</th>
                         </tr>
                     </thead>
@@ -36,7 +36,7 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $ples->deskripsi }}</td>
                                 <td>{{ $ples->kode_pl }}</td>
-                                <td>{{ $ples->unsur }}</td>
+                                <td>{{ $ples->kategori }}</td>
                                 <td>
                                     <!-- Tombol Edit -->
                                     <a href="{{ route('pl.edit', $ples->id) }}" class="btn btn-warning btn-sm">

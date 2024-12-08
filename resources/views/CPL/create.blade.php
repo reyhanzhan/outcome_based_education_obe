@@ -34,12 +34,12 @@
                         required></textarea>
                 </div>
 
-                <!-- Input Unsur -->
-                {{-- <div class="form-group mb-4 position-relative">
+                <!-- Input kategori -->
+                <div class="form-group mb-4 position-relative">
                     <span class="input-icon"><i class="bi bi-list-check"></i></span>
-                    <label for="unsur" class="form-label">Unsur</label>
-                    <input type="text" name="unsur" class="form-control" id="unsur" placeholder="Masukkan unsur..." required>
-                </div> --}}
+                    <label for="kategori" class="form-label">kategori</label>
+                    <input type="text" name="kategori" class="form-control" id="unsur" placeholder="Masukkan kategori..." required>
+                </div>
 
                 <!-- Tombol submit -->
                 <div class="d-flex gap-3 mt-4">

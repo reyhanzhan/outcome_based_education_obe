@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cpl', function (Blueprint $table) {
+        Schema::create('pemetaan_cpmkpl', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade'); // Relasi ke tabel CPMK
+            $table->foreignId('pl_id')->constrained('pl')->onDelete('cascade');   // Relasi ke tabel PL
+            $table->boolean('checked')->default(false); // Status centang
             $table->timestamps();
-            $table->string('kode_cpl');
-            $table->string('deskripsi');
-            $table->string('kategori');
         });
     }
 
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cpl');
+        Schema::dropIfExists('pemetaan_cpmkpl');
     }
 };

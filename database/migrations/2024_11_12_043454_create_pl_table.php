@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('kode_pl');
             $table->string('deskripsi');
-            $table->string('unsur');
+            $table->string('kategori');
         });
     }
 

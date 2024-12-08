@@ -34,13 +34,13 @@
                     required></textarea>
             </div>
 
-            <!-- Input Unsur -->
+            <!-- Input Kategori -->
             <div class="form-group mb-4 position-relative">
                 <span class="input-icon"><i class="bi bi-list-check"></i></span>
-                <label for="unsur" class="form-label" style="color: #8293e4; font-weight: bold;">
-                    Unsur<span class="text-danger">*</span>
+                <label for="kategori" class="form-label" style="color: #8293e4; font-weight: bold;">
+                    Kategori<span class="text-danger">*</span>
                 </label>
-                <input type="text" name="unsur" class="form-control" id="unsur" placeholder="Masukkan unsur..." required>
+                <input type="text" name="kategori" class="form-control" id="kategori" placeholder="Masukkan kategori..." required>
             </div>
 
             <!-- Tombol submit -->

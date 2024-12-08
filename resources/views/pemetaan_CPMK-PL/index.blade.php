@@ -113,7 +113,6 @@
         <div class="card card-custom">
             <!-- Header -->
 
-
             <!-- Table Content -->
             <div class="table-container">
                 <!-- Tampilkan Notifikasi -->
@@ -124,7 +123,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('pemetaan_CPL-PL.update') }}" method="POST">
+                <form action="{{ route('pemetaan_CPMK-PL.update') }}" method="POST">
                     @csrf
 
                     <!-- Table -->
@@ -133,7 +132,7 @@
                             <thead>
                                 <tr>
                                     <th rowspan="2" style="width: 5%;">No</th>
-                                    <th rowspan="2" style="width: 20%;">Kode CPL</th>
+                                    <th rowspan="2" style="width: 20%;">Kode CPMK</th>
                                     <th colspan="{{ count($pl) }}">Profil Lulusan (PL)</th>
                                 </tr>
                                 <tr>
@@ -143,21 +142,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($cpl as $index => $cples)
+                                @foreach ($cpmk as $index => $cpmkes)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $cples->kode_cpl }}</td>
+                                        <td>{{ $cpmkes->kode_cpmk }}</td>
                                         @foreach ($pl as $ples)
                                             <td>
                                                 <input type="checkbox"
-                                                    name="mapping[{{ $cples->id }}][{{ $ples->id }}]"
+                                                    name="mapping[{{ $cpmkes->id }}][{{ $ples->id }}]"
                                                     value="1"
-                                                    {{ $cples->pl && $cples->pl->contains($ples->id) ? 'checked' : '' }}>
+                                                    {{ $cpmkes->pl && $cpmkes->pl->contains($ples->id) ? 'checked' : '' }}>
                                             </td>
                                         @endforeach
                                     </tr>
                                 @endforeach
                             </tbody>
+
+
+
                         </table>
                     </div>
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\PlController;
 use App\Http\Controllers\PemetaanController;
 use App\Http\Controllers\CpmkController;
 use App\Http\Controllers\BkController;
+use App\Http\Controllers\PemetaancpmkplController;
 use App\Models\Pl;
 use Illuminate\Support\Facades\Route;
 
@@ -126,6 +127,10 @@ Route::delete('/v/{name}', [CplController::class, 'destroy'])->name('cpl.destroy
 
 
 
-// Routing pemetaan
-Route::get('/pemetaan', [PemetaanController::class, 'index'])->name('pemetaan.index');
-Route::post('/pemetaan/update', [PemetaanController::class, 'update'])->name('pemetaan.update');
+// Routing pemetaan CPL-PL
+Route::get('/pemetaan_cpl-pl', [PemetaanController::class, 'index'])->name('pemetaan_CPL-PL.index');
+Route::post('/pemetaan_cpl-pl/update', [PemetaanController::class, 'update'])->name('pemetaan_CPL-PL.update');
+
+// Routing pemetaan CPMK-PL
+Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-PL.index');
+Route::post('/pemetaan_cpmkpl/update', [PemetaancpmkplController::class, 'update'])->name('pemetaan_CPMK-PL.update');

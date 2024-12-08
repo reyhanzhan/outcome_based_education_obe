@@ -34,6 +34,11 @@
                     <textarea id="deskripsi" name="deskripsi" class="custom-input" rows="3" required>{{ $cpl->deskripsi }}</textarea>
                 </div>
 
+                <div class="mb-3">
+                    <label for="kategori" class="form-label">kategori</label>
+                    <textarea id="kategori" name="kategori" class="custom-input" rows="3" required>{{ $cpl->kategori }}</textarea>
+                </div>
+
                 <div class="d-flex justify-content-between">
                     <a href="{{ route('cpl.index') }}" class="custom-btn custom-btn-blue">Kembali</a>
                     <button type="submit" class="custom-btn custom-btn-green">Simpan Perubahan</button>

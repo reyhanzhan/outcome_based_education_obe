@@ -26,14 +26,14 @@ class PlController extends Controller
         $request->validate([
             'kode_pl' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'unsur' => 'required|string',
+            'kategori' => 'required|string',
         ]);
 
         // Menyimpan data ke database
         Pl::create([
             'kode_pl' => $request->kode_pl,
             'deskripsi' => $request->deskripsi,
-            'unsur' => $request->unsur,
+            'kategori' => $request->kategori,
         ]);
 
         // Redirect ke halaman daftar dengan pesan sukses
@@ -52,14 +52,14 @@ class PlController extends Controller
         $validatedData = $request->validate([
             'kode_pl' => 'required|string',
             'deskripsi' => 'required|string',
-            'unsur' => 'required|string',
+            'kategori' => 'required|string',
         ]);
 
         $pl = Pl::findOrFail($id);
         $pl->update([
             'kode_pl' => $request->kode_pl,
             'deskripsi' => $request->deskripsi,
-            'unsur' => $request->unsur,
+            'kategori' => $request->kategori,
         ]);
 
         return redirect()->route('pl.index')->with('success', 'Data berhasil diperbarui');

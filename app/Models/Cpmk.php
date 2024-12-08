@@ -15,4 +15,9 @@ class Cpmk extends Model
         'kode_cpmk',
         'deskripsi',
     ];
+
+    public function pl()
+    {
+        return $this->belongsToMany(Pl::class, 'pemetaan_cpmkpl', 'cpmk_id', 'pl_id')->withPivot('checked')->withTimestamps();
+    }
 }

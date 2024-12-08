@@ -147,25 +147,6 @@
             border: none;
         }
 
-        /* iki gawe responsif antar mobile karo pc */
-        @media (min-width: 992px) {
-            .sidebar {
-                transform: translateX(0);
-                position: relative;
-                height: auto;
-            }
-
-            .main-content {
-                margin-left: 220px;
-                /* Adjust space for the sidebar */
-            }
-
-            .navbar-toggler {
-                display: none;
-                /* Hide the toggle button on larger screens */
-            }
-        }
-
         /* Styles for main content */
         .main-content {
             padding: 20px;
@@ -179,43 +160,21 @@
             /* buat hilangkan jarak navbar dengann sidebar */
         }
 
-        /* Menyembunyikan tombol close pada layar besar */
-        @media (min-width: 992px) {
-            .close-btn {
-                display: none;
-            }
-        }
-
-        @media (max-width: 991px) {
-            .close-btn {
-                display: block;
-                margin-left: auto;
-            }
-        }
-
         .navbar-custom {
             position: sticky;
             display: flex;
-            height: 100px;
-            /* padding: 2%; */
-            padding: 48px 20px;
-            /* padding-left: 15%; */
+            height: auto;
+            width: auto;
+            /* padding: 48px 20px; */
             align-items: center;
-            /* padding-top: 4%; */
-            padding-bottom: 5%;
-            background: url('{{ asset('img/pat_04.png') }}') #0052A2 !important;
-            top: 0;
-            /* Menempel di bagian atas */
+            justify-content: center;
+            padding-bottom: 10px;
+            padding-top: 10px;
+            background: url('{{ asset('img/pat_04.png') }}') #004680 !important;
+            /* background: url('{{ asset('img/pat_04.png') }}') #0052A2 !important; */
+            top: 0px;
             z-index: 1030;
-            /* Pastikan di atas elemen lain */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            /* Tambahkan bayangan */
-        }
-
-        .navbar-brand-logo {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
         }
 
         .navbar-brand-logo img {
@@ -243,18 +202,11 @@
             /* Jarak antara logo dan teks */
         }
 
-        .navbar-brand-text {
+        /* .navbar-brand-text {
             line-height: 1.2;
-        }
+        } */
 
-        .navbar-brand-text .main-text {
-            font-weight: bold;
-            font-size: 1.8rem;
-        }
 
-        .navbar-brand-text .sub-text {
-            font-size: 1.5rem;
-        }
 
         .user-menu {
             cursor: pointer;
@@ -265,12 +217,12 @@
             background-color: white;
             padding: 10px 20px;
             padding-left: 2%;
-            top: 110px;
+            top: 143px;
             /* Offset dari navbar */
             z-index: 1020;
-            /* Di bawah navbar */
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            /* Tambahkan bayangan */
+            /* padding: 10px 10px; */
+            font-size: 12px;
         }
 
         .btn-primary {
@@ -331,12 +283,6 @@
         .dropdown-item {
             padding: 10px 20px;
             background-color: white;
-        }
-
-        .breadcrumb {
-            list-style: none;
-            padding: 0;
-            margin: 0;
         }
 
         .breadcrumb-item+.breadcrumb-item::before {
@@ -442,7 +388,6 @@
             display: block;
         }
 
-
         .navbar-custom .dropdown-toggle i {
             font-size: 30px;
             margin-right: 10px;
@@ -454,8 +399,6 @@
             border-radius: 10px;
             overflow: hidden;
         }
-
-
 
         .navbar-custom .dropdown-menu .dropdown-header {
             background-color: #004680;
@@ -518,7 +461,6 @@
             /* Atur jarak antar tombol, bisa disesuaikan */
         }
 
-
         .profile-menu-btn {
             border: 1px solid #ddd;
             background-color: #ffffff;
@@ -544,36 +486,124 @@
             border-color: #bbb;
         }
 
-        @media (max-width: 768px) {
+
+        /* atur responsive di media query biasanya untuk laptop atau desktop */
+        /* Aturan CSS akan berlaku ketika lebar layar lebih besar dari atau sama dengan nilai yang ditentukan. */
+        /* lebar min */
+        @media (min-width: 992px) {
             .navbar-custom {
-                flex-direction: column;
-                padding: 15px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .breadcrumb-container {
+                position: sticky;
+                background-color: white;
+                padding: 10px 20px;
+                /* padding-left: 2%; */
+                top: 0px;
+                /* Offset dari navbar */
+                /* z-index: 1020; */
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                /* padding: 10px 10px; */
+                font-size: 12px;
             }
 
             .navbar-brand-logo {
-                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
             }
 
-            .navbar-brand-logo img {
-                width: 40px;
+            .logo-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 90px;
+                /* Adjust logo wrapper size */
+                height: 90px;
             }
+
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+            }
+
+            .navbar-brand-text {
+                display: flex;
+                flex-direction: column;
+                /* justify-content: center; */
+                padding-left: 15px;
+            }
+
+            .navbar-brand-text .main-text {
+                font-weight: bold;
+                font-size: 1.8rem;
+                line-height: 1.2;
+
+            }
+
+            .navbar-brand-text .sub-text {
+                font-size: 1.5rem;
+                color: #ffffff;
+
+            }
+
+            .navbar-brand-logo {
+                display: flex;
+                /* margin-top: 10px; */
+                /* padding-top: 20%; */
+                /* align-items: center;
+                text-align: center; */
+            }
+
+
+
+            .main-content {
+                margin-left: 220px;
+            }
+
+            .navbar-toggler {
+                display: none;
+            }
+        }
+
+
+        @media (min-width: 1025px) {
+            /* Untuk desktop besar */
+
+        }
+
+
+        /* atur responsive di media query biasanya untuk table/ponsel atau layar kecil*/
+        /* Aturan CSS akan berlaku ketika lebar layar kurang dari atau sama dengan nilai yang ditentukan. */
+        /* lebar max */
+        @media (max-width: 576px) {
+            .navbar-custom {
+                flex-direction: column;
+                padding: 10px;
+                height: auto;
+                /* Pastikan tinggi navbar menyesuaikan */
+            }
+
+
 
 
 
             .dropdown-menu {
-                max-width: 100%;
-                left: 0;
-                right: 0;
+                width: 100%;
+                box-shadow: none;
+                /* Hilangkan shadow untuk perangkat kecil */
             }
 
-            .dropdown-menu .profile-header {
-                padding: 10px;
+            .sidebar {
+                width: 100%;
+                height: auto;
             }
 
-            .profile-header .profile-img {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+            .content {
+                padding: 15px;
+                /* Kurangi padding pada konten */
             }
         }
     </style>
@@ -588,6 +618,7 @@
             <!-- Sticky Navbar -->
             <nav class="navbar-custom navbar-expand-lg" style="background-color: #004680">
                 <div class="container-fluid d-flex align-items-center">
+
                     <!-- Menu Hamburger -->
                     <button class="btn btn-primary d-lg-none me-3" type="button" data-bs-toggle="collapse"
                         data-bs-target="#breadcrumbMenu" aria-expanded="false" aria-controls="breadcrumbMenu">
@@ -615,12 +646,10 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown"
                             style="width: 250px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                             <div class="profile-header">
-                                {{-- <li class="text-center p-3" style="background-color: #004680; color: white;"> --}}
                                 <div class="profile-img">MR</div>
                                 <strong>Pak Alven</strong>
                                 <p class="mb-0">Kps</p>
                                 <p class="mb-0">Teknik Informatika</p>
-                                {{-- </li> --}}
                             </div>
                             <div class="profile-actions-container">
                                 <a href="#" class="btn profile-menu-btn">
@@ -635,7 +664,6 @@
                                     <i class="bi bi-box-arrow-right"></i> Keluar
                                 </a>
                             </div>
-
                         </ul>
                     </div>
                 </div>
@@ -643,88 +671,77 @@
 
             <!-- Sticky Breadcrumb -->
             <div class="breadcrumb-container">
-                <nav aria-label="breadcrumb">
-                    <!-- Breadcrumb Default -->
-                    <ol class="breadcrumb mb-0 d-none d-lg-flex">
-                        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
-                        <li class="breadcrumb-item dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">CPL</a>
+                <ol class="breadcrumb mb-0 d-none d-lg-flex">
+                    <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+                    <li class="breadcrumb-item dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">CPL</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/CPL/index">Daftar CPL</a></li>
+                            <li><a class="dropdown-item" href="/CPL/create">Tambah CPL</a></li>
+                        </ul>
+                    </li>
+                    <li class="breadcrumb-item dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">PL</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/PL/index">Daftar PL</a></li>
+                            <li><a class="dropdown-item" href="/PL/create">Tambah PL</a></li>
+                        </ul>
+                    </li>
+                    <li class="breadcrumb-item dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">CPMK</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/CPMK/index">Daftar CPMK</a></li>
+                            <li><a class="dropdown-item" href="/CPMK/create">Tambah CPMK</a></li>
+                        </ul>
+                    </li>
+                    <li class="breadcrumb-item dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">BK</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/BK/index">Daftar BK</a></li>
+                            <li><a class="dropdown-item" href="/BK/create">Tambah BK</a></li>
+                        </ul>
+                    </li>
+                    <li class="breadcrumb-item dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">Pemetaan</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('pemetaan_CPL-PL.index') }}">Pemetaan
+                                    CPL-PL</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('pemetaan_CPMK-PL.index') }}">Pemetaan
+                                    CPMK-PL</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="collapse d-lg-none" id="breadcrumbMenu">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="#" class="btn btn-primary w-100">Beranda</a>
+                        </li>
+                        <li class="list-group-item">
+                            <a href="#" class="dropdown-toggle btn btn-primary w-100"
+                                data-bs-toggle="dropdown">CPL</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="/CPL/index">Daftar CPL</a></li>
                                 <li><a class="dropdown-item" href="/CPL/create">Tambah CPL</a></li>
                             </ul>
                         </li>
-                        <li class="breadcrumb-item dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">PL</a>
+                        <li class="list-group-item">
+                            <a href="#" class="dropdown-toggle btn btn-primary w-100"
+                                data-bs-toggle="dropdown">PL</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="/PL/index">Daftar PL</a></li>
                                 <li><a class="dropdown-item" href="/PL/create">Tambah PL</a></li>
                             </ul>
                         </li>
-                        <li class="breadcrumb-item dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">CPMK</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/CPMK/index">Daftar CPMK</a></li>
-                                <li><a class="dropdown-item" href="/CPMK/create">Tambah CPMK</a></li>
-                            </ul>
-                        </li>
-                        <li class="breadcrumb-item dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">BK</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/BK/index">Daftar BK</a></li>
-                                <li><a class="dropdown-item" href="/BK/create">Tambah BK</a></li>
-                            </ul>
-                        </li>
-                        <li class="breadcrumb-item dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">Pemetaan</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('pemetaan.index') }}">Pemetaan CPL-BK</a>
-                                </li>
-                                <li><a class="dropdown-item" href="{{ route('pemetaan.index') }}">Pemetaan CPL-PL</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ol>
-
-
-
-                    <!-- Breadcrumb Hamburger (Collapse Menu) -->
-                    {{-- <button class="btn btn-primary d-lg-none me-3" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#breadcrumbMenu" aria-expanded="false" aria-controls="breadcrumbMenu">
-                        Menu
-                    </button> --}}
-
-                    <div class="collapse d-lg-none" id="breadcrumbMenu">
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <a href="#" class="btn btn-primary w-100">Beranda</a>
-                            </li>
-                            <li class="list-group-item">
-                                <a href="#" class="dropdown-toggle btn btn-primary w-100"
-                                    data-bs-toggle="dropdown">CPL</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/CPL/index">Daftar CPL</a></li>
-                                    <li><a class="dropdown-item" href="/CPL/create">Tambah CPL</a></li>
-                                </ul>
-                            </li>
-                            <li class="list-group-item">
-                                <a href="#" class="dropdown-toggle btn btn-primary w-100"
-                                    data-bs-toggle="dropdown">PL</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/PL/index">Daftar PL</a></li>
-                                    <li><a class="dropdown-item" href="/PL/create">Tambah PL</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+                    </ul>
+                </div>
             </div>
-
 
             <!-- Content Section -->
             <div class="content">
@@ -737,6 +754,5 @@
     <!-- Bootstrap 5 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 
 </html>

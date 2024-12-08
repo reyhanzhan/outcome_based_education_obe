@@ -42,7 +42,12 @@
                             </th>
                             <th scope="col"
                                 style="color: #ffffff !important; background-color: #0052A2 !important; width: 20%;">
-                                SINGKATAN CPL</th>
+                                SINGKATAN CPL
+                            </th>
+                            <th scope="col"
+                                style="color: #ffffff !important; background-color: #0052A2 !important; width: 20%;">
+                                KATEGORI
+                            </th>
                             <th scope="col"
                                 style="color: #ffffff !important; background-color: #0052A2 !important; width: 20%;">AKSI
                             </th>
@@ -54,6 +59,7 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $cples->deskripsi }}</td>
                                 <td>{{ $cples->kode_cpl }}</td>
+                                <td>{{ $cples->kategori }}</td>
                                 <td>
                                     <!-- Tombol Edit -->
                                     <a href="{{ route('cpl.edit', $cples->id) }}" class="btn btn-warning btn-sm">
