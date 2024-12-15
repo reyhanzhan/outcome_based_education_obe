@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="vendor/fontawesome-free-6.5.1-web/css/all.min.css">
-    {{-- <link rel="stylesheet" href="fonts/HelveticaNeue/HelveticaNeue.css"> --}}
     <link rel="stylesheet" href="fonts/Poppins\Poppins.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="/img/logo-uwp1.png" type="image/x-icon">
@@ -21,37 +20,27 @@
             /* background-color: #f4f4f9; */
             overflow-x: hidden;
             overflow-y: visible;
-            /* iki gawe scrol sing horizontal e catatt */
         }
 
         /* Dropdown Button */
         .dropdown-toggle {
             background-color: #ffffff;
-            /* Same color as sidebar */
             color: #ffffff;
-            /* White text color */
             border: none;
-            /* Remove default border */
             font-weight: 450;
-            /* Adjust font weight to match sidebar links */
             transition: background-color 0.3s ease;
         }
 
         .dropdown-toggle:hover {
             background-color: #34495E;
-            /* Hover effect with a slightly darker red */
         }
 
         /* Dropdown Menu */
         .dropdown-menu {
             background-color: #2C3E50;
-            /* Same color as sidebar */
             border-radius: 8px;
-            /* Match sidebar rounded corners */
             border: 1px solid #DEB887;
-            /* Same border style as sidebar */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            /* Optional shadow for better visibility */
         }
 
         /* Dropdown Item */
@@ -69,7 +58,7 @@
 
         .dropdown-item:hover {
             background-color: #2C3E50;
-            /* Hover effect with a slightly darker red */
+
             transform: scale(1.05);
             /* Slightly increase size on hover */
         }
@@ -110,17 +99,13 @@
             color: #ffffff;
             text-decoration: none;
             padding: 10px 15px;
-            /* padding gawe jarak */
             display: flex;
             align-items: center;
             border-radius: 8px;
-            /* gawe coner sing border ben apik */
             margin-bottom: 10px;
-            /* Decreased margin */
             transition: background-color 0.3s, transform 0.2s;
             font-weight: 450;
             font-size: 1.0rem;
-            /* deleh font size */
         }
 
         .sidebar a:hover {
@@ -131,16 +116,13 @@
 
         .sidebar i {
             font-size: 1.5rem;
-            /* kene tak deleh icon size */
             margin-right: 10px;
-            /* Aspace gawe jarak tect eben masuk */
             transition: color 0.3s;
             /* Smooth color transition */
         }
 
         .sidebar a:hover i {
             color: #D3D3D3;
-            /* hoper gawe effect nek arep di pejet */
         }
 
         .navbar-toggler {
@@ -202,12 +184,6 @@
             /* Jarak antara logo dan teks */
         }
 
-        /* .navbar-brand-text {
-            line-height: 1.2;
-        } */
-
-
-
         .user-menu {
             cursor: pointer;
         }
@@ -267,7 +243,6 @@
         /* Menampilkan dropdown saat hover tanpa perlu klik */
         .breadcrumb-item.dropdown:hover .dropdown-menu {
             display: block;
-
         }
 
         /* Menghilangkan background dan border dropdown menu */
@@ -486,7 +461,6 @@
             border-color: #bbb;
         }
 
-
         /* atur responsive di media query biasanya untuk laptop atau desktop */
         /* Aturan CSS akan berlaku ketika lebar layar lebih besar dari atau sama dengan nilai yang ditentukan. */
         /* lebar min */
@@ -512,6 +486,8 @@
             .navbar-brand-logo {
                 display: flex;
                 align-items: center;
+                padding-left: 15px;
+
             }
 
             .logo-wrapper {
@@ -522,33 +498,28 @@
                 /* Adjust logo wrapper size */
                 height: 90px;
             }
-
             .sidebar {
                 transform: translateX(0);
                 position: relative;
                 height: auto;
             }
-
             .navbar-brand-text {
                 display: flex;
                 flex-direction: column;
                 /* justify-content: center; */
-                padding-left: 15px;
+                padding-left: 10px;
             }
-
             .navbar-brand-text .main-text {
                 font-weight: bold;
                 font-size: 1.8rem;
                 line-height: 1.2;
 
             }
-
             .navbar-brand-text .sub-text {
                 font-size: 1.5rem;
                 color: #ffffff;
 
             }
-
             .navbar-brand-logo {
                 display: flex;
                 /* margin-top: 10px; */
@@ -556,9 +527,6 @@
                 /* align-items: center;
                 text-align: center; */
             }
-
-
-
             .main-content {
                 margin-left: 220px;
             }
@@ -568,12 +536,24 @@
             }
         }
 
-
         @media (min-width: 1025px) {
             /* Untuk desktop besar */
-
         }
 
+        @media (max-width: 991px) {
+            .breadcrumb-container {
+                position: sticky;
+                background-color: white;
+                padding: 10px 20px;
+                /* padding-left: 2%; */
+                top: 0px;
+                /* Offset dari navbar */
+                /* z-index: 1020; */
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                /* padding: 10px 10px; */
+                font-size: 12px;
+            }
+        }
 
         /* atur responsive di media query biasanya untuk table/ponsel atau layar kecil*/
         /* Aturan CSS akan berlaku ketika lebar layar kurang dari atau sama dengan nilai yang ditentukan. */
@@ -585,10 +565,6 @@
                 height: auto;
                 /* Pastikan tinggi navbar menyesuaikan */
             }
-
-
-
-
 
             .dropdown-menu {
                 width: 100%;
@@ -619,7 +595,7 @@
             <nav class="navbar-custom navbar-expand-lg" style="background-color: #004680">
                 <div class="container-fluid d-flex align-items-center">
 
-                    <!-- Menu Hamburger -->
+                    <!-- Tombol Hamburger -->
                     <button class="btn btn-primary d-lg-none me-3" type="button" data-bs-toggle="collapse"
                         data-bs-target="#breadcrumbMenu" aria-expanded="false" aria-controls="breadcrumbMenu">
                         <i class="bi bi-list"></i>
@@ -718,6 +694,7 @@
                     </li>
                 </ol>
 
+                {{-- menu hamburger --}}
                 <div class="collapse d-lg-none" id="breadcrumbMenu">
                     <ul class="list-group">
                         <li class="list-group-item">

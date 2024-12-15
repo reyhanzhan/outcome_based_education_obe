@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts_baru.app')
 @section('title', 'Daftar Capaian Pembelajaran Lulusan')
 @section('content')
     <style>
@@ -14,13 +14,7 @@
         }
     </style>
 
-
     <div class="container">
-        {{-- ini agar tabel tidak terlalu ke atas, ganti dengan  --}}
-        <div class="container-title mb-4">
-            <h1 class="display-5">Daftar CPL</h1>
-            <p class="lead text-muted">Lihat informasi kode CPL dan deskripsi di bawah ini.</p>
-        </div>
 
         <!-- Pembungkus kotak dengan shadow -->
         <div class="card p-4 shadow-lg border-0 mb-5 border-top"
