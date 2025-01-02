@@ -49,7 +49,8 @@
             text-align: center;
             padding: 15px;
             border-bottom: 2px solid #004080;
-            vertical-align: middle; /* Menyelaraskan teks di tengah */
+            vertical-align: middle;
+            /* Menyelaraskan teks di tengah */
         }
 
         .custom-table thead tr th {
@@ -95,6 +96,7 @@
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
+
             .custom-table th,
             .custom-table td {
                 font-size: 0.85rem;
@@ -113,7 +115,6 @@
         <div class="card card-custom">
             <!-- Header -->
 
-
             <!-- Table Content -->
             <div class="table-container">
                 <!-- Tampilkan Notifikasi -->
@@ -124,7 +125,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('pemetaan_CPL-PL.update') }}" method="POST">
+                <form action="{{ route('pemetaan_CPMK-CPL.update') }}" method="POST">
                     @csrf
 
                     <!-- Table -->
@@ -132,28 +133,31 @@
                         <table class="table custom-table">
                             <thead>
                                 <tr>
-                                    <th rowspan="2" style="width: 5%;">No</th>
-                                    <th rowspan="2" style="width: 20%;">Kode CPL</th>
-                                    <th colspan="{{ count($pl) }}">Profil Lulusan (PL)</th>
-                                </tr>
-                                <tr>
-                                    @foreach ($pl as $ples)
-                                        <th style="width: {{ 75 / count($pl) }}%;">{{ $ples->kode_pl }}</th>
+                                    <th>CPMK</th>
+                                    <th>CPL</th>
+                                    @foreach ($mk as $mkItem)
+                                        <th>{{ $mkItem->kode_mk }}</th>
                                     @endforeach
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($cpl as $index => $cples)
+                                @foreach ($cpmk as $cpmkItem)
                                     <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $cples->kode_cpl }}</td>
-                                        @foreach ($pl as $ples)
-                                            <td>
-                                                <input type="checkbox"
-                                                    name="mapping[{{ $cples->id }}][{{ $ples->id }}]"
-                                                    value="1"
-                                                    {{ $cples->pl && $cples->pl->contains($ples->id) ? 'checked' : '' }}>
-                                            </td>
+                                        <td rowspan="{{ count($cpl) }}">{{ $cpmkItem->kode_cpmk }}</td>
+                                        @foreach ($cpl as $index => $cplItem)
+                                            @if ($index > 0)
+                                                <tr>
+                                            @endif
+                                            <td>{{ $cplItem->kode_cpl }}</td>
+                                            @foreach ($mk as $mkItem)
+                                                <td>
+                                                    <input type="checkbox"
+                                                        name="mapping[{{ $cpmkItem->id }}][{{ $cplItem->id }}][{{ $mkItem->id }}]"
+                                                        value="1"
+                                                        {{ $cpmkItem->cpl->contains($cplItem->id) && $cpmkItem->cpl->find($cplItem->id)->pivot->mk_id == $mkItem->id ? 'checked' : '' }}>
+                                                </td>
+                                            @endforeach
+                                            </tr>
                                         @endforeach
                                     </tr>
                                 @endforeach

@@ -1,111 +1,114 @@
-@extends('layouts.app')
-@section('title', 'Daftar Bahan Kajian')
+@extends('layouts_baru.app')
+@section('title', 'Edit Bahan Kajian')
 @section('content')
-    <style>
-        .custom-table thead {
-            color: #ffffff !important;
-            background-color: #0052A2 !important;
-        }
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="row w-100">
+            <div class="col-md-8 col-lg-6 mx-auto">
+                <div class="form-card shadow-lg p-4 rounded-4 bg-white">
+                    <h2 class="text-center mb-3 text-dark font-weight-bold">Edit Bahan Kajian</h2>
 
-        .custom-table thead th {
-            color: #ffffff !important;
-            text-align: center;
-            padding: 1rem;
-        }
-    </style>
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
+                    <form action="{{ route('bk.update', $bk->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
+                        <!-- Input Kode BK -->
+                        <div class="form-group mb-4">
+                            <label for="kode_bk" class="form-label d-flex align-items-center text-primary fw-semibold">
+                                <i class="bi bi-code-slash me-2"></i> Kode BK<span class="text-danger">*</span>
+                            </label>
+                            <div class="input-container">
+                                <input type="text" name="kode_bk" class="custom-input form-control" id="kode_bk"
+                                    value="{{ $bk->kode_bk }}" placeholder="Masukkan kode BK..." required>
+                            </div>
+                        </div>
 
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="form-card">
-            <h2 class="text-primary text-center mb-4">Edit BK</h2>
+                        <!-- Input Deskripsi -->
+                        <div class="form-group mb-4">
+                            <label for="deskripsi" class="form-label d-flex align-items-center text-primary fw-semibold">
+                                <i class="bi bi-card-text me-2"></i> Deskripsi<span class="text-danger">*</span>
+                            </label>
+                            <textarea name="deskripsi" class="custom-input form-control" id="deskripsi" rows="3"
+                                placeholder="Masukkan deskripsi..." required>{{ $bk->deskripsi }}</textarea>
+                        </div>
 
-            <form action="{{ route('bk.update', $bk->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <div class="mb-3">
-                    <label for="kode_bk" class="form-label">Kode BK</label>
-                    <input type="text" id="kode_bk" name="kode_bk" class="custom-input" value="{{ $bk->kode_bk }}" required>
+                        <!-- Tombol Submit -->
+                        <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
+                            <a href="{{ route('bk.index') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-arrow-left"></i> Kembali ke Daftar
+                            </a>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-save"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="mb-3">
-                    <label for="deskripsi" class="form-label">Deskripsi</label>
-                    <textarea id="deskripsi" name="deskripsi" class="custom-input" rows="3" required>{{ $bk->deskripsi }}</textarea>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <a href="{{ route('bk.index') }}" class="custom-btn custom-btn-blue">Kembali</a>
-                    <button type="submit" class="custom-btn custom-btn-green">Simpan Perubahan</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 @endsection
 
 <style>
+    /* General Styling */
     .min-vh-100 {
         min-height: 100vh;
     }
 
     .form-card {
-        max-width: 600px;
-        width: 100%;
-        background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-        border-radius: 15px;
-        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e0e4e8;
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
     }
 
-    .text-primary {
-        color: #357ab8;
-        font-weight: 700;
+    /* Input Styling */
+    .input-container {
+        position: relative;
     }
 
     .custom-input {
-        width: 100%;
-        padding: 10px 15px;
-        border: 1px solid #ced4da;
+        padding-left: 2.5rem;
+    }
+
+    /* Label Styling */
+    .form-label i {
+        color: #357ab8;
+        font-size: 1.2rem;
+    }
+
+    /* Button Styling */
+    .btn {
         border-radius: 8px;
-        background-color: #fdfdfd;
-        transition: border 0.3s, box-shadow 0.3s;
+        font-weight: bold;
     }
 
-    .custom-input:focus {
-        border-color: #357ab8;
-        box-shadow: 0 0 8px rgba(53, 122, 184, 0.25);
-    }
-
-    .custom-btn {
-        font-size: 1.1rem;
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        transition: background 0.3s, transform 0.2s;
-    }
-
-    .custom-btn-blue {
+    .btn-primary {
         background-color: #357ab8;
-        color: #ffffff;
+        border: none;
     }
 
-    .custom-btn-blue:hover {
+    .btn-primary:hover {
         background-color: #28527a;
     }
 
-    .custom-btn-green {
+    .btn-success {
         background-color: #28a745;
-        color: #ffffff;
+        border: none;
     }
 
-    .custom-btn-green:hover {
+    .btn-success:hover {
         background-color: #218838;
     }
 
-    .custom-btn:active {
-        transform: translateY(1px);
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        .form-card {
+            padding: 20px;
+        }
     }
-
-
 </style>

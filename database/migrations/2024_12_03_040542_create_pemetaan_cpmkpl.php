@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('pemetaan_cpmkpl', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade'); // Relasi ke tabel CPMK
-            $table->foreignId('pl_id')->constrained('pl')->onDelete('cascade');   // Relasi ke tabel PL
+            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade');   // Relasi ke tabel CPL
             $table->boolean('checked')->default(false); // Status centang
             $table->timestamps();
+
+
+            $table->foreign('cpmk_id')->references('id')->on('cpmk')->onDelete('cascade');
+            $table->foreign('cpl_id')->references('id')->on('cpl')->onDelete('cascade');
         });
     }
 

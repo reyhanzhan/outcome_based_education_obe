@@ -13,11 +13,11 @@ class LoginController extends Controller
     // Menampilkan form login
     public function showLoginForm()
     {
-        
+
         if (Auth::check()) {
             return redirect()->intended('/CPL/index'); // Ganti dengan rute yang diinginkan
         }
-    
+
         return view('login.index', [
             "title" => "Login",
             "active" => "login"
@@ -51,4 +51,12 @@ class LoginController extends Controller
 
         return redirect('/');
     }
+
+    // fungsi untuk panggil semua data yang ada di user start
+    public function callName()
+    {
+        $user = Auth::user(); // Mengambil data pengguna yang sedang login
+        return view('layouts_baru', compact('user'));
+    }
+    // fungsi untuk panggil semua data yang ada di user end
 }

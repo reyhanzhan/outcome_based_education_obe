@@ -587,7 +587,7 @@
 
 <body>
     <!-- Wrapper -->
-    <div class="wrapper" style="background-color: #0080ff;">
+    <div class="wrapper" style="background-color: #0080ff;" style="background-image: url('/img/texture.jpg'); background-repeat: repeat; min-height: 100vh;">
         <!-- Tambahkan background image pada wrapper -->
         <div class="background"
             style="background-image: url('/img/texture.jpg'); background-repeat: repeat; min-height: 100vh;">

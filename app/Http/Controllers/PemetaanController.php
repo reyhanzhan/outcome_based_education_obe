@@ -32,6 +32,6 @@ class PemetaanController extends Controller
             $cpl->pl()->sync($syncData); // Menghapus yang tidak dicentang, menambahkan yang baru
         }
 
-        return redirect()->route('pemetaan_cpl-pl.index')->with('success', 'Pemetaan berhasil diperbarui!');
+        return redirect()->route('pemetaan_CPL-PL.index')->with('success', 'Pemetaan berhasil diperbarui!');
     }
 }

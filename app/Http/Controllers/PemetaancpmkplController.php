@@ -2,36 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Cpl;
 use App\Models\Cpmk;
 use App\Models\Pl;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class PemetaancpmkplController extends Controller
 {
     public function index()
     {
-        $cpmk = Cpmk::with('pl')->get();
-        $pl = Pl::all();
-        return view('pemetaan_CPMK-PL.index', compact('cpmk', 'pl'));
-        
+        $cpmk = Cpmk::with('cpl')->get();
+        $cpl = Cpl::all();
+        return view('pemetaan_CPMK-CPL.index', compact('cpmk', 'cpl'));
+
     }
 
     public function update(Request $request)
     {
         $data = $request->input('mapping'); // Data dari form
-        // dd($data);
-        // Perulangan untuk memperbarui data CPL ke PL
-        foreach ($data as $cpmkId => $plIds) {
-            $cpmk = Cpmk::find($cpmkId);
 
-            // Simpan data yang baru dicentang
-            $syncData = [];
-            foreach ($plIds as $plId => $checked) {
-                $syncData[$plId] = ['checked' => $checked];
-            }
-            $cpmk->pl()->sync($syncData); // Menghapus yang tidak dicentang, menambahkan yang baru
+        if (!$data || !is_array($data)) {
+            return redirect()->route('pemetaan_CPMK-CPL.index')
+                ->with('error', 'Data pemetaan tidak valid!');
         }
 
-        return redirect()->route('pemetaan_CPMK-PL.index')->with('success', 'Pemetaan berhasil diperbarui!');
+        // Perulangan untuk memperbarui data CPMK ke CPL
+        foreach ($data as $cpmkId => $cplIds) {
+            $cpmk = Cpmk::find($cpmkId);
+
+            if ($cpmk) {
+                // Simpan data yang baru dicentang
+                $syncData = [];
+                foreach ($cplIds as $cplId => $checked) {
+                    $syncData[$cplId] = ['checked' => $checked];
+                }
+                $cpmk->cpl()->sync($syncData);
+            }
+        }
+
+        return redirect()->route('pemetaan_CPMK-CPL.index')
+            ->with('success', 'Pemetaan berhasil diperbarui!');
     }
+
 }

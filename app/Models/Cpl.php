@@ -26,4 +26,17 @@ class Cpl extends Model
     {
         return $this->belongsToMany(Pl::class, 'pemetaan_cpmkpl')->withPivot('checked')->withTimestamps();
     }
+
+    // function cpmk start
+    public function cpmk()
+    {
+        return $this->belongsToMany(Cpmk::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+    }
+
+    public function cpmk2()
+    {
+        return $this->belongsToMany(Cpmk::class, 'pemetaan_cpmk_cpl_mk')
+                    ->withPivot('mk_id', 'checked')
+                    ->withTimestamps();
+    }
 }

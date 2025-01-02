@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts_baru.app')
 
 @section('content')
     <style>
@@ -123,7 +123,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('pemetaan_CPMK-PL.update') }}" method="POST">
+                <form action="{{ route('pemetaan_CPMK-CPL.update') }}" method="POST">
                     @csrf
 
                     <!-- Table -->
@@ -133,11 +133,11 @@
                                 <tr>
                                     <th rowspan="2" style="width: 5%;">No</th>
                                     <th rowspan="2" style="width: 20%;">Kode CPMK</th>
-                                    <th colspan="{{ count($pl) }}">Profil Lulusan (PL)</th>
+                                    <th colspan="{{ count($cpl) }}">Capaian Profil Lulusan (CPL)</th>
                                 </tr>
                                 <tr>
-                                    @foreach ($pl as $ples)
-                                        <th style="width: {{ 75 / count($pl) }}%;">{{ $ples->kode_pl }}</th>
+                                    @foreach ($cpl as $cples)
+                                        <th style="width: {{ 75 / count($cpl) }}%;">{{ $cples->kode_cpl }}</th>
                                     @endforeach
                                 </tr>
                             </thead>
@@ -146,12 +146,12 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $cpmkes->kode_cpmk }}</td>
-                                        @foreach ($pl as $ples)
+                                        @foreach ($cpl as $cples)
                                             <td>
                                                 <input type="checkbox"
-                                                    name="mapping[{{ $cpmkes->id }}][{{ $ples->id }}]"
+                                                    name="mapping[{{ $cpmkes->id }}][{{ $cples->id }}]"
                                                     value="1"
-                                                    {{ $cpmkes->pl && $cpmkes->pl->contains($ples->id) ? 'checked' : '' }}>
+                                                    {{ $cpmkes->cpl && $cpmkes->cpl->contains($cples->id) ? 'checked' : '' }}>
                                             </td>
                                         @endforeach
                                     </tr>
