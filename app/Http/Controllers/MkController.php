@@ -8,14 +8,12 @@ use App\Models\Mk;
 class MkController extends Controller
 {
     /// Method untuk menampilkan semua data CPL
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua data CPL dari model
         $mk = Mk::all();
-
-        // Mengirim data ke view CPL.index
         return view('MK.index', compact('mk'));
     }
+
 
     public function create()
     {
@@ -29,18 +27,33 @@ class MkController extends Controller
         $request->validate([
             'kode_mk' => 'required|string|max:255',
             'deskripsi' => 'required|string',
+            'sks' => 'required|string',
+            'wptwp' => 'required|string',
 
         ]);
 
         // Menyimpan data ke database
-        Mk::create([
+        // Mk::create([
+        //     'kode_mk' => $request->kode_mk,
+        //     'deskripsi' => $request->deskripsi,
+        //     'sks' => $request->sks,
+        //     'wptwp' => $request->wptwp,
+
+        // ]);
+
+        $mk = Mk::create([
             'kode_mk' => $request->kode_mk,
             'deskripsi' => $request->deskripsi,
-
+            'sks' => $request->sks,
+            'wptwp' => $request->wptwp,
         ]);
 
         // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('mk.index')->with('success', 'Data berhasil ditambahkan');
+        // Redirect ke halaman daftar dengan pesan sukses dan ID baru
+        return redirect()->route('mk.index')->with([
+            'success' => 'Data MK berhasil ditambahkan!',
+            'new_id' => $mk->id // Mendapatkan ID dari data yang baru dibuat
+        ]);
     }
 
     public function edit($id)
@@ -56,6 +69,8 @@ class MkController extends Controller
         $request->validate([
             'kode_mk' => 'required|string|max:255',
             'deskripsi' => 'required|string',
+            'sks' => 'required|string',
+            'wptwp' => 'required|string',
 
         ]);
 
@@ -64,7 +79,8 @@ class MkController extends Controller
         $mk->update([
             'kode_mk' => $request->kode_mk,
             'deskripsi' => $request->deskripsi,
-
+            'sks' => $request->sks,
+            'wptwp' => $request->wptwp,
         ]);
 
         // Redirect ke halaman daftar dengan pesan sukses

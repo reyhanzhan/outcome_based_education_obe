@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'layouts.app')</title>
+    <title>@yield('title', 'Outcome Based Education')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="fonts/Poppins\Poppins.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="/img/logo-uwp1.png" type="image/x-icon">
+    <link href="https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css" rel="stylesheet">
     <style>
         * {
             outline: solid 1px green;
@@ -23,6 +24,15 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* .page-wrapper {
+            background-image: url('/img/texture.jpg');
+            background-repeat: repeat;
+            background-size: cover;
+            background-blend-mode: overlay;
+            background-color: rgba(255, 255, 255, 0.8);
+        } */
+
 
         .page-header {
             z-index: 1000;
@@ -198,6 +208,54 @@
                 display: none;
             }
         }
+
+        #scrollToTop {
+            background-color: #004680;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        #scrollToTop:hover {
+            background-color: #0066cc;
+            transform: scale(1.1);
+        }
+
+        #scrollToTop {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #004680;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            /* Sembunyikan default */
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        #scrollToTop:hover {
+            background-color: #0066cc;
+            transform: scale(1.1);
+        }
+
+        <style>.breadcrumb-item+.breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+            margin: 0 0.5rem;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
     </style>
 </head>
 
@@ -206,7 +264,6 @@
     <!-- wrapper start -->
     <div class="page-wrapper"
         style="background-image: url('/img/texture.jpg'); background-repeat: repeat; min-height: 100vh;">
-
         <!-- page header start -->
         <header class="page-header sticky-top">
             <!-- navbar start -->
@@ -214,8 +271,6 @@
             <nav class="navbar navbar-dark bg-primary py-3 py-lg-4"
                 style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
                 <div class="container column-gap-3">
-
-
                     <div class="flex-grow-0 d-lg-none">
                         <button class="navbar-toggler rounded-0 border-0 p-0" data-bs-toggle="offcanvas"
                             data-bs-target="#sidebar">
@@ -246,7 +301,6 @@
                             /* Muncul paling atas */
                             width: 200px;
                             /* Lebar dropdown */
-                            /* height: 240px; */
                             background-color: #fff;
                             /* Latar belakang dropdown */
                             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -257,7 +311,6 @@
                             /* Border radius agar lebih estetik */
                             overflow: hidden;
                             /* Hindari elemen keluar */
-
                         }
 
                         /* end style menu profil Dropdown Menu Mengambang di Paling Atas */
@@ -279,23 +332,22 @@
                                     <span class="d-none d-lg-block">{{ Auth::user()->name }}</span>
                                 </a>
                                 <!-- Dropdown profil Menu start -->
-                                <div class="dropdown-menu dropdown-menu-end shadow"
-                                    aria-labelledby="profileDropdown" id="menu-profil" style="padding-top: 2">
+                                <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="profileDropdown"
+                                    id="menu-profil" style="padding-top: 2">
                                     <div class="text-center">
-                                        <div class="p-3 rounded-3 text-white" style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
-                                            <img src="https://via.placeholder.com/80" alt="Profile Picture"
-                                                class="rounded-circle mb-2" />
+                                        <div class="p-3 rounded-3 text-white"
+                                            style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
+
+                                            <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : 'https://via.placeholder.com/80' }}"
+                                                alt="Profile Picture" class="rounded-circle mb-2"
+                                                style="width: 80px; height: 80px;">
                                             <h6 class="fw-bold mb-0">{{ Auth::user()->name }}</h6>
                                             <small>{{ Auth::user()->jabatan }}</small><br>
                                             <small>{{ Auth::user()->prodi }}</small>
-
                                         </div>
                                         <div class="d-flex justify-content-around mt-2">
-                                            <a href="/profile" class="btn btn-outline-primary btn-sm"><i
+                                            <a href="/profile/edit" class="btn btn-outline-primary btn-sm"><i
                                                     class="bi bi-person"></i> Profil</a>
-                                            {{-- <a href="/menu" class="btn btn-outline-primary btn-sm"><i
-                                                    class="bi bi-grid"></i> Menu</a> --}}
-                                            {{-- logout start --}}
                                             <form id="logout-form" action="{{ route('logout') }}" method="POST"
                                                 style="display: none;">
                                                 @csrf
@@ -320,14 +372,9 @@
             <!-- sidebar start-->
             <div class="offcanvas-lg offcanvas-start bg-light" data-bs-scroll="true" data-bs-backdrop="static"
                 tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-                {{-- <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="sidebarLabel">Outcome Based Education</h5>
-                    <button type="button" class="btn-close" data-bs-toggle="offcanvas"
-                        data-bs-target="#sidebar"></button>
-                </div> --}}
                 <!-- Sidebar Header -->
-                <div class="offcanvas-header" style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
-                    {{-- <h5 class="offcanvas-title" id="sidebarLabel">Outcome Based Education</h5> --}}
+                <div class="offcanvas-header"
+                    style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
                     <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="sidebar-logo img-fluid"
                         style="width: 300px;">
                     <button type="button" class="btn-close" data-bs-toggle="offcanvas"
@@ -339,10 +386,12 @@
                         <ul class="nav flex-column flex-lg-row py-lg-2 gap-3">
                             <li class="nav-item">
                                 <!-- atur jarak tiap tombol -->
-                                <a href="#"
+                                {{-- beranda start --}}
+                                {{-- <a href="#"
                                     class="btn btn-outline-primary rounded-2 border-0 w-100 text-start text-lg-center text-dark btn-hover">
                                     <i class="fa fa-home me-2 icon-hover"></i> Beranda
-                                </a>
+                                </a> --}}
+                                {{-- beranda end --}}
                             </li>
                             <!-- button cpl start -->
                             <li class="nav-item dropdown">
@@ -408,11 +457,14 @@
                                     class="btn btn-outline-primary rounded-2 border-0 w-100 text-start text-lg-center dropdown-toggle text-dark btn-hover"
                                     data-bs-toggle="dropdown" data-bs-target="#dropdown-pemetaan">
                                     <i class="fa fa-map me-2 icon-pemetaan"></i> Pemetaan
-
                                 </a>
                                 <ul class="dropdown-menu rounded-2" id="dropdown-pemetaan">
                                     <li><a href="{{ route('pemetaan_CPL-PL.index') }}" class="dropdown-item">Pemetaan
                                             CPL-PL</a></li>
+                                    {{-- pemetaan cpl-mk start --}}
+                                    <li><a href="{{ route('pemetaan_CPL-MK.index') }}" class="dropdown-item">Pemetaan
+                                            CPL-MK</a></li>
+                                    {{-- pemetaan cpl-mk end --}}
                                     <li><a href="{{ route('pemetaan_CPMK-CPL.index') }}"
                                             class="dropdown-item">Pemetaan
                                             CPMK-CPL</a></li>
@@ -435,6 +487,10 @@
             <section>
                 <div class="container">
                     @yield('content')
+                    <button id="scrollToTop" class="btn btn-primary"
+                        style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px;">
+                        <i class="bi bi-arrow-up"></i>
+                    </button>
                     {{-- button modal/pop up start --}}
                     {{-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">
                   OPEN MODAL
@@ -447,10 +503,6 @@
 
         <!-- start footer -->
         <footer class="page-footer" style="background-color: #004680; color:white">
-            {{-- <div class="container py-4">
-                copyright &copy;
-                <script src="../../../../public/js/year.js"></script>
-            </div> --}}
             <div class="container py-4">
                 © {{ date('Y') }} <b>Outcome Based Education.</b> All Rights Reserved.
             </div>
@@ -461,24 +513,43 @@
     <!-- end page wrapper -->
 
     <!-- content modal start -->
-    {{-- <div class="modal fade" id="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h1 class="modal-title fs-5" id="modalLabel">Modal title</h1>
-               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body"></div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-         </div>
-      </div>
-   </div> --}}
     <!-- content modal end-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Ambil tombol
+        const scrollToTopBtn = document.getElementById('scrollToTop');
 
+        // Tampilkan tombol saat scroll lebih dari 100px
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                scrollToTopBtn.style.display = 'block'; // Tampilkan tombol
+            } else {
+                scrollToTopBtn.style.display = 'none'; // Sembunyikan tombol
+            }
+        });
 
+        // Scroll ke atas saat tombol diklik
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (session('success') && session('new_id'))
+                const newElement = document.getElementById('mk-{{ session('new_id') }}');
+                if (newElement) {
+                    newElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    newElement.style.backgroundColor = '#d1e7dd'; // Highlight background
+                    setTimeout(() => newElement.style.backgroundColor = '', 3000); // Hilangkan highlight
+                }
+            @endif
+        });
+    </script>
 </body>
-
 </html>

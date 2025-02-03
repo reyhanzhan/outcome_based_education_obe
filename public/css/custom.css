@@ -1,0 +1,16 @@
+/* table.dataTable {
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+table.dataTable th,
+table.dataTable td {
+    text-align: center;
+    vertical-align: middle;
+    word-wrap: break-word;
+}
+
+table.dataTable th:last-child,
+table.dataTable td:last-child {
+    width: 100px; 
+} */

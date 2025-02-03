@@ -17,26 +17,34 @@ class Cpl extends Model
         'kategori',
     ];
 
-    public function pl()
+
+    public function pls()
     {
-        return $this->belongsToMany(Pl::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Pl::class, 'cpl_pl');
     }
 
-    public function pl2()
+
+
+    public function bks()
     {
-        return $this->belongsToMany(Pl::class, 'pemetaan_cpmkpl')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Bk::class, 'cpl_bk');
     }
 
-    // function cpmk start
-    public function cpmk()
+
+    public function cpmks()
     {
-        return $this->belongsToMany(Cpmk::class, 'pemetaan')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Cpmk::class, 'cpmk_cpl', 'cpl_id', 'cpmk_id');
     }
 
-    public function cpmk2()
+    public function mks()
     {
-        return $this->belongsToMany(Cpmk::class, 'pemetaan_cpmk_cpl_mk')
-                    ->withPivot('mk_id', 'checked')
-                    ->withTimestamps();
+        return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id');
     }
+
+    public function mksThroughCpmk()
+    {
+        return $this->hasManyThrough(Mk::class, Cpmk::class, 'cpl_id', 'id', 'id', 'id');
+    }
+
+
 }

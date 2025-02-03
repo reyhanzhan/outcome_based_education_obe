@@ -17,10 +17,6 @@ return new class extends Migration
             $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade');   // Relasi ke tabel CPL
             $table->boolean('checked')->default(false); // Status centang
             $table->timestamps();
-
-
-            $table->foreign('cpmk_id')->references('id')->on('cpmk')->onDelete('cascade');
-            $table->foreign('cpl_id')->references('id')->on('cpl')->onDelete('cascade');
         });
     }
 

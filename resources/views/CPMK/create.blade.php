@@ -1,100 +1,53 @@
-@extends('layouts_baru.app')
+@extends('layouts_adminlte.app')
+
 @section('title', 'Tambah Capaian Pembelajaran Mata Kuliah')
+
 @section('content')
-<div class="container min-vh-100 d-flex justify-content-center align-items-center">
-    <div class="row w-100">
-        <div class="col-md-8 col-lg-6 mx-auto">
-            <div class="form-card shadow-lg p-4 rounded-4 bg-white">
-                <h2 class="text-center mb-3 text-dark font-weight-bold">Tambah Capaian Pembelajaran Mata Kuliah</h2>
-
-                <!-- Tampilkan pesan sukses jika ada -->
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                <!-- Form Input -->
-                <form action="{{ route('cpmk.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf <!-- Token CSRF untuk keamanan -->
-
-                    <!-- Input Kode CPMK -->
-                    <div class="form-group mb-4">
-                        <label for="kode_cpmk" class="form-label d-flex align-items-center text-primary fw-semibold">
-                            <i class="bi bi-code-slash me-2"></i> Kode CPMK<span class="text-danger">*</span>
-                        </label>
-                        <div class="input-container">
-                            <input type="text" name="kode_cpmk" class="custom-input form-control" id="kode_cpmk"
-                                placeholder="Masukkan kode CPMK..." required>
-                        </div>
-                    </div>
-
-                    <!-- Input Deskripsi -->
-                    <div class="form-group mb-4">
-                        <label for="deskripsi" class="form-label d-flex align-items-center text-primary fw-semibold">
-                            <i class="bi bi-card-text me-2"></i> Deskripsi<span class="text-danger">*</span>
-                        </label>
-                        <textarea name="deskripsi" class="custom-input form-control" id="deskripsi" rows="3"
-                            placeholder="Masukkan deskripsi..." required></textarea>
-                    </div>
-
-                    <!-- Tombol Aksi -->
-                    <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
-                        <a href="{{ url('CPMK/index') }}" class="btn btn-primary w-100">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Daftar
-                        </a>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-save"></i> Simpan
-                        </button>
-                    </div>
-                </form>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="card-title">Tambah Capaian Pembelajaran Mata Kuliah Baru</h3>
             </div>
+            <form action="{{ route('cpmk.store') }}" method="POST">
+                @csrf
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="kode_cpmk">Kode Capaian Pembelajaran Mata Kuliah</label>
+                        <input type="text" 
+                               class="form-control @error('kode_cpmk') is-invalid @enderror" 
+                               id="kode_cpmk" 
+                               name="kode_cpmk" 
+                               value="{{ old('kode_cpmk') }}"
+                               placeholder="Contoh: cpmk001">
+                        @error('kode_cpmk')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deskripsi">Deskripsi Capaian Pembelajaran Mata Kuliah</label>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
+                                  id="deskripsi" 
+                                  name="deskripsi" 
+                                  rows="3"
+                                  placeholder="Masukkan deskripsi mata kuliah">{{ old('deskripsi') }}</textarea>
+                        @error('deskripsi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <a href="{{ route('cpmk.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+</section>
 @endsection
-
-<style>
-    /* General Styling */
-    .min-vh-100 {
-        min-height: 100vh;
-    }
-
-    .form-card {
-        background-color: #f8f9fa;
-        border-radius: 12px;
-        border: 1px solid #e0e4e8;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Input Styling */
-    .input-container {
-        position: relative;
-    }
-
-    .icon {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1.2rem;
-    }
-
-    .custom-input {
-        padding-left: 2.5rem;
-    }
-
-    /* Button Styling */
-    .btn {
-        border-radius: 8px;
-        font-weight: bold;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 576px) {
-        .form-card {
-            padding: 20px;
-        }
-    }
-</style>

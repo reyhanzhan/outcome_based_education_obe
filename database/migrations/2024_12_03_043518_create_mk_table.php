@@ -16,6 +16,8 @@ return new class extends Migration
             $table->timestamps();
             $table->string('kode_mk');
             $table->string('deskripsi');
+            $table->integer('sks');
+            $table->enum('wptwp', ['TWP', 'WP'])->nullable()->change();
         });
     }
 

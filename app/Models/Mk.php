@@ -15,16 +15,27 @@ class Mk extends Model
     protected $fillable = [
         'kode_mk',
         'deskripsi',
+        'sks',
+        'wptwp',
     ];
 
-    // Relasi dengan CPMK
-    public function cpmk()
+    public function cpl()
     {
-        return $this->belongsToMany(Cpmk::class, 'pemetaan_cpmkmk', 'mk_id', 'cpmk_id')->withTimestamps();
+        return $this->belongsToMany(Cpl::class, 'cpl_mk');
     }
 
-    public function pemetaan()
+    public function cpmks()
     {
-        return $this->hasMany(Pemetaan::class);
+        return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id');
+    }
+
+    public function mksThroughCpmk()
+    {
+        return $this->hasManyThrough(Mk::class, Cpmk::class, 'cpl_id', 'id', 'id', 'id');
+    }
+
+    public function cpls()
+    {
+        return $this->belongsToMany(Cpl::class, 'cpl_mk', 'mk_id', 'cpl_id');
     }
 }

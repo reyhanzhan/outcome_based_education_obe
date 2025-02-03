@@ -12,7 +12,14 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
+
     <style>
+        * {
+            outline: solid 1px green;
+            outline: solid 1px transparent;
+
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -20,7 +27,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: url('{{ asset('img/pat_04.png') }}')
+            background: url('{{ asset('img/pat_04.png') }}');
+
         }
 
         .login-container {
@@ -100,7 +108,7 @@
         }
 
         .form-control:focus {
-            border-bottom: 2px solid #6a11cb;
+            border-bottom: 2px solid #004680;
             outline: none;
             box-shadow: none;
         }
@@ -111,7 +119,7 @@
 
         .password-toggle .toggle-icon {
             position: absolute;
-            top: 50%;
+            top: 65%;
             right: 10px;
             transform: translateY(-50%);
             cursor: pointer;
@@ -119,7 +127,7 @@
         }
 
         .toggle-icon:hover {
-            color: #6a11cb;
+            color: #004680;
         }
 
         .btn-primary {
@@ -132,7 +140,7 @@
         }
 
         .btn-primary:hover {
-            background-color: #004680;
+            background-color: #0d64ab;
         }
 
         .form-check-label {
@@ -140,16 +148,11 @@
             color: #555;
         }
 
-        .forgot-password {
-            font-size: 0.9rem;
-            color: #6a11cb;
-            text-decoration: none;
-            transition: color 0.3s ease;
+        .right-section img {
+            display: none;
+            /* Secara default gambar disembunyikan */
         }
 
-        .forgot-password:hover {
-            color: #2575fc;
-        }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -160,6 +163,13 @@
             .left-section {
                 display: none;
             }
+
+            .right-section img {
+                display: block;
+                /* Gambar muncul hanya untuk layar di bawah 768px */
+                margin: 0 auto;
+                /* Mengatur gambar berada di tengah */
+            }
         }
     </style>
 </head>
@@ -168,44 +178,51 @@
     <!-- Login Container -->
     <div class="login-container">
         <!-- Left Section -->
-        <div class="left-section">
-            <h1>Welcome!</h1>
-            <p>Outcome Based Education</p>
-            <p>Universitas Wijaya Putra</p>
+        <div class="left-section" style="padding-bottom: 40%">
+            <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid mb-4"
+                style="max-width: 300px; height: auto; background-color: rgba(0, 0, 0, 0.5); border-radius: 3px;">
         </div>
 
         <!-- Right Section -->
-        <div class="right-section">
-            <h2 class="text-center">Masuk dan Verifikasi</h2>
+        <div class="right-section d-flex flex-column justify-content-center">
+            <img src="{{ asset('img/logo-uwp1.png') }}" alt="Logo" class="img-fluid mb-4"
+                style="max-width: 100px; height: auto; background-color: rgba(0, 0, 0, 0.5); border-radius: 3px;">
+            <h2 class="text-center">Login</h2>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="/login" method="POST">
                 @csrf
                 <!-- Email Input -->
-                <div class="form-floating mb-3">
-                    <input type="email" name="email" id="email" class="form-control" placeholder="Email"
-                        required>
-                    <label for="email"><i class="bx bx-envelope"></i> Email</label>
+                <div class="mb-3">
+                    <label for="email"><i class="bx bx-envelope"></i> Email</label><span style="color:red">*</span>
+                    <input type="email" name="email" id="email" class="form-control"
+                        placeholder="Masukkan email yang terdaftar" value="{{ old('email') }}" required>
                 </div>
 
                 <!-- Password Input -->
-                <div class="form-floating mb-3 password-toggle">
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Password"
-                        required>
-                    <label for="password"><i class="bx bx-lock"></i> Password</label>
-                    <i class="bx bx-show toggle-icon" id="togglePassword"></i>
+                <div class="mb-3 password-toggle">
+                    <label for="password"><i class="bx bx-lock"></i> Password</label><span style="color:red">*</span>
+                    <input type="password" name="password" id="password" class="form-control"
+                        placeholder="Masukkan password" required>
+                    <i class="bx bx-hide toggle-icon" id="togglePassword"></i>
                 </div>
-
                 <!-- Sign In Button -->
                 <button type="submit" class="btn btn-primary w-100">Sign In</button>
             </form>
-
-
         </div>
     </div>
 
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Password Toggle
         const togglePassword = document.getElementById('togglePassword');
         const passwordField = document.getElementById('password');
 
@@ -217,6 +234,7 @@
             this.classList.toggle('bx-hide');
         });
     </script>
+
 </body>
 
 </html>

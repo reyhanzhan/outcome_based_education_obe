@@ -1,174 +1,113 @@
-@extends('layouts_baru.app')
+@extends('layouts_adminlte.app')
+
+@section('title', 'Pemetaan CPMK - CPL')
 
 @section('content')
-    <style>
-        /* General Styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Styling Card */
-        .card-custom {
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-            border: none;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .card-header-custom {
-            background: linear-gradient(135deg, #0052A2, #0080FF);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            border-radius: 15px 15px 0 0;
-            letter-spacing: 1px;
-        }
-
-        .table-container {
-            padding: 20px;
-        }
-
-        /* Table Styling */
-        .custom-table {
-            background: white;
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-            border-spacing: 0;
-            overflow: hidden;
-        }
-
-        .custom-table thead th {
-            background-color: #0052A2;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-            border-bottom: 2px solid #004080;
-            vertical-align: middle; /* Menyelaraskan teks di tengah */
-        }
-
-        .custom-table thead tr th {
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .custom-table tbody td {
-            padding: 12px;
-            text-align: center;
-            border-right: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .custom-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .custom-table tbody tr:hover {
-            background-color: #e9f2ff;
-        }
-
-        .custom-table td {
-            vertical-align: middle;
-        }
-
-        /* Button Styling */
-        .btn-save {
-            background: linear-gradient(135deg, #0052A2, #0080FF);
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 12px 25px;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .btn-save:hover {
-            background: linear-gradient(135deg, #003580, #0052A2);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .custom-table th,
-            .custom-table td {
-                font-size: 0.85rem;
-                padding: 10px;
-            }
-
-            .btn-save {
-                width: 100%;
-                font-size: 1rem;
-                margin-top: 20px;
-            }
-        }
-    </style>
-
-    <div class="container mt-5">
-        <div class="card card-custom">
-            <!-- Header -->
-
-            <!-- Table Content -->
-            <div class="table-container">
-                <!-- Tampilkan Notifikasi -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <form action="{{ route('pemetaan_CPMK-CPL.update') }}" method="POST">
-                    @csrf
-
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table custom-table">
-                            <thead>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="card-title">Pemetaan CPMK - CPL</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="pemetaanTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="align-middle text-center">No</th>
+                                <th rowspan="2" class="align-middle text-center">Kode CPMK</th>
+                                <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
+                            </tr>
+                            <tr>
+                                @foreach ($cpls as $cpl)
+                                    <th class="text-center">{{ $cpl->kode_cpl }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        
+                        
+                
+                        <tbody>
+                            @foreach ($cpmks as $index => $cpmk)
                                 <tr>
-                                    <th rowspan="2" style="width: 5%;">No</th>
-                                    <th rowspan="2" style="width: 20%;">Kode CPMK</th>
-                                    <th colspan="{{ count($cpl) }}">Capaian Profil Lulusan (CPL)</th>
-                                </tr>
-                                <tr>
-                                    @foreach ($cpl as $cples)
-                                        <th style="width: {{ 75 / count($cpl) }}%;">{{ $cples->kode_cpl }}</th>
+                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td>{{ $cpmk->kode_cpmk }}</td>
+                                    
+                                    @foreach ($cpls as $cpl)
+                                        <td class="text-center">
+                                            <input type="checkbox" class="update-mapping"
+                                                data-cpmk="{{ $cpmk->id }}"
+                                                data-cpl="{{ $cpl->id }}"
+                                                @if ($cpmk->cpls->contains($cpl->id)) checked @endif>
+                                        </td>
                                     @endforeach
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($cpmk as $index => $cpmkes)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $cpmkes->kode_cpmk }}</td>
-                                        @foreach ($cpl as $cples)
-                                            <td>
-                                                <input type="checkbox"
-                                                    name="mapping[{{ $cpmkes->id }}][{{ $cples->id }}]"
-                                                    value="1"
-                                                    {{ $cpmkes->cpl && $cpmkes->cpl->contains($cples->id) ? 'checked' : '' }}>
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-
-
-
-                        </table>
-                    </div>
-
-                    <!-- Save Button -->
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-save">Simpan Pemetaan</button>
-                    </div>
-                </form>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>  
             </div>
         </div>
     </div>
+</section>
+@endsection
+
+@section('scripts')
+    <script>
+        $(document).ready(function() {
+            $("#pemetaanTable").DataTable({
+                "scrollX": true,  // ✅ Tambahkan scroll horizontal agar tabel tidak keluar
+                "paging": true,
+                "lengthMenu": [10, 25, 50, 100],
+                "pageLength": 10,
+                "searching": true,
+                "info": true,
+                "ordering": false,
+                "autoWidth": false,
+                "language": {
+                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                    "zeroRecords": "Data tidak ditemukan",
+                    "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada data tersedia",
+                    "infoFiltered": "(Disaring dari _MAX_ total data)",
+                    "searchPlaceholder": "Cari data...",
+                    "search": "",
+                    "paginate": {
+                        "first": "Awal",
+                        "last": "Akhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
+                }
+            });
+
+            // ✅ Event ketika checkbox berubah (AJAX)
+            $(".update-mapping").on("change", function() {
+                var cpmk_id = $(this).data("cpmk");
+                var cpl_id = $(this).data("cpl");
+                var checked = $(this).prop("checked");
+
+                $.ajax({
+                    url: "{{ route('Cpmk_Cpl.update') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        cpmk_id: cpmk_id,
+                        cpl_id: cpl_id,
+                        checked: checked ? 1 : 0 // Kirim 1 jika dicentang, 0 jika dihapus
+                    },
+                    success: function(response) {
+                        if (checked) {
+                            toastr.success("✅ Data berhasil disimpan!");
+                        } else {
+                            toastr.warning("❌ Data telah dihapus!");
+                        }
+                    },
+                    error: function() {
+                        toastr.error("Gagal menyimpan perubahan!");
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

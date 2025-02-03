@@ -15,4 +15,9 @@ class Bk extends Model
         'kode_bk',
         'deskripsi',
     ];
+
+    public function cpls()
+    {
+        return $this->belongsToMany(Cpl::class, 'cpl_bk');
+    }
 }

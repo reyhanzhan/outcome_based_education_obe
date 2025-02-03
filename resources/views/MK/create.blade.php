@@ -1,100 +1,85 @@
-@extends('layouts_baru.app')
+@extends('layouts_adminlte.app')
+
 @section('title', 'Tambah Mata Kuliah')
+
 @section('content')
-<div class="container min-vh-100 d-flex justify-content-center align-items-center">
-    <div class="row w-100">
-        <div class="col-md-8 col-lg-6 mx-auto">
-            <div class="form-card shadow-lg p-4 rounded-4 bg-white">
-                <h2 class="text-center mb-3 text-dark font-weight-bold">Tambah Mata Kuliah</h2>
-
-                <!-- Tampilkan pesan sukses jika ada -->
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="card-title">Tambah Mata Kuliah Baru</h3>
+            </div>
+            <form action="{{ route('mk.store') }}" method="POST">
+                @csrf
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="kode_mk">Kode Mata Kuliah</label>
+                        <input type="text" 
+                               class="form-control @error('kode_mk') is-invalid @enderror" 
+                               id="kode_mk" 
+                               name="kode_mk" 
+                               value="{{ old('kode_mk') }}"
+                               placeholder="Contoh: MK001">
+                        @error('kode_mk')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                @endif
 
-                <!-- Form Input -->
-                <form action="{{ route('mk.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf <!-- Token CSRF untuk keamanan -->
+                    <div class="form-group">
+                        <label for="deskripsi">Deskripsi Mata Kuliah</label>
+                        <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
+                                  id="deskripsi" 
+                                  name="deskripsi" 
+                                  rows="3"
+                                  placeholder="Masukkan deskripsi mata kuliah">{{ old('deskripsi') }}</textarea>
+                        @error('deskripsi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                    <!-- Input Kode BK -->
-                    <div class="form-group mb-4">
-                        <label for="kode_mk" class="form-label d-flex align-items-center text-primary fw-semibold">
-                            <i class="bi bi-code-slash me-2"></i> Kode MK<span class="text-danger">*</span>
-                        </label>
-                        <div class="input-container">
-                            <input type="text" name="kode_mk" class="custom-input form-control" id="kode_mk"
-                                placeholder="MK..." required>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sks">SKS</label>
+                                <input type="number" 
+                                       class="form-control @error('sks') is-invalid @enderror" 
+                                       id="sks" 
+                                       name="sks" 
+                                       value="{{ old('sks') }}"
+                                       min="1"
+                                       max="6">
+                                @error('sks')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="wptwp">WP/TWP</label>
+                                <select class="form-control @error('wptwp') is-invalid @enderror" name="wptwp" id="wptwp">
+                                    <option value="" selected disabled>Pilih TWP/WP</option>
+                                    <option value="TWP">TWP</option>
+                                    <option value="WP">WP</option>
+                                </select>
+                                @error('wptwp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            
+                            
                         </div>
                     </div>
-
-                    <!-- Input Deskripsi -->
-                    <div class="form-group mb-4">
-                        <label for="deskripsi" class="form-label d-flex align-items-center text-primary fw-semibold">
-                            <i class="bi bi-card-text me-2"></i> Deskripsi<span class="text-danger">*</span>
-                        </label>
-                        <textarea name="deskripsi" class="custom-input form-control" id="deskripsi" rows="3"
-                            placeholder="Masukkan deskripsi..." required></textarea>
-                    </div>
-
-                    <!-- Tombol Aksi -->
-                    <div class="d-flex flex-column flex-sm-row gap-3 mt-4">
-                        <a href="{{ url('MK/index') }}" class="btn btn-primary w-100">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Daftar
-                        </a>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-save"></i> Simpan
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <a href="{{ route('mk.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+</section>
 @endsection
-
-<style>
-    /* General Styling */
-    .min-vh-100 {
-        min-height: 100vh;
-    }
-
-    .form-card {
-        background-color: #f8f9fa;
-        border-radius: 12px;
-        border: 1px solid #e0e4e8;
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Input Styling */
-    .input-container {
-        position: relative;
-    }
-
-    .icon {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1.2rem;
-    }
-
-    .custom-input {
-        padding-left: 2.5rem;
-    }
-
-    /* Button Styling */
-    .btn {
-        border-radius: 8px;
-        font-weight: bold;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 576px) {
-        .form-card {
-            padding: 20px;
-        }
-    }
-</style>

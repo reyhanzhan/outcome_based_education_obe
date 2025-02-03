@@ -7,13 +7,10 @@ use Illuminate\Http\Request;
 
 class CplController extends Controller
 {
-    // Method untuk menampilkan semua data CPL
     public function index()
     {
-        // Mengambil semua data CPL dari model
+        // Menampilkan semua data PL
         $cpl = Cpl::all();
-
-        // Mengirim data ke view CPL.index
         return view('CPL.index', compact('cpl'));
     }
 
@@ -26,21 +23,20 @@ class CplController extends Controller
     public function store(Request $request)
     {
         // Validasi input
+        
         $request->validate([
             'kode_cpl' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'kategori' => 'required|string'
-            
+            'kategori' => 'required|string',
         ]);
-    
+
         // Menyimpan data ke database
-        Cpl::create([
+        CPl::create([
             'kode_cpl' => $request->kode_cpl,
             'deskripsi' => $request->deskripsi,
-            'kategori' => $request->kategori
-           
+            'kategori' => $request->kategori,
         ]);
-    
+
         // Redirect ke halaman daftar dengan pesan sukses
         return redirect()->route('cpl.index')->with('success', 'Data berhasil ditambahkan');
     }
@@ -54,26 +50,22 @@ class CplController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi input
-        $request->validate([
-            'kode_cpl' => 'required|string|max:255',
+        $validatedData = $request->validate([
+            'kode_cpl' => 'required|string',
             'deskripsi' => 'required|string',
-            'kategori' => 'required|string'
-            
+            'kategori' => 'required|string',
         ]);
-    
-        // Menemukan data berdasarkan ID dan memperbarui data
+
         $cpl = Cpl::findOrFail($id);
         $cpl->update([
             'kode_cpl' => $request->kode_cpl,
             'deskripsi' => $request->deskripsi,
-            'kategori' => $request->kategori
-            
+            'kategori' => $request->kategori,
         ]);
 
-        // Redirect ke halaman daftar dengan pesan sukses
         return redirect()->route('cpl.index')->with('success', 'Data berhasil diperbarui');
     }
+
 
     public function destroy($id)
     {

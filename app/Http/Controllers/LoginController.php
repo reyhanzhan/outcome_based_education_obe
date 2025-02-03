@@ -10,12 +10,10 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    // Menampilkan form login
     public function showLoginForm()
     {
-
         if (Auth::check()) {
-            return redirect()->intended('/CPL/index'); // Ganti dengan rute yang diinginkan
+            return redirect()->intended('/CPL/index');
         }
 
         return view('login.index', [
@@ -24,24 +22,54 @@ class LoginController extends Controller
         ]);
     }
 
-    // Proses login
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        // Validasi input
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ], [
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Password harus diisi',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // Cek apakah email terdaftar
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Email tidak terdaftar']);
+        }
+
+        // Cek kredensial
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $request->session()->regenerate();
+
+            // Jika login berhasil
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => '/CPL/index'
+                ]);
+            }
+
             return redirect()->intended('/CPL/index');
         }
 
-        return back()->with('loginError', 'Email atau password salah');
+        // Jika password salah
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password yang Anda masukkan salah'
+            ], 422);
+        }
+
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['password' => 'Password yang Anda masukkan salah']);
     }
 
-
-    // Proses logout
     public function logout(Request $request)
     {
         Auth::logout();
@@ -49,14 +77,19 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Anda berhasil logout');
     }
 
-    // fungsi untuk panggil semua data yang ada di user start
     public function callName()
     {
-        $user = Auth::user(); // Mengambil data pengguna yang sedang login
-        return view('layouts_baru', compact('user'));
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return redirect('/')->with('error', 'Silakan login terlebih dahulu');
+            }
+            return view('layouts_baru', compact('user'));
+        } catch (\Exception $e) {
+            return redirect('/')->with('error', 'Terjadi kesalahan. Silakan coba lagi.');
+        }
     }
-    // fungsi untuk panggil semua data yang ada di user end
 }

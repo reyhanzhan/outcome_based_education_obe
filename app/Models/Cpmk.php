@@ -16,27 +16,14 @@ class Cpmk extends Model
         'deskripsi',
     ];
 
-    public function pl()
+    public function cpls()
     {
-        return $this->belongsToMany(Pl::class, 'pemetaan_cpmkpl', 'cpmk_id', 'pl_id')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id');
     }
 
-
-    public function cpl()
+    public function mks()
     {
-        return $this->belongsToMany(Cpl::class, 'pemetaan_cpmkpl')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id');
     }
 
-    // Relasi dengan MK
-    public function mk()
-    {
-        return $this->belongsToMany(Mk::class, 'pemetaan_cpmkmk', 'cpmk_id', 'mk_id')->withTimestamps();
-    }
-
-    public function cpl2()
-    {
-        return $this->belongsToMany(Cpl::class, 'pemetaan_cpmk_cpl_mk')
-                    ->withPivot('mk_id', 'checked')
-                    ->withTimestamps();
-    }
 }

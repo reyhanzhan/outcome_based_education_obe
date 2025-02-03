@@ -17,14 +17,9 @@ class Pl extends Model
         'kategori',
     ];
 
-    public function cpl()
+    public function cpls()
     {
-        return $this->belongsToMany(Cpl::class, 'pemetaan')->withPivot('checked')->withTimestamps();
-    }
-
-    public function cpl2()
-    {
-        return $this->belongsToMany(Cpl::class, 'pemetaan_cpmkpl')->withPivot('checked')->withTimestamps();
+        return $this->belongsToMany(Cpl::class, 'cpl_pl');
     }
 }
 

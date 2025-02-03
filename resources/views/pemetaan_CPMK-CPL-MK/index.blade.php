@@ -1,176 +1,58 @@
-@extends('layouts_baru.app')
+@extends('layouts_adminlte.app')
+
+@section('title', 'Pemetaan CPMK - CPL - MK')
 
 @section('content')
-    <style>
-        /* General Styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="card-title">Pemetaan CPMK - CPL - MK</h3>
+            </div>
+            <div class="card-body">
+                <table id="pemetaanTable" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="align-middle text-center">No</th>
+                            <th rowspan="2" class="align-middle text-center">CPL</th>
+                            <th rowspan="2" class="align-middle text-center">Deskripsi CPL</th>
+                            <th rowspan="2" class="align-middle text-center">Kode CPMK</th>
+                            <th rowspan="2" class="align-middle text-center">CPMK</th>
+                            <th rowspan="2" class="align-middle text-center">MK</th>
+                        </tr>
+                    </thead>
 
-        /* Styling Card */
-        .card-custom {
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-            border: none;
-            overflow: hidden;
-            padding: 20px;
-        }
+                    <tbody>
+                        @foreach ($cpls as $index => $cpl)
+                            @php
+                                $totalCpmks = $cpl->cpmks->count();
+                            @endphp
 
-        .card-header-custom {
-            background: linear-gradient(135deg, #0052A2, #0080FF);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            border-radius: 15px 15px 0 0;
-            letter-spacing: 1px;
-        }
+                            <tr>
+                                <td rowspan="{{ $totalCpmks }}" class="text-center">{{ $index + 1 }}</td>
+                                <td rowspan="{{ $totalCpmks }}">{{ $cpl->kode_cpl }}</td>
+                                <td rowspan="{{ $totalCpmks }}">{{ $cpl->deskripsi }}</td>
 
-        .table-container {
-            padding: 20px;
-        }
+                                @foreach ($cpl->cpmks as $cpmk)
+                                    @php
+                                        $totalMks = $cpmk->cpls->flatMap->mks->unique('id')->count();
+                                    @endphp
+                                    
+                                    @if (!$loop->first) <tr> @endif
+                                        <td rowspan="{{ $totalMks }}">{{ $cpmk->kode_cpmk }}</td>
+                                        <td rowspan="{{ $totalMks }}">{{ $cpmk->deskripsi }}</td>
 
-        /* Table Styling */
-        .custom-table {
-            background: white;
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-            border-spacing: 0;
-            overflow: hidden;
-        }
-
-        .custom-table thead th {
-            background-color: #0052A2;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-            border-bottom: 2px solid #004080;
-            vertical-align: middle;
-            /* Menyelaraskan teks di tengah */
-        }
-
-        .custom-table thead tr th {
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .custom-table tbody td {
-            padding: 12px;
-            text-align: center;
-            border-right: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .custom-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .custom-table tbody tr:hover {
-            background-color: #e9f2ff;
-        }
-
-        .custom-table td {
-            vertical-align: middle;
-        }
-
-        /* Button Styling */
-        .btn-save {
-            background: linear-gradient(135deg, #0052A2, #0080FF);
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 12px 25px;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .btn-save:hover {
-            background: linear-gradient(135deg, #003580, #0052A2);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-
-            .custom-table th,
-            .custom-table td {
-                font-size: 0.85rem;
-                padding: 10px;
-            }
-
-            .btn-save {
-                width: 100%;
-                font-size: 1rem;
-                margin-top: 20px;
-            }
-        }
-    </style>
-
-    <div class="container mt-5">
-        <div class="card card-custom">
-            <!-- Header -->
-
-            <!-- Table Content -->
-            <div class="table-container">
-                <!-- Tampilkan Notifikasi -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <form action="{{ route('pemetaan_CPMK-CPL.update') }}" method="POST">
-                    @csrf
-
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table custom-table">
-                            <thead>
-                                <tr>
-                                    <th>CPMK</th>
-                                    <th>CPL</th>
-                                    @foreach ($mk as $mkItem)
-                                        <th>{{ $mkItem->kode_mk }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($cpmk as $cpmkItem)
-                                    <tr>
-                                        <td rowspan="{{ count($cpl) }}">{{ $cpmkItem->kode_cpmk }}</td>
-                                        @foreach ($cpl as $index => $cplItem)
-                                            @if ($index > 0)
-                                                <tr>
-                                            @endif
-                                            <td>{{ $cplItem->kode_cpl }}</td>
-                                            @foreach ($mk as $mkItem)
-                                                <td>
-                                                    <input type="checkbox"
-                                                        name="mapping[{{ $cpmkItem->id }}][{{ $cplItem->id }}][{{ $mkItem->id }}]"
-                                                        value="1"
-                                                        {{ $cpmkItem->cpl->contains($cplItem->id) && $cpmkItem->cpl->find($cplItem->id)->pivot->mk_id == $mkItem->id ? 'checked' : '' }}>
-                                                </td>
-                                            @endforeach
+                                        @foreach ($cpl->mks as $mk)
+                                            @if (!$loop->first) <tr> @endif
+                                                <td>{{ $mk->kode_mk }}</td>
                                             </tr>
                                         @endforeach
-                                    </tr>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Save Button -->
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-save">Simpan Pemetaan</button>
-                    </div>
-                </form>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</section>
 @endsection
