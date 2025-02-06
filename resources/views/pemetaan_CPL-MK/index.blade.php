@@ -10,37 +10,41 @@
                 <h3 class="card-title">Pemetaan CPL - MK</h3>
             </div>
             <div class="card-body">
-                <table id="pemetaanTable" class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" class="align-middle text-center">No</th>
-                            <th rowspan="2" class="align-middle text-center">Kode MK</th>
-                            <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
-                        </tr>
-                        <tr>
-                            @foreach ($cpls as $cpl)
-                                <th class="text-center">{{ $cpl->kode_cpl }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach ($mks as $index => $mk)
+                <div class="table-responsive"> <!-- ✅ Tambahkan class ini agar responsif -->
+                    <table id="pemetaanTable" class="table table-bordered table-hover">
+                        <thead>
                             <tr>
-                                <td class="text-center">{{ $index + 1 }}</td>
-                                <td>{{ $mk->kode_mk }}</td>
+                                <th rowspan="2" class="align-middle text-center">No</th>
+                                <th rowspan="2" class="align-middle text-center">Kode MK</th>
+                                <th rowspan="2" class="align-middle text-center">Deskripsi MK</th> <!-- ✅ Tambahkan deskripsi MK -->
+                                <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
+                            </tr>
+                            <tr>
                                 @foreach ($cpls as $cpl)
-                                    <td class="text-center">
-                                        <input type="checkbox" class="update-mapping"
-                                            data-cpl="{{ $cpl->id }}"
-                                            data-mk="{{ $mk->id }}"
-                                            @if ($cpl->mks->contains($mk->id)) checked @endif>
-                                    </td>
+                                    <th class="text-center">{{ $cpl->kode_cpl }}</th>
                                 @endforeach
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+
+                        <tbody>
+                            @foreach ($mks as $index => $mk)
+                                <tr>
+                                    <td class="text-center">{{ $index + 1 }}</td>
+                                    <td>{{ $mk->kode_mk }}</td>
+                                    <td>{{ $mk->deskripsi }}</td> <!-- ✅ Tambahkan deskripsi MK -->
+                                    @foreach ($cpls as $cpl)
+                                        <td class="text-center">
+                                            <input type="checkbox" class="update-mapping"
+                                                data-cpl="{{ $cpl->id }}"
+                                                data-mk="{{ $mk->id }}"
+                                                @if ($cpl->mks->contains($mk->id)) checked @endif>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div> <!-- ✅ Akhiran div untuk responsif -->
             </div>
         </div>
     </div>
@@ -50,7 +54,8 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $("#pemetaanTable").DataTable({
+            // Inisialisasi DataTables
+            var table = $("#pemetaanTable").DataTable({
                 "paging": true,
                 "lengthMenu": [10, 25, 50, 100],
                 "pageLength": 10,
@@ -75,8 +80,8 @@
                 }
             });
 
-            // Event ketika checkbox berubah
-            $(".update-mapping").on("change", function() {
+            // Event delegation untuk checkbox agar tetap berfungsi setelah pagination
+            $(document).on("change", ".update-mapping", function() {
                 var cpl_id = $(this).data("cpl");
                 var mk_id = $(this).data("mk");
                 var checked = $(this).prop("checked");
@@ -105,3 +110,4 @@
         });
     </script>
 @endsection
+

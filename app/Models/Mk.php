@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Cpl;
 use App\Models\Cpmk;
+use App\Models\CpmkCpl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,5 +39,13 @@ class Mk extends Model
     public function cpls()
     {
         return $this->belongsToMany(Cpl::class, 'cpl_mk', 'mk_id', 'cpl_id');
+    }
+
+    // Relasi ke CPL melalui CPMK (Many to Many)
+    public function cplsThroughCpmk()
+    {
+        return $this->hasManyThrough(Cpl::class, CpmkCpl::class, 'cpmk_id', 'id', 'id', 'cpl_id')
+                    ->join('cpmk_mk', 'cpmk.id', '=', 'cpmk_mk.cpmk_id')
+                    ->select('cpl.*');
     }
 }

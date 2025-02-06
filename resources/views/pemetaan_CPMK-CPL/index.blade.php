@@ -55,7 +55,8 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $("#pemetaanTable").DataTable({
+            // Inisialisasi DataTables
+            var table = $("#pemetaanTable").DataTable({
                 "scrollX": true,  // ✅ Tambahkan scroll horizontal agar tabel tidak keluar
                 "paging": true,
                 "lengthMenu": [10, 25, 50, 100],
@@ -81,8 +82,8 @@
                 }
             });
 
-            // ✅ Event ketika checkbox berubah (AJAX)
-            $(".update-mapping").on("change", function() {
+            // ✅ Event delegation untuk checkbox agar tetap berfungsi setelah pagination
+            $(document).on("change", ".update-mapping", function() {
                 var cpmk_id = $(this).data("cpmk");
                 var cpl_id = $(this).data("cpl");
                 var checked = $(this).prop("checked");
@@ -111,3 +112,4 @@
         });
     </script>
 @endsection
+

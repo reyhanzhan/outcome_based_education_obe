@@ -38,6 +38,9 @@ use Illuminate\Support\Facades\Route;
 //     return view('dashboard');
 // });
 
+
+
+
 Route::middleware('guest')->group(function() {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -99,6 +102,15 @@ Route::put('/bk/{id}', [BkController::class, 'update'])->name('bk.update')->midd
 Route::delete('/bk/{id}', [BkController::class, 'destroy'])->name('bk.destroy')->middleware('auth');
 // Route untuk menampilkan CPMK index end
 // 
+Route::get('/bk', [BkController::class, 'index'])->name('bk.index');
+Route::get('/bk/getData', [BkController::class, 'getData'])->name('bk.getData');
+Route::post('/bk/store', [BkController::class, 'store'])->name('bk.store');
+Route::delete('/bk/destroy/{id}', [BkController::class, 'destroy'])->name('bk.destroy');
+
+Route::get('/bk/getData', [BkController::class, 'getData'])->name('bk.getData')->middleware('auth');
+Route::post('/bk/store', [BkController::class, 'store'])->name('bk.store')->middleware('auth');
+Route::delete('/bk/destroy/{id}', [BkController::class, 'destroy'])->name('bk.destroy')->middleware('auth');
+
 
 
 // 
@@ -158,11 +170,16 @@ Route::post('/CPL-BK/update', [Cpl_BKController::class, 'update'])->name('Cpl_Bk
 // Routing pemetaan CPL-BK end
 // 
 
+
+Route::get('/pemetaan-cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('CplCpmkMk.index');
+
+
+
 // 
 // Routing pemetaan CPMK-CPL-MK start
-Route::get('/CPMK-CPL-MK', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('Cpmk-Cpl-Mk.index');
-// Route untuk menyimpan pemetaan
-Route::post('/CPMK-CPL-MK/update', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('Cpmk-Cpl-Mk.store');
+// Route::get('/CPMK-CPL-MK', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('Cpmk-Cpl-Mk.index');
+// // Route untuk menyimpan pemetaan
+// Route::post('/CPMK-CPL-MK/update', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('Cpmk-Cpl-Mk.store');
 // Routing pemetaan CPMK-PL-MK end
 // 
 

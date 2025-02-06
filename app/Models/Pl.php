@@ -19,7 +19,8 @@ class Pl extends Model
 
     public function cpls()
     {
-        return $this->belongsToMany(Cpl::class, 'cpl_pl');
+        return $this->belongsToMany(Cpl::class, 'cpl_pl', 'pl_id', 'cpl_id');
     }
+
 }
 

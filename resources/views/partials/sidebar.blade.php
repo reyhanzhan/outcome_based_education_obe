@@ -1,20 +1,21 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar sidebar-dark-primary">
     <!-- Brand Logo -->
     <a href="#" class="brand-link">
-        <img src="{{ asset('/img/logo-uwp1.png') }}" class="brand-image">
+        <img src="{{ asset('/img/logo-uwp1.png') }}" class="brand-image custom-logo">
         <span class="brand-text font-weight-light" style="font-size:1rem">Outcome Based Education</span>
     </a>
+
 
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
+        <div class=" mt-3 pb-0 mb-0 d-flex">
+            {{-- <div class="image">
                 <img src="{{ asset('dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="#" class="d-block">Alexander Pierce</a>
-            </div>
+            </div> --}}
         </div>
 
         <!-- SidebarSearch Form -->
@@ -34,7 +35,10 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
-                <li class="nav-item has-treeview">
+
+                <!-- Manajemen Data -->
+                <li
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-folder"></i>
                         <p>
@@ -44,51 +48,47 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('bk.index') }}" class="nav-link">
+                            <a href="{{ route('bk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
                                 <i class="fas fa-book nav-icon"></i>
                                 <p>Bahan Kajian</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('mk.index') }}" class="nav-link">
+                            <a href="{{ route('mk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
                                 <i class="fas fa-book-open nav-icon"></i>
                                 <p>Mata Kuliah</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('cpmk.index') }}" class="nav-link">
+                            <a href="{{ route('cpmk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
                                 <i class="fas fa-tasks nav-icon"></i>
                                 <p>Capaian Pembelajaran Mata Kuliah</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('pl.index') }}" class="nav-link">
+                            <a href="{{ route('pl.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
                                 <i class="fas fa-user-graduate nav-icon"></i>
                                 <p>Profil Lulusan</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('cpl.index') }}" class="nav-link">
+                            <a href="{{ route('cpl.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
                                 <i class="fas fa-file-alt nav-icon"></i>
-                                {{-- <i class="far fa-circle nav-icon"></i> --}}
                                 <p>Capaian Profil Lulusan</p>
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                <!-- Pemetaan start -->
-                <li class="nav-item has-treeview">
+                <!-- Pemetaan -->
+                <li
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-cpl-mk']) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
-                        {{-- <i class="nav-icon fas fa-map-marked-alt"></i> --}}
                         <i class="nav-icon fas fa-sitemap"></i>
                         <p>
                             Pemetaan
@@ -97,54 +97,44 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('Cpl_Pl.index') }}" class="nav-link">
+                            <a href="{{ route('Cpl_Pl.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-pl' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
                                 <p>CPL - PL</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('Cpl_Mk.index') }}" class="nav-link">
+                            <a href="{{ route('Cpl_Mk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-mk' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
                                 <p>CPL - MK</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('Cpl_Bk.index') }}" class="nav-link">
+                            <a href="{{ route('Cpl_Bk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-bk' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
                                 <p>CPL - BK</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('Cpmk_Cpl.index') }}" class="nav-link">
+                            <a href="{{ route('Cpmk_Cpl.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
                                 <p>CPMK - CPL</p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('Cpmk-Cpl-Mk.index') }}" class="nav-link">
+                            <a href="{{ route('CplCpmkMk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl-mk' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
                                 <p>CPMK - CPL - MK</p>
                             </a>
                         </li>
                     </ul>
                 </li>
-                {{-- pemetaan end --}}
-
-                <li class="nav-item">
-                    <a href="{{ route('logout') }}" class="nav-link">
-                        <i class="nav-icon fas fa-sign-out-alt"></i>
-                        <p>Logout</p>
-                    </a>
-                </li>
             </ul>
         </nav>
+
     </div>
 </aside>

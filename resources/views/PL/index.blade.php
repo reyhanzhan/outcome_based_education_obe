@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Daftar Profil Lulusan</h3>
+                    {{-- <h3 class="card-title">Daftar Profil Lulusan</h3> --}}
                     <a href="{{ route('pl.create') }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Tambah Profil Lulusan
                     </a>

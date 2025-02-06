@@ -1,13 +1,13 @@
 @extends('layouts_adminlte.app')
 
-@section('title', 'Capaian Profil Lulusan')
+@section('title', 'Daftar Capaian Profil Lulusan')
 
 @section('content')
     <section class="content">
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Daftar Capaian Profil Lulusan</h3>
+                    {{-- <h3 class="card-title">Daftar Capaian Profil Lulusan</h3> --}}
                     <a href="{{ route('cpl.create') }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Tambah Capaian Profil Lulusan
                     </a>
