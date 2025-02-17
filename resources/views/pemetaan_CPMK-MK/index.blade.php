@@ -14,31 +14,26 @@
                     <table id="pemetaanTable" class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="align-middle text-center">No</th>
-                                <th rowspan="2" class="align-middle text-center">Kode MK</th>
+                                <th rowspan="2" class="align-middle text-center">Mata Kuliah (MK)</th>
                                 <th colspan="{{ count($cpmks) }}" class="text-center">Capaian Pembelajaran Mata Kuliah (CPMK)</th>
                             </tr>
                             <tr>
-                                @foreach ($mks as $mk)
-                                    <th class="text-center">{{ $mk->kode_mk }}</th>
+                                @foreach ($cpmks as $cpmk)
+                                    <th class="text-center">{{ $cpmk->kode_cpmk }}</th>
                                 @endforeach
                             </tr>
                         </thead>
                         
-                        
-                
                         <tbody>
-                            @foreach ($cpmks as $index => $cpmk)
+                            @foreach ($mks as $mk)
                                 <tr>
-                                    <td class="text-center">{{ $index + 1 }}</td>
-                                    <td>{{ $cpmk->kode_cpmk }}</td>
-                                    
+                                    <td class="align-middle">{{ $mk->kode_mk }} - {{ $mk->deskripsi }}</td>
                                     @foreach ($cpmks as $cpmk)
                                         <td class="text-center">
                                             <input type="checkbox" class="update-mapping"
-                                                data-cpmk="{{ $mk->id }}"
-                                                data-cpl="{{ $cpmk->id }}"
-                                                @if ($mk->cpmks->contains($cpmk->id)) checked @endif>
+                                                data-cpmk="{{ $cpmk->id }}"
+                                                data-mk="{{ $mk->id }}"
+                                                @if ($cpmk->mks->contains($mk->id)) checked @endif>
                                         </td>
                                     @endforeach
                                 </tr>
@@ -55,7 +50,8 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $("#pemetaanTable").DataTable({
+            // Inisialisasi DataTables
+            var table = $("#pemetaanTable").DataTable({
                 "scrollX": true,  // ✅ Tambahkan scroll horizontal agar tabel tidak keluar
                 "paging": true,
                 "lengthMenu": [10, 25, 50, 100],
@@ -81,10 +77,10 @@
                 }
             });
 
-            // ✅ Event ketika checkbox berubah (AJAX)
-            $(".update-mapping").on("change", function() {
-                var mk_id = $(this).data("mk");
+            // ✅ Event delegation untuk checkbox agar tetap berfungsi setelah pagination
+            $(document).on("change", ".update-mapping", function() {
                 var cpmk_id = $(this).data("cpmk");
+                var mk_id = $(this).data("mk");
                 var checked = $(this).prop("checked");
 
                 $.ajax({
@@ -93,7 +89,7 @@
                     data: {
                         _token: "{{ csrf_token() }}",
                         cpmk_id: cpmk_id,
-                        cpl_id: cpl_id,
+                        mk_id: mk_id,
                         checked: checked ? 1 : 0 // Kirim 1 jika dicentang, 0 jika dihapus
                     },
                     success: function(response) {

@@ -26,9 +26,14 @@ class Mk extends Model
         return $this->belongsToMany(Cpl::class, 'cpl_mk');
     }
 
+    public function cplsbelongsto()
+    {
+        return $this->belongsTo(Cpl::class, 'cpl_id');
+    }
+
     public function cpmks()
     {
-        return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id');
+        return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id')->with('subcpmks');
     }
 
     public function mksThroughCpmk()

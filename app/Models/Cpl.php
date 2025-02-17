@@ -26,6 +26,16 @@ class Cpl extends Model
     }
 
 
+    public function cpmkshasmany()
+    {
+        return $this->hasMany(Cpmk::class, 'cpl_id');
+    }
+
+    public function mkshasmany()
+    {
+        return $this->hasMany(Mk::class, 'cpl_id');
+    }
+
     // Relasi ke CPMK
     public function cpmks()
     {

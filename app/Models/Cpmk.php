@@ -21,9 +21,19 @@ class Cpmk extends Model
         return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id');
     }
 
+    public function cplsbelongsto()
+    {
+        return $this->belongsTo(Cpl::class, 'cpl_id');
+    }
+
     public function mks()
     {
         return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id');
+    }
+
+    public function subcpmks()
+    {
+        return $this->hasMany(SubCpmk::class, 'cpmk_id');
     }
 
 }

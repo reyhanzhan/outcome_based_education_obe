@@ -14,7 +14,11 @@ use App\Http\Controllers\Cpl_PlController;
 use App\Http\Controllers\Cpl_MkController;
 use App\Http\Controllers\Cpl_BkController;
 use App\Http\Controllers\Cpmk_CplController;
+use App\Http\Controllers\Cpmk_MkController;
 use App\Http\Controllers\Cpmk_Cpl_Mk_Controller;
+use App\Http\Controllers\Mk_Cpmk_SubcpmkController;
+use App\Http\Controllers\SubCpmkCrudController;
+use App\Http\Controllers\Metode_penilaianController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Controller;
 use App\Models\Pl;
@@ -89,6 +93,22 @@ Route::delete('/cpmk/{id}', [CpmkController::class, 'destroy'])->name('cpmk.dest
 
 
 // 
+// Route untuk menampilkan subcpmk start
+Route::get('/subcpmk/index', [SubCpmkCrudController::class, 'index'])->name('subcpmk.index')->middleware('auth');
+// Route untuk menampilkan form tambah kartu nama
+Route::get('/subcpmk/create', [SubCpmkCrudController::class, 'create'])->name('subcpmk.create')->middleware('auth');
+// Route untuk menyimpan kartu nama yang baru dibuat
+Route::post('/subcpmk/index', [SubCpmkCrudController::class, 'store'])->name('subcpmk.store')->middleware('auth');
+Route::get('/subcpmk/{id}/edit', [SubCpmkCrudController::class, 'edit'])->name('subcpmk.edit')->middleware('auth');
+// Route untuk mengupdate kartu bisnis
+Route::put('/subcpmk/{id}', [SubCpmkCrudController::class, 'update'])->name('subcpmk.update')->middleware('auth');
+// Route untuk menghapus kartu bisnis
+Route::delete('/subcpmk/{id}', [SubCpmkCrudController::class, 'destroy'])->name('subcpmk.destroy')->middleware('auth');
+// Route untuk menampilkan CPMK end
+// 
+
+
+// 
 // Route untuk menampilkan BK start
 Route::get('/BK/index', [BkController::class, 'index'])->name('bk.index')->middleware('auth');
 // Route untuk menampilkan form tambah kartu nama
@@ -100,16 +120,8 @@ Route::get('/bk/{id}/edit', [BkController::class, 'edit'])->name('bk.edit')->mid
 Route::put('/bk/{id}', [BkController::class, 'update'])->name('bk.update')->middleware('auth');
 // Route untuk menghapus kartu bisnis
 Route::delete('/bk/{id}', [BkController::class, 'destroy'])->name('bk.destroy')->middleware('auth');
-// Route untuk menampilkan CPMK index end
+// Route untuk menampilkan BK index end
 // 
-Route::get('/bk', [BkController::class, 'index'])->name('bk.index');
-Route::get('/bk/getData', [BkController::class, 'getData'])->name('bk.getData');
-Route::post('/bk/store', [BkController::class, 'store'])->name('bk.store');
-Route::delete('/bk/destroy/{id}', [BkController::class, 'destroy'])->name('bk.destroy');
-
-Route::get('/bk/getData', [BkController::class, 'getData'])->name('bk.getData')->middleware('auth');
-Route::post('/bk/store', [BkController::class, 'store'])->name('bk.store')->middleware('auth');
-Route::delete('/bk/destroy/{id}', [BkController::class, 'destroy'])->name('bk.destroy')->middleware('auth');
 
 
 
@@ -164,34 +176,44 @@ Route::post('/CPMK-CPL/update', [Cpmk_CplController::class, 'update'])->name('Cp
 
 
 // 
+// Routing pemetaan CPL-MK start
+Route::get('/CPMK-MK', [Cpmk_MkController::class, 'index'])->name('Cpmk_Mk.index');
+Route::post('/CPMK-MK/update', [Cpmk_MkController::class, 'update'])->name('Cpmk_Mk.update');
+Route::get('/total-bobot', [Cpmk_MkController::class, 'getTotalBobot'])->name('Cpmk_Mk.totalBobot');
+
+// Routing pemetaan CPL-MK end
+// 
+
+
+// 
 // Routing pemetaan CPL-BK start
 Route::get('/CPL-BK', [Cpl_BKController::class, 'index'])->name('Cpl_Bk.index');
 Route::post('/CPL-BK/update', [Cpl_BKController::class, 'update'])->name('Cpl_Bk.update');
 // Routing pemetaan CPL-BK end
 // 
 
+// pemetan cpmk-cpl-mk start
+Route::get('/cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('CplCpmkMk.index');
+// pemetan cpmk-cpl-mk end
 
-Route::get('/pemetaan-cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('CplCpmkMk.index');
 
 
-
-// 
-// Routing pemetaan CPMK-CPL-MK start
-// Route::get('/CPMK-CPL-MK', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('Cpmk-Cpl-Mk.index');
-// // Route untuk menyimpan pemetaan
-// Route::post('/CPMK-CPL-MK/update', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('Cpmk-Cpl-Mk.store');
-// Routing pemetaan CPMK-PL-MK end
-// 
 
 // 
 // Routing pemetaan CPMK-PL start
 Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-CPL.index');
 Route::post('/pemetaan_cpmkpl/update', [PemetaancpmkplController::class, 'update'])->name('pemetaan_CPMK-CPL.update');
+Route::post('/pemetaan-cpl-cpmk-mk/store', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('cpmk_cpl_mk.store');
+
 // Routing pemetaan CPMK-PL end
 // 
 
-
-
+// 
+// Routing pemilihan metode penilaian start
+Route::get('/teknik_penilaian', [Metode_penilaianController::class, 'pilihMetodePenilaian'])->name('teknik_penilaian.index');
+Route::post('/teknik_penilaian', [Metode_penilaianController::class, 'simpanMetodePenilaian'])->name('teknik_penilaian.store');
+// Routing pemilihan metode penilaian end
+// 
 
 
 

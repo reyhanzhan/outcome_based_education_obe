@@ -10,7 +10,7 @@
                 <h3 class="card-title">Pemetaan CPMK - CPL</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div class="table-responsive"> <!-- ✅ Tambahkan ini agar tabel bisa di-scroll horizontal -->
                     <table id="pemetaanTable" class="table table-bordered table-hover">
                         <thead>
                             <tr>
@@ -24,9 +24,8 @@
                                 @endforeach
                             </tr>
                         </thead>
-                        
-                        
-                
+
+
                         <tbody>
                             @foreach ($cpmks as $index => $cpmk)
                                 <tr>
@@ -45,7 +44,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                </div>  
+                </div> <!-- ✅ Akhiran div table-responsive -->
             </div>
         </div>
     </div>
@@ -57,7 +56,6 @@
         $(document).ready(function() {
             // Inisialisasi DataTables
             var table = $("#pemetaanTable").DataTable({
-                "scrollX": true,  // ✅ Tambahkan scroll horizontal agar tabel tidak keluar
                 "paging": true,
                 "lengthMenu": [10, 25, 50, 100],
                 "pageLength": 10,
@@ -82,7 +80,7 @@
                 }
             });
 
-            // ✅ Event delegation untuk checkbox agar tetap berfungsi setelah pagination
+            // Event delegation untuk checkbox agar tetap berfungsi setelah pagination
             $(document).on("change", ".update-mapping", function() {
                 var cpmk_id = $(this).data("cpmk");
                 var cpl_id = $(this).data("cpl");
@@ -99,13 +97,13 @@
                     },
                     success: function(response) {
                         if (checked) {
-                            toastr.success("✅ Data berhasil disimpan!");
+                            toastr.success("Data berhasil disimpan!", "Sukses");
                         } else {
-                            toastr.warning("❌ Data telah dihapus!");
+                            toastr.warning("Data telah dihapus!", "Perhatian");
                         }
                     },
                     error: function() {
-                        toastr.error("Gagal menyimpan perubahan!");
+                        toastr.error("Gagal menyimpan perubahan", "Error");
                     }
                 });
             });

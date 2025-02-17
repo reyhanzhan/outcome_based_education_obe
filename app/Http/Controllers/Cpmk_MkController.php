@@ -13,9 +13,9 @@ class Cpmk_MkController extends Controller
 {
     public function index()
     {
-        $mks = Mk::with('mks')->get();
-        $cpmks = Cpmk::all();
-        return view('pemetaan_CPMK-MK.index', compact('mks', 'cpmks'));
+        $cpmks = Cpmk::with('mks')->get(); // ✅ Ambil CPMK beserta MK terkait
+        $mks = Mk::all();
+        return view('pemetaan_CPMK-MK.index', compact('cpmks', 'mks'));
     }
 
     public function update(Request $request)

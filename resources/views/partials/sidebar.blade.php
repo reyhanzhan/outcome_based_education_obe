@@ -38,7 +38,7 @@
 
                 <!-- Manajemen Data -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk','subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-folder"></i>
                         <p>
@@ -47,27 +47,6 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('bk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
-                                <i class="fas fa-book nav-icon"></i>
-                                <p>Bahan Kajian</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('mk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
-                                <i class="fas fa-book-open nav-icon"></i>
-                                <p>Mata Kuliah</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('cpmk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
-                                <i class="fas fa-tasks nav-icon"></i>
-                                <p>Capaian Pembelajaran Mata Kuliah</p>
-                            </a>
-                        </li>
                         <li class="nav-item">
                             <a href="{{ route('pl.index') }}"
                                 class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
@@ -82,12 +61,33 @@
                                 <p>Capaian Profil Lulusan</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('bk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
+                                <i class="fas fa-book nav-icon"></i>
+                                <p>Bahan Kajian</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('cpmk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
+                                <i class="fas fa-tasks nav-icon"></i>
+                                <p>Capaian Pembelajaran Mata Kuliah</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('mk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
+                                <i class="fas fa-book-open nav-icon"></i>
+                                <p>Mata Kuliah</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
                 <!-- Pemetaan -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-cpl-mk']) ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl','cpmk-mk', 'cpl-cpmk-mk',]) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-sitemap"></i>
                         <p>
@@ -100,14 +100,7 @@
                             <a href="{{ route('Cpl_Pl.index') }}"
                                 class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-pl' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
-                                <p>CPL - PL</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('Cpl_Mk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-mk' ? 'active' : '' }}">
-                                <i class="fas fa-layer-group nav-icon"></i>
-                                <p>CPL - MK</p>
+                                <p>PL - CPL</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -125,10 +118,53 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('CplCpmkMk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl-mk' ? 'active' : '' }}">
+                            <a href="{{ route('Cpmk_Mk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-mk' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
-                                <p>CPMK - CPL - MK</p>
+                                <p>CPMK - MK</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('Cpl_Mk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-mk' ? 'active' : '' }}">
+                                <i class="fas fa-layer-group nav-icon"></i>
+                                <p>MK - CPL</p>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a href="{{ route('CplCpmkMk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-cpmk-mk' ? 'active' : '' }}">
+                                <i class="fas fa-layer-group nav-icon"></i>
+                                <p>CPL - CPMK - MK</p>
+                            </a>
+                        </li>
+                        {{-- <li class="nav-item">
+                            <a href="{{ route('MkCpmkSubcpmk.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'mk-cpmk-subcpmk' ? 'active' : '' }}">
+                                <i class="fas fa-layer-group nav-icon"></i>
+                                <p>MK - CPMK - SUBCPMK</p>
+                            </a>
+                        </li> --}}
+                    </ul>
+                </li>
+
+                <!-- Penilaian -->
+                <li
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['teknik_penilaian',]) ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-chart-bar"></i>
+                        <p>
+                            Penilaian
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('teknik_penilaian.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'teknik_penilaian' ? 'active' : '' }}">
+                                <i class="fas fa-layer-group nav-icon"></i>
+                                <p>Teknik Penilaian</p>
                             </a>
                         </li>
                     </ul>
