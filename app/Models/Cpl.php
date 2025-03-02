@@ -25,6 +25,39 @@ class Cpl extends Model
         return $this->belongsToMany(Pl::class, 'cpl_pl', 'cpl_id', 'pl_id');
     }
 
+    public function cpmks()
+    {
+        return $this->belongsToMany(Cpmk::class, 'cpmk_cpl')->withPivot('bobot')->withTimestamps();
+    }
+
+    public function bks()
+    {
+        return $this->belongsToMany(Bk::class, 'cpl_bk')->withTimestamps();
+    }
+
+    public function mks()
+    {
+        return $this->belongsToMany(Mk::class, 'cpl_mk')->withPivot('bobot')->withTimestamps();
+    }
+
+        // Relasi ke CPMK
+        // public function cpmks()
+        // {
+        //     return $this->belongsToMany(Cpmk::class, 'cpmk_cpl', 'cpl_id', 'cpmk_id','cpl_cpmk')->withPivot('bobot')->withTimestamps();
+        // }
+    
+    
+        // Relasi ke MK (Melalui CPMK)
+        // public function mks()
+        // {
+        //     return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id')->withPivot('bobot')->withTimestamps();
+        // }
+    
+        // public function bks()
+        // {
+        //     return $this->belongsToMany(Mk::class, 'cpl_bk', 'cpl_id', 'bk_id');
+        // }
+
 
     public function cpmkshasmany()
     {
@@ -36,27 +69,19 @@ class Cpl extends Model
         return $this->hasMany(Mk::class, 'cpl_id');
     }
 
-    // Relasi ke CPMK
-    public function cpmks()
-    {
-        return $this->belongsToMany(Cpmk::class, 'cpmk_cpl', 'cpl_id', 'cpmk_id');
-    }
 
-    // Relasi ke MK (Melalui CPMK)
-    public function mks()
-    {
-        return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id');
-    }
-
-    public function bks()
-    {
-        return $this->belongsToMany(Mk::class, 'cpl_bk', 'cpl_id', 'bk_id');
-    }
 
     // Relasi langsung CPL-MK jika ada
     public function directMks()
     {
         return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id');
+    }
+
+
+
+    public function mahasiswas()
+    {
+        return $this->belongsToMany(Mahasiswa::class, 'nilai_cpl')->withPivot('nilai')->withTimestamps();
     }
     
 

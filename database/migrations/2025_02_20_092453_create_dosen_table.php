@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cpmk_cpl', function (Blueprint $table) {
+        Schema::create('dosen', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade'); // Relasi ke CPMK
-            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade');   // Relasi ke CPL
-            $table->integer('bobot')->default(0);
+            $table->string('nama', 100)->nullable(false); // Nama dosen, wajib diisi
+            $table->string('email', 100)->unique()->nullable(false); // Email unik, wajib diisi
+            $table->string('role', 20)->default('dosen')->nullable(false); // Peran (role): 'kps' atau 'dosen'
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cpmk_cpl');
+        Schema::dropIfExists('dosen');
     }
 };

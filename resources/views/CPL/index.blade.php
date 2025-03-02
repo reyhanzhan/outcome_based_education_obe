@@ -24,7 +24,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($cpl as $index => $item)
+                            @foreach ($cpls as $index => $item)
                                 <tr>
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td>{{ $item->kode_cpl }}</td>

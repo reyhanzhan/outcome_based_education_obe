@@ -14,11 +14,12 @@ class Cpmk extends Model
     protected $fillable = [
         'kode_cpmk',
         'deskripsi',
+        'min_standard',
     ];
 
     public function cpls()
     {
-        return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id');
+        return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id')->withPivot('bobot')->withTimestamps();
     }
 
     public function cplsbelongsto()
@@ -28,8 +29,14 @@ class Cpmk extends Model
 
     public function mks()
     {
-        return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id');
+        return $this->belongsToMany(Mk::class, 'cpmk_mk')->withPivot('bobot', 'min_standard')->withTimestamps();
     }
+
+    public function nilaiCpmks()
+    {
+        return $this->hasMany(NilaiCpmk::class, 'cpmk_id');
+    }
+
 
     public function subcpmks()
     {

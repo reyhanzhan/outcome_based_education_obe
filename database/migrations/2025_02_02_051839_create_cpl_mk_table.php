@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); // Relasi ke CPL
             $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');   // Relasi ke MK
+            $table->integer('bobot')->default(0); // Bobot CPL-MK, total harus 100% per CPL
             $table->timestamps();
+            $table->unique(['cpl_id', 'mk_id']); // Pastikan kombinasi unik
         });
     }
 

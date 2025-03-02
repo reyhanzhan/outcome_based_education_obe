@@ -38,7 +38,7 @@
 
                 <!-- Manajemen Data -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk','subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-folder"></i>
                         <p>
@@ -55,8 +55,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('cpl.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
+                            <a href="{{ route('cpl.list') }}"
+                                class="nav-link {{ request()->path() == 'CPL/index' ? 'active' : '' }}">
                                 <i class="fas fa-file-alt nav-icon"></i>
                                 <p>Capaian Profil Lulusan</p>
                             </a>
@@ -87,7 +87,7 @@
 
                 <!-- Pemetaan -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl','cpmk-mk', 'cpl-cpmk-mk',]) ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-sitemap"></i>
                         <p>
@@ -114,7 +114,7 @@
                             <a href="{{ route('Cpmk_Cpl.index') }}"
                                 class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl' ? 'active' : '' }}">
                                 <i class="fas fa-layer-group nav-icon"></i>
-                                <p>CPMK - CPL</p>
+                                <p>CPL - CPMK</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -131,7 +131,7 @@
                                 <p>MK - CPL</p>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item">
                             <a href="{{ route('CplCpmkMk.index') }}"
                                 class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-cpmk-mk' ? 'active' : '' }}">
@@ -151,7 +151,7 @@
 
                 <!-- Penilaian -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['teknik_penilaian',]) ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-chart-bar"></i>
                         <p>
@@ -159,12 +159,53 @@
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
+
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('teknik_penilaian.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'teknik_penilaian' ? 'active' : '' }}">
-                                <i class="fas fa-layer-group nav-icon"></i>
-                                <p>Teknik Penilaian</p>
+                            <a href="{{ route('pembobotan.index') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'pembobotan' ? 'active' : '' }}">
+                                <i class="fas fa-balance-scale nav-icon"></i>
+                                <p>Pembobotan</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('nilai.mahasiswa.choose') }}"
+                                class="nav-link {{ strtolower(request()->segment(1)) == 'nilai' ? 'active' : '' }}">
+                                <i class="fas fa-edit nav-icon"></i>
+                                <p>Input Nilai Mahasiswa</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('penilaian.cpmk.index', ['mk_id' => \App\Models\Mk::first()->id ?? 1]) }}"
+                                class="nav-link {{ request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
+                                <i class="fas fa-chart-pie nav-icon"></i>
+                                <p>Penilaian CPMK</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}"
+                                class="nav-link {{ request()->is('visualisasi') ? 'active' : '' }}">
+                                <i class="fas fa-chart-line nav-icon"></i>
+                                <p>Visualisasi Grafik Radar</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('penilaian.cpl.index') }}"
+                                class="nav-link {{ request()->is('penilaian/cpl') ? 'active' : '' }}">
+                                <i class="fas fa-graduation-cap nav-icon"></i>
+                                <p>Penilaian CPL</p>
                             </a>
                         </li>
                     </ul>

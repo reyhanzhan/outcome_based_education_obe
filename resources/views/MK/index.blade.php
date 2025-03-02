@@ -94,7 +94,7 @@
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",
-                    "searchPlaceholder": "Cari Bahan Kajian...",
+                    "searchPlaceholder": "Cari Mata Kuliah...",
                     "search": "",
                     "paginate": {
                         "first": "Awal",
