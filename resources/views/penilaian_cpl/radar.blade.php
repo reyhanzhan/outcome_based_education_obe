@@ -65,20 +65,19 @@
                                 <tr>
                                     <th>Kode CPL</th>
                                     <th>Deskripsi</th>
-                                    <th>Nilai Mahasiswa</th>
+                                    <th>Nilai Mahasiswa (0-100%)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($labels as $index => $label)
                                     @php
                                         $cplScore = $data[$index];
-                                        $minStandard = $minStandard;
                                     @endphp
                                     <tr>
                                         <td>{{ $label }}</td>
                                         <td>{{ $cpls[$index]->deskripsi }}</td>
-                                        <td class="{{ $cplScore < $minStandard ? 'below-min' : '' }}">
-                                            {{ number_format($cplScore, 0) }}
+                                        <td class="{{ $cplScore < 55 ? 'below-min' : '' }}"> <!-- Tetap tampilkan warna merah di bawah 55%, opsional -->
+                                            {{ number_format($cplScore, 0) }}%
                                         </td>
                                     </tr>
                                 @endforeach
@@ -106,32 +105,20 @@
                         datasets: [
                             {
                                 label: 'Nilai CPL {{ $mahasiswa->nama }}',
-                                data: @json($data), // Nilai CPL mahasiswa
+                                data: @json($data), // Nilai CPL mahasiswa (0-100%)
                                 fill: true,
                                 backgroundColor: 'rgba(0, 123, 255, 0.2)', // Biru transparan
                                 borderColor: 'rgba(0, 123, 255, 1)', // Biru solid
                                 pointBackgroundColor: function(context) {
                                     const value = context.raw;
-                                    const min = @json($minStandard);
-                                    return value < min ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
+                                    return value < 55 ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)'; // Opsional: tetap tandai di bawah 55% dengan merah
                                 },
                                 pointBorderColor: '#fff',
                                 pointHoverBackgroundColor: '#fff',
                                 pointHoverBorderColor: function(context) {
                                     const value = context.raw;
-                                    const min = @json($minStandard);
-                                    return value < min ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
+                                    return value < 55 ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
                                 }
-                            },
-                            {
-                                label: 'Standar Minimum',
-                                data: @json(array_fill(0, count($labels), $minStandard)), // Standar minimum, misalnya 55
-                                fill: true,
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Merah transparan
-                                borderColor: 'rgba(255, 99, 132, 1)', // Merah solid
-                                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-                                pointBorderColor: '#fff',
-                                pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
                             }
                         ]
                     },
@@ -142,7 +129,7 @@
                                 suggestedMax: 100, // Sesuaikan dengan skala maksimum (0-100 untuk nilai CPL)
                                 ticks: {
                                     stepSize: 20,
-                                    callback: function(value) { return value; }
+                                    callback: function(value) { return value + '%'; }
                                 },
                                 pointLabels: {
                                     font: {
@@ -163,7 +150,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return context.label + ': ' + context.raw;
+                                        return context.label + ': ' + context.raw + '%';
                                     }
                                 }
                             }

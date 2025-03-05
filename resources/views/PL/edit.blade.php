@@ -14,20 +14,19 @@
                 @method('PUT')
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="kode_pl">Kode Mata Kuliah</label>
+                        <label for="kode_pl">Kode Profil Lulusan</label>
                         <input type="text" 
                                class="form-control @error('kode_pl') is-invalid @enderror" 
                                id="kode_pl" 
                                name="kode_pl" 
-                               value="{{ old('kode_pl', $pl->kode_pl) }}"
-                               readonly>
+                               value="{{ old('kode_pl', $pl->kode_pl) }}">
                         @error('kode_pl')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label for="deskripsi">Deskripsi Mata Kuliah</label>
+                        <label for="deskripsi">Deskripsi Capaian Profil Lulusan</label>
                         <textarea class="form-control @error('deskripsi') is-invalid @enderror" 
                                   id="deskripsi" 
                                   name="deskripsi" 
@@ -37,6 +36,18 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="kategori">Kategori</label>
+                        <input type="text" 
+                               class="form-control @error('kategori') is-invalid @enderror" 
+                               id="kategori" 
+                               name="kategori" 
+                               value="{{ old('kategori', $pl->kategori) }}"
+                               placeholder="Masukkan kategori">
+                        @error('kategori')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-warning">
@@ -50,4 +61,26 @@
         </div>
     </div>
 </section>
+
+@if (session('error'))
+    <script>
+        toastr.error('{{ session('error') }}', {
+            position: 'top-right',
+            timeOut: 5000,
+            progressBar: true,
+            iconClass: 'toast-error'
+        });
+    </script>
+@endif
+
+@if (session('success'))
+    <script>
+        toastr.success('{{ session('success') }}', {
+            position: 'top-right',
+            timeOut: 5000,
+            progressBar: true,
+            iconClass: 'toast-success'
+        });
+    </script>
+@endif
 @endsection

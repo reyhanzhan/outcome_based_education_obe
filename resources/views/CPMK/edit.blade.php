@@ -19,8 +19,7 @@
                                class="form-control @error('kode_cpmk') is-invalid @enderror" 
                                id="kode_cpmk" 
                                name="kode_cpmk" 
-                               value="{{ old('kode_cpmk', $cpmk->kode_cpmk) }}"
-                               readonly>
+                               value="{{ old('kode_cpmk', $cpmk->kode_cpmk) }}">
                         @error('kode_cpmk')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

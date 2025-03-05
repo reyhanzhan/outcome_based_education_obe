@@ -122,7 +122,14 @@ Route::delete('/mk/{id}', [MkController::class, 'destroy'])->name('mk.destroy')-
 // Route untuk menampilkan CPMK index end
 // 
 
-
+// Route untuk CRUD CPL (Manajemen Data)
+Route::get('/CPL', [CplController::class, 'index'])->name('cpl.index')->middleware('auth');
+Route::get('/CPL/index', [CplController::class, 'list'])->name('cpl.list')->middleware('auth');
+Route::get('/CPL/create', [CplController::class, 'create'])->name('cpl.create')->middleware('auth');
+Route::post('/CPL/index', [CplController::class, 'store'])->name('cpl.store')->middleware('auth');
+Route::get('/CPL/{id}/edit', [CplController::class, 'edit'])->name('cpl.edit')->middleware('auth');
+Route::put('/CPL/{id}', [CplController::class, 'update'])->name('cpl.update')->middleware('auth');
+Route::delete('/CPL/{id}', [CplController::class, 'destroy'])->name('cpl.destroy')->middleware('auth');
 
 
 
@@ -204,13 +211,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/penilaian/cpmk/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
 
 
-    // Route untuk CRUD CPL (Manajemen Data)
-    Route::get('/CPL/index', [CplController::class, 'list'])->name('cpl.list')->middleware('auth');
-    Route::get('/CPL/create', [CplController::class, 'create'])->name('cpl.create')->middleware('auth');
-    Route::post('/CPL/index', [CplController::class, 'store'])->name('cpl.store')->middleware('auth');
-    Route::get('/CPL/{id}/edit', [CplController::class, 'edit'])->name('cpl.edit')->middleware('auth');
-    Route::put('/CPL/{id}', [CplController::class, 'update'])->name('cpl.update')->middleware('auth');
-    Route::delete('/CPL/{id}', [CplController::class, 'destroy'])->name('cpl.destroy')->middleware('auth');
+    
 
     // Route untuk Penilaian CPL
     Route::get('/penilaian/cpl', [CplController::class, 'index'])->name('penilaian.cpl.index')->middleware('auth');

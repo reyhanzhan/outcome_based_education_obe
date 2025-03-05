@@ -52,12 +52,19 @@ class PenilaianCpmkController extends Controller
     public function index($mk_id)
     {
         $mk = Mk::findOrFail($mk_id);
-        $mahasiswas = Mahasiswa::all();
-        $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
+        $mahasiswas = Mahasiswa::all(); // Ambil semua mahasiswa untuk tampilan tabel
+        $cpmks = Cpmk::with('mks')->whereHas('mks', function ($query) use ($mk_id) {
             $query->where('mk_id', $mk_id);
         })->get();
+        $minStandard = session('min_standard', 55); // Ambil standar minimum dari session atau default 55
 
-        return view('penilaian_cpmk.index', compact('mk', 'mahasiswas', 'cpmks'));
+        // Ambil mahasiswa_id dari sesi atau dari parameter (opsional, sesuaikan logika)
+        $mahasiswa_id = request()->session()->get('current_mahasiswa_id'); // Contoh, gunakan sesi
+        if (!$mahasiswa_id) {
+            $mahasiswa_id = $mahasiswas->first()->id ?? null; // Default ke mahasiswa pertama jika tidak ada sesi
+        }
+
+        return view('penilaian_cpmk.index', compact('mk', 'mahasiswas', 'cpmks', 'minStandard', 'mahasiswa_id'));
     }
 
     public function calculateMkScore($mk_id, $mahasiswa_id)
