@@ -1,6 +1,6 @@
 @extends('layouts_adminlte.app')
 
-@section('title', 'Pilih Mata Kuliah untuk Penilaian CPMK')
+@section('title', 'Pilih Mata Kuliah untuk Visualisasi Grafik Radar CPMK')
 
 @section('content')
 <section class="content">
@@ -8,14 +8,12 @@
         <div class="card">
             <div class="card-header bg-primary">
                 <h3 class="card-title">Pilih Mata Kuliah untuk {{ $mahasiswa->nama }}</h3>
-                <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mahasiswa</a>
             </div>
             <div class="card-body">
                 @if ($mks->isEmpty())
                     <div class="alert alert-warning">Tidak ada mata kuliah yang tersedia. Silakan tambahkan data mata kuliah terlebih dahulu.</div>
                 @else
-                    <form action="{{ route('penilaian.cpmk.index', ['mk_id' => ':mk_id']) }}" method="GET">
-                        <input type="hidden" name="mahasiswa_id" value="{{ $mahasiswa->id }}">
+                    <form action="{{ route('visualisasi.cpmk.radar', ['mahasiswa_id' => $mahasiswa->id, 'mk_id' => ':mk_id']) }}" method="GET">
                         <div class="form-group">
                             <label for="mk_id">Pilih Mata Kuliah:</label>
                             <select name="mk_id" id="mk_id" class="form-control" required>
@@ -24,7 +22,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Lihat Penilaian CPMK</button>
+                        <button type="submit" class="btn btn-primary">Lihat Grafik Radar</button>
                     </form>
                 @endif
             </div>
@@ -41,16 +39,25 @@
                 e.preventDefault();
                 var mk_id = $('#mk_id').val();
                 if (mk_id) {
-                    var mahasiswa_id = $('input[name="mahasiswa_id"]').val();
-                    window.location.href = "{{ route('penilaian.cpmk.index', ['mk_id' => ':mk_id']) }}".replace(':mk_id', mk_id) + '?mahasiswa_id=' + mahasiswa_id;
+                    window.location.href = "{{ route('visualisasi.cpmk.radar', ['mahasiswa_id' => $mahasiswa->id, 'mk_id' => ':mk_id']) }}".replace(':mk_id', mk_id);
                 } else {
                     console.error('Pilih mata kuliah terlebih dahulu!');
-                    toastr.error('Pilih mata kuliah terlebih dahulu!');
+                    toastr.error('Pilih mata kuliah terlebih dahulu!', {
+                        position: 'top-right',
+                        timeOut: 5000,
+                        progressBar: true,
+                        iconClass: 'toast-error'
+                    });
                 }
             });
         } else {
             console.error('jQuery tidak dimuat!');
-            toastr.error('Gagal memuat halaman. Silakan perbarui browser.');
+            toastr.error('Gagal memuat halaman. Silakan perbarui browser.', {
+                position: 'top-right',
+                timeOut: 5000,
+                progressBar: true,
+                iconClass: 'toast-error'
+            });
         }
     });
 </script>

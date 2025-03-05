@@ -3,67 +3,67 @@
 @section('title', 'Input Nilai Mahasiswa')
 
 @section('css')
-    <style>
-        .card-header.bg-primary {
-            background-color: #007bff !important; /* Biru primer AdminLTE */
-            color: #fff;
-        }
+<style>
+    .card-header.bg-primary {
+        background-color: #007bff !important; /* Biru primer AdminLTE */
+        color: #fff;
+    }
 
-        .table-bordered th, .table-bordered td {
-            vertical-align: middle;
-            text-align: center;
-        }
+    .table-bordered th, .table-bordered td {
+        vertical-align: middle;
+        text-align: center;
+    }
 
-        .bobot-highlight {
-            background-color: #e9ecef; /* Abu-abu muda untuk bobot */
-            font-weight: bold;
-            color: #000000; /* Hitam untuk kontras */
-        }
+    .bobot-highlight {
+        background-color: #e9ecef; /* Abu-abu muda untuk bobot */
+        font-weight: bold;
+        color: #000000; /* Hitam untuk kontras */
+    }
 
-        .success-bg {
-            background-color: #d4edda; /* Hijau muda untuk sukses */
-            color: #155724; /* Hijau gelap untuk teks sukses */
-        }
+    .success-bg {
+        background-color: #d4edda; /* Hijau muda untuk sukses */
+        color: #155724; /* Hijau gelap untuk teks sukses */
+    }
 
-        .error-bg {
-            background-color: #f8d7da; /* Merah muda untuk error */
-            color: #721c24; /* Merah gelap untuk teks error */
-        }
+    .error-bg {
+        background-color: #f8d7da; /* Merah muda untuk error */
+        color: #721c24; /* Merah gelap untuk teks error */
+    }
 
-        .input-group .form-control {
-            border-color: #007bff; /* Biru untuk border input */
-        }
+    .input-group .form-control {
+        border-color: #007bff; /* Biru untuk border input */
+    }
 
-        .input-group .form-control.below-min {
-            border-color: #dc3545 !important; /* Merah untuk nilai di bawah standar minimum */
-            background-color: #fff3cd; /* Kuning muda untuk peringatan */
-        }
+    .input-group .form-control.below-min {
+        border-color: #dc3545 !important; /* Merah untuk nilai di bawah standar minimum */
+        background-color: #fff3cd; /* Kuning muda untuk peringatan */
+    }
 
-        .min-standard {
-            color: #6c757d; /* Abu-abu untuk standar minimum */
-            font-style: italic;
-        }
+    .min-standard {
+        color: #6c757d; /* Abu-abu untuk standar minimum */
+        font-style: italic;
+    }
 
-        .btn-primary {
-            background-color: #007bff; /* Biru primer AdminLTE */
-            border-color: #007bff;
-        }
+    .btn-primary {
+        background-color: #007bff; /* Biru primer AdminLTE */
+        border-color: #007bff;
+    }
 
-        .btn-primary:hover {
-            background-color: #0056b3; /* Biru gelap saat hover */
-            border-color: #0056b3;
-        }
+    .btn-primary:hover {
+        background-color: #0056b3; /* Biru gelap saat hover */
+        border-color: #0056b3;
+    }
 
-        .btn-secondary {
-            background-color: #6c757d; /* Abu-abu sekunder AdminLTE */
-            border-color: #6c757d;
-        }
+    .btn-secondary {
+        background-color: #6c757d; /* Abu-abu sekunder AdminLTE */
+        border-color: #6c757d;
+    }
 
-        .btn-secondary:hover {
-            background-color: #5a6268; /* Abu-abu lebih gelap saat hover */
-            border-color: #5a6268;
-        }
-    </style>
+    .btn-secondary:hover {
+        background-color: #5a6268; /* Abu-abu lebih gelap saat hover */
+        border-color: #5a6268;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -90,13 +90,13 @@
                         <div class="form-group mb-3">
                             <label for="minStandard">Standar Minimum Nilai CPMK:</label>
                             <select name="min_standard" id="minStandard" class="form-control">
-                                <option value="55" @if(!isset($minStandard) || $minStandard == 55) selected @endif>55</option>
-                                <option value="60" @if(isset($minStandard) && $minStandard == 60) selected @endif>60</option>
-                                <option value="65" @if(isset($minStandard) && $minStandard == 65) selected @endif>65</option>
-                                <option value="70" @if(isset($minStandard) && $minStandard == 70) selected @endif>70</option>
-                                <option value="75" @if(isset($minStandard) && $minStandard == 75) selected @endif>75</option>
+                                <option value="55" @if($minStandard == 55) selected @endif>55</option>
+                                <option value="60" @if($minStandard == 60) selected @endif>60</option>
+                                <option value="65" @if($minStandard == 65) selected @endif>65</option>
+                                <option value="70" @if($minStandard == 70) selected @endif>70</option>
+                                <option value="75" @if($minStandard == 75) selected @endif>75</option>
                             </select>
-                            <small class="form-text text-muted">Pilih standar minimum untuk semua CPMK di MK ini (hanya untuk visualisasi di grafik radar).</small>
+                            <small class="form-text text-muted">Pilih standar minimum untuk semua CPMK di MK ini (akan disimpan ke database).</small>
                         </div>
 
                         <div class="table-responsive">
@@ -105,9 +105,10 @@
                                     <tr>
                                         <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
                                         @foreach ($cpmks as $cpmk)
-                                            <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}, Min: <span class="min-standard">{{ $minStandard ?? 55 }}</span>)</th>
+                                        {{-- Min: <span class="min-standard">{{ $minStandard }}</span>% --}}
+                                            <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}% )</th>
                                         @endforeach
-                                        <th class="bg-light">Nilai Total MK</th>
+                                        {{-- <th class="bg-light">Nilai Total MK</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -117,13 +118,13 @@
                                             @foreach ($cpmks as $cpmk)
                                                 <td>
                                                     <div class="input-group">
-                                                        <input type="number" name="nilai_{{ $mahasiswa->id }}_{{ $cpmk->id }}" class="form-control nilai-input" data-min="{{ $minStandard ?? 55 }}" data-bobot="{{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}" value="{{ number_format($mahasiswa->nilaiCpmks()->where('mk_id', $mk->id)->where('cpmk_id', $cpmk->id)->first()->nilai ?? 0, 0) }}" min="0" max="100" step="0.01">
+                                                        <input type="number" name="nilai_{{ $mahasiswa->id }}_{{ $cpmk->id }}" class="form-control nilai-input" data-min="{{ $minStandard }}" data-bobot="{{ $cpmk->pivot->bobot ?? 0 }}" value="{{ number_format($mahasiswa->nilaiCpmks()->where('mk_id', $mk->id)->where('cpmk_id', $cpmk->id)->first()->nilai ?? 0, 0) }}" min="0" max="100" step="0.01">
                                                     </div>
                                                 </td>
                                             @endforeach
-                                            <td class="bg-light">
+                                            {{-- <td class="bg-light">
                                                 {{ number_format($mk->calculateMkScore($mahasiswa->id), 0) }}
-                                            </td>
+                                            </td> --}}
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -177,7 +178,7 @@
                         let total = 0;
                         let bobotTotal = 0;
                         @foreach ($cpmks as $cpmk)
-                            let bobot_{{ $cpmk->id }} = {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }};
+                            let bobot_{{ $cpmk->id }} = {{ $cpmk->pivot->bobot ?? 0 }};
                             let nilai_{{ $cpmk->id }} = parseFloat($(`input[name="nilai_${mahasiswaId}_${{ $cpmk->id }}"]`).val()) || 0;
                             total += (nilai_{{ $cpmk->id }} * bobot_{{ $cpmk->id }} / 100);
                             bobotTotal += bobot_{{ $cpmk->id }};

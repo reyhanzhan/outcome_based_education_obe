@@ -47,7 +47,7 @@
             <div class="card">
                 <div class="card-header bg-primary d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Penilaian CPMK untuk {{ $mk->kode_mk }} - {{ $mk->deskripsi }}</h3>
-                    <a href="{{ route('nilai.mahasiswa.choose') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
+                    <a href="{{ route('penilaian.cpmk.choose_mk', $mahasiswa_id) }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
                 </div>
                 <div class="card-body">
                     @if (session('success'))
@@ -63,7 +63,8 @@
                                 <tr>
                                     <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
                                     @foreach ($cpmks as $cpmk)
-                                        <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}%, Min: {{ $minStandard ?? 55 }}%)</th>
+                                    {{-- Min: {{ $minStandard ?? 55 }}% --}}
+                                        <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}%)</th>
                                     @endforeach
                                     <th class="bg-light">Nilai Total MK</th>
                                 </tr>

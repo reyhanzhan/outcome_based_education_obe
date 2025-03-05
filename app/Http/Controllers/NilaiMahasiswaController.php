@@ -8,6 +8,7 @@ use App\Models\Mahasiswa;
 use App\Models\NilaiCpmk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class NilaiMahasiswaController extends Controller
 {
@@ -23,9 +24,17 @@ class NilaiMahasiswaController extends Controller
         $mahasiswas = Mahasiswa::all();
         $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
             $query->where('mk_id', $mk_id);
-        })->get();
+        })->with([
+                    'mks' => function ($query) use ($mk_id) {
+                        $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+                    }
+                ])->get();
 
-        return view('nilai_mahasiswa.index', compact('mk', 'mahasiswas', 'cpmks'));
+        // Ambil min_standard dari session atau default 55
+        $minStandard = session('min_standard_' . $mk_id, 55);
+
+        // Kembalikan view dengan data
+        return view('nilai_mahasiswa.index', compact('mk', 'mahasiswas', 'cpmks', 'minStandard'));
     }
 
     public function store(Request $request)
@@ -36,8 +45,17 @@ class NilaiMahasiswaController extends Controller
             $mk_id = $request->input('mk_id');
             $mk = Mk::findOrFail($mk_id);
 
+            // Ambil min_standard dari request jika ada
+            $minStandard = $request->input('min_standard', 55); // Default 55 jika tidak ada
+            session(['min_standard_' . $mk_id => $minStandard]); // Simpan ke session berdasarkan mk_id
+
+            // Perbarui min_standard untuk semua entri cpmk_mk terkait MK ini
+            DB::table('cpmk_mk')
+                ->where('mk_id', $mk_id)
+                ->update(['min_standard' => $minStandard]);
+
             // Validasi input untuk semua mahasiswa dan CPMK
-            $data = $request->except(['_token', 'mk_id']);
+            $data = $request->except(['_token', 'mk_id', 'min_standard']);
             $errors = [];
 
             foreach ($data as $key => $value) {
@@ -50,7 +68,7 @@ class NilaiMahasiswaController extends Controller
                         "nilai_{$mahasiswa_id}_{$cpmk_id}" => 'nullable|numeric|min:0|max:100'
                     ]);
 
-                    $nilai = $value ? (float)$value : 0;
+                    $nilai = $value ? (float) $value : 0;
                     $bobot = Cpmk::find($cpmk_id)->mks()->where('mk_id', $mk_id)->first()->pivot->bobot ?? 0;
 
                     if ($bobot <= 0) {
@@ -74,7 +92,7 @@ class NilaiMahasiswaController extends Controller
                 return redirect()->back()->with('error', implode(' ', $errors));
             }
 
-            return redirect()->back()->with('success', 'Semua nilai berhasil disimpan!');
+            return redirect()->back()->with('success', 'Semua nilai dan standar minimum berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('Error menyimpan nilai: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal menyimpan nilai: ' . $e->getMessage());

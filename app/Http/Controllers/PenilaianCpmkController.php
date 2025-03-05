@@ -53,16 +53,23 @@ class PenilaianCpmkController extends Controller
     {
         $mk = Mk::findOrFail($mk_id);
         $mahasiswas = Mahasiswa::all(); // Ambil semua mahasiswa untuk tampilan tabel
-        $cpmks = Cpmk::with('mks')->whereHas('mks', function ($query) use ($mk_id) {
+        $cpmks = Cpmk::with([
+            'mks' => function ($query) use ($mk_id) {
+                $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+            }
+        ])->whereHas('mks', function ($query) use ($mk_id) {
             $query->where('mk_id', $mk_id);
         })->get();
-        $minStandard = session('min_standard', 55); // Ambil standar minimum dari session atau default 55
 
-        // Ambil mahasiswa_id dari sesi atau dari parameter (opsional, sesuaikan logika)
-        $mahasiswa_id = request()->session()->get('current_mahasiswa_id'); // Contoh, gunakan sesi
+        // Ambil min_standard dari tabel cpmk_mk untuk MK ini
+        $minStandard = $cpmks->first()->mks->first()->pivot->min_standard ?? session('min_standard_' . $mk_id, 55);
+
+        // Ambil mahasiswa_id dari query string atau sesi
+        $mahasiswa_id = request()->input('mahasiswa_id') ?? request()->session()->get('current_mahasiswa_id');
         if (!$mahasiswa_id) {
-            $mahasiswa_id = $mahasiswas->first()->id ?? null; // Default ke mahasiswa pertama jika tidak ada sesi
+            $mahasiswa_id = $mahasiswas->first()->id ?? null; // Default ke mahasiswa pertama jika tidak ada
         }
+        request()->session()->put('current_mahasiswa_id', $mahasiswa_id); // Simpan ke sesi
 
         return view('penilaian_cpmk.index', compact('mk', 'mahasiswas', 'cpmks', 'minStandard', 'mahasiswa_id'));
     }

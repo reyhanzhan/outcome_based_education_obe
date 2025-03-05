@@ -151,7 +151,7 @@
 
                 <!-- Penilaian -->
                 <li
-                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi') ? 'menu-open' : '' }}">
+                    class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi/cpmk/*') ? 'menu-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-chart-bar"></i>
                         <p>
@@ -182,20 +182,20 @@
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('penilaian.cpmk.index', ['mk_id' => \App\Models\Mk::first()->id ?? 1]) }}"
-                                class="nav-link {{ request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
-                                <i class="fas fa-chart-pie nav-icon"></i>
-                                <p>Penilaian CPMK</p>
+                            <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}"
+                               class="nav-link {{ request()->is('penilaian/cpmk/choose_mahasiswa') || request()->is('penilaian/cpmk/choose_mk/*') || request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
+                               <i class="fas fa-chart-pie nav-icon"></i>
+                               <p>Penilaian CPMK</p>
                             </a>
                         </li>
                     </ul>
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}"
-                                class="nav-link {{ request()->is('visualisasi') ? 'active' : '' }}">
-                                <i class="fas fa-chart-line nav-icon"></i>
-                                <p>Visualisasi Grafik Radar</p>
+                            <a href="{{ route('visualisasi.cpmk.choose_mahasiswa') }}"
+                               class="nav-link {{ request()->is('visualisasi/cpmk/choose_mahasiswa') || request()->is('visualisasi/cpmk/choose_mk/*') || request()->is('visualisasi/cpmk/radar/*') ? 'active' : '' }}">
+                               <i class="fas fa-chart-line nav-icon"></i>
+                               <p>Visualisasi Grafik Radar</p>
                             </a>
                         </li>
                     </ul>

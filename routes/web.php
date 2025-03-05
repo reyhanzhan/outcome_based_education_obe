@@ -20,6 +20,7 @@ use App\Http\Controllers\PembobotanCpmkMkController;
 use App\Http\Controllers\SubCpmkCrudController;
 use App\Http\Controllers\NilaiMahasiswaController;
 use App\Http\Controllers\PenilaianCpmkController;
+use App\Http\Controllers\VisualisasiCpmkController;
 use App\Http\Controllers\Metode_penilaianController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Controller;
@@ -207,11 +208,15 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/penilaian/cpmk/choose_mahasiswa', [PenilaianCpmkController::class, 'chooseMahasiswa'])->name('penilaian.cpmk.choose_mahasiswa');
     Route::get('/penilaian/cpmk/choose_mk/{mahasiswa_id}', [PenilaianCpmkController::class, 'chooseMk'])->name('penilaian.cpmk.choose_mk');
-    Route::get('/penilaian/cpmk/radar/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'showRadar'])->name('penilaian.cpmk.radar');
+    // Route::get('/penilaian/cpmk/radar/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'showRadar'])->name('penilaian.cpmk.radar');
     Route::get('/penilaian/cpmk/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
 
+    // Rute baru untuk Visualisasi Grafik Radar CPMK
+    Route::get('/visualisasi/cpmk/choose_mahasiswa', [VisualisasiCpmkController::class, 'chooseMahasiswa'])->name('visualisasi.cpmk.choose_mahasiswa');
+    Route::get('/visualisasi/cpmk/choose_mk/{mahasiswa_id}', [VisualisasiCpmkController::class, 'chooseMk'])->name('visualisasi.cpmk.choose_mk');
+    Route::get('/visualisasi/cpmk/radar/{mahasiswa_id}/{mk_id}', [VisualisasiCpmkController::class, 'showRadar'])->name('visualisasi.cpmk.radar');
 
-    
+
 
     // Route untuk Penilaian CPL
     Route::get('/penilaian/cpl', [CplController::class, 'index'])->name('penilaian.cpl.index')->middleware('auth');
