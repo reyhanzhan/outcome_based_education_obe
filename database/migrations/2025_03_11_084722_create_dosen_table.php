@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('dosen', function (Blueprint $table) {
             $table->id();
-            $table->string('nama', 100)->nullable(false); // Nama dosen, wajib diisi
-            $table->string('email', 100)->unique()->nullable(false); // Email unik, wajib diisi
-            $table->string('role', 20)->default('dosen')->nullable(false); // Peran (role): 'kps' atau 'dosen'
+            $table->string('nip', 20)->unique()->nullable(false); // Nomor Induk Pegawai (NIP)
+            $table->string('nama', 150)->nullable(false); // Nama lengkap
+            $table->string('nidn', 20)->unique()->nullable()->default(null); // Nomor Induk Dosen Nasional (NIDN)
             $table->timestamps();
         });
     }

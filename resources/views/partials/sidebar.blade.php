@@ -1,8 +1,114 @@
-<aside class="main-sidebar sidebar-dark-primary">
+<style>
+    .sidebar-light .nav-sidebar .nav-link {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 500 !important;
+        /* Tebal */
+        color: #222 !important;
+        /* Warna hitam pekat */
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Warna menu saat aktif */
+    .sidebar-light .nav-sidebar .nav-link.active {
+        color: white !important;
+        /* Pastikan teks berubah putih */
+        background-color: #004680 !important;
+        /* Latar belakang biru */
+        font-weight: 500 !important;
+        /* Lebih tebal saat aktif */
+    }
+
+    /* Warna menu saat di-hover */
+    .sidebar-light .nav-sidebar .nav-link:hover {
+        color: rgb(0, 0, 0) !important;
+        /* Pastikan teks berubah putih */
+        background-color: #004680 !important;
+    }
+
+    /* ikon juga berubah warna saat aktif atau hover */
+    .sidebar-light .nav-sidebar .nav-link.active i{
+        color: rgb(255, 255, 255) !important;
+    }
+    .sidebar-light .nav-sidebar .nav-link:hover i {
+        color: rgb(0, 0, 0)portant;
+    }
+
+    /* Warna submenu */
+    .sidebar-light .nav-sidebar .nav-treeview .nav-link {
+        font-weight: 500 !important;
+        color: #333 !important;
+        /* Warna abu-abu lebih gelap agar tetap terbaca */
+    }
+
+    /* Hover submenu */
+    .sidebar-light .nav-sidebar .nav-treeview .nav-link:hover {
+        color: white !important;
+        background-color: #004680 !important;
+    }
+
+    /* Pastikan sidebar memiliki background putih di mode normal */
+    .sidebar-light {
+        background-color: #ffffff !important;
+        /* Putih */
+    }
+
+    /* Warna parent menu saat salah satu child aktif */
+    .nav-sidebar .nav-item.has-treeview.menu-open>.nav-link {
+        background-color: #dcdcdc !important;
+        /* Warna abu-abu */
+        color: #222 !important;
+        font-weight: bold;
+    }
+
+    /* Warna child menu saat aktif */
+    .nav-sidebar .nav-treeview .nav-link.active {
+        background-color: #004680 !important;
+        color: white !important;
+    }
+
+
+    /* Pastikan sidebar tetap berwarna di mode mobile */
+    @media (max-width: 768px) {
+        .main-sidebar {
+            background-color: #ffffff !important;
+            /* Warna putih */
+        }
+    }
+
+    /* Fix tambahan jika sidebar masih transparan */
+    @media (max-width: 768px) {
+
+        .main-sidebar,
+        .sidebar {
+            background-color: #ffffff !important;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            /* Tambahkan bayangan agar tidak terlalu flat */
+        }
+    }
+
+    /* Pastikan teks tetap hitam di sidebar */
+    .sidebar-light .nav-sidebar .nav-link {
+        color: #222 !important;
+    }
+
+    /* Warna menu saat aktif */
+    .sidebar-light .nav-sidebar .nav-link.active {
+        color: white !important;
+        background-color: #004680 !important;
+        font-weight: 500 !important;
+    }
+</style>
+
+{{-- <nav class="navbar navbar-dark bg-primary py-3 py-lg-4"
+                style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;"> --}}
+
+{{-- <aside class="main-sidebar sidebar-dark-custom elevation-4"> --}}
+<aside class="main-sidebar sidebar-light elevation-4">
     <!-- Brand Logo -->
-    <a href="#" class="brand-link">
-        <img src="{{ asset('/img/logo-uwp1.png') }}" class="brand-image custom-logo">
-        <span class="brand-text font-weight-light" style="font-size:1rem">Outcome Based Education</span>
+    <a href="#" class="brand-link" style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
+        <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid"
+            style="width: 20rem; height: auto;">
+
     </a>
 
 
@@ -39,7 +145,8 @@
                 <!-- Manajemen Data -->
                 <li
                     class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link">
+                    <a href="#"
+                        class="nav-link {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
                         <i class="nav-icon fas fa-folder"></i>
                         <p>
                             Manajemen Data
@@ -88,7 +195,7 @@
                 <!-- Pemetaan -->
                 <li
                     class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link">
+                    <a href="#" class="nav-link {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
                         <i class="nav-icon fas fa-sitemap"></i>
                         <p>
                             Pemetaan
@@ -139,20 +246,13 @@
                                 <p>CPL - CPMK - MK</p>
                             </a>
                         </li>
-                        {{-- <li class="nav-item">
-                            <a href="{{ route('MkCpmkSubcpmk.index') }}"
-                                class="nav-link {{ strtolower(request()->segment(1)) == 'mk-cpmk-subcpmk' ? 'active' : '' }}">
-                                <i class="fas fa-layer-group nav-icon"></i>
-                                <p>MK - CPMK - SUBCPMK</p>
-                            </a>
-                        </li> --}}
                     </ul>
                 </li>
 
                 <!-- Penilaian -->
                 <li
                     class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi/cpmk/*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link">
+                    <a href="#" class="nav-link {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi/cpmk/*') ? 'menu-open' : '' }}">
                         <i class="nav-icon fas fa-chart-bar"></i>
                         <p>
                             Penilaian
@@ -183,9 +283,9 @@
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}"
-                               class="nav-link {{ request()->is('penilaian/cpmk/choose_mahasiswa') || request()->is('penilaian/cpmk/choose_mk/*') || request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
-                               <i class="fas fa-chart-pie nav-icon"></i>
-                               <p>Penilaian CPMK</p>
+                                class="nav-link {{ request()->is('penilaian/cpmk/choose_mahasiswa') || request()->is('penilaian/cpmk/choose_mk/*') || request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
+                                <i class="fas fa-chart-pie nav-icon"></i>
+                                <p>Penilaian CPMK</p>
                             </a>
                         </li>
                     </ul>
@@ -193,25 +293,22 @@
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="{{ route('visualisasi.cpmk.choose_mahasiswa') }}"
-                               class="nav-link {{ request()->is('visualisasi/cpmk/choose_mahasiswa') || request()->is('visualisasi/cpmk/choose_mk/*') || request()->is('visualisasi/cpmk/radar/*') ? 'active' : '' }}">
-                               <i class="fas fa-chart-line nav-icon"></i>
-                               <p>Visualisasi Grafik Radar</p>
+                                class="nav-link {{ request()->is('visualisasi/cpmk/choose_mahasiswa') || request()->is('visualisasi/cpmk/choose_mk/*') || request()->is('visualisasi/cpmk/radar/*') ? 'active' : '' }}">
+                                <i class="fas fa-chart-line nav-icon"></i>
+                                <p>Visualisasi Grafik Radar</p>
                             </a>
                         </li>
                     </ul>
 
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('penilaian.cpl.index') }}"
-                                class="nav-link {{ request()->is('penilaian/cpl') ? 'active' : '' }}">
-                                <i class="fas fa-graduation-cap nav-icon"></i>
-                                <p>Penilaian CPL</p>
-                            </a>
-                        </li>
-                    </ul>
+                <li class="nav-item">
+                    <a href="{{ route('penilaian.cpl.choose_mahasiswa') }}"
+                        class="nav-link {{ request()->is('penilaian/cpl/*') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar nav-icon"></i>
+                        <p>Penilaian CPL</p>
+                    </a>
+                </li>
                 </li>
             </ul>
         </nav>
-
     </div>
 </aside>

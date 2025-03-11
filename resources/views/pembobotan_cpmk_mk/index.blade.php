@@ -65,10 +65,12 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
+        let debounceTimeout; // Variabel untuk debounce
+
         // Hitung total bobot secara otomatis saat halaman dimuat
         updateTotalBobot();
 
-        // Pastkan tidak ada konflik dengan event listener lain
+        // Pastikan tidak ada konflik dengan event listener lain
         $('#mkSelect').off('change').on('change', function() {
             var mk_id = $(this).val();
             console.log('Selected MK ID:', mk_id);
@@ -98,7 +100,7 @@
                         }
                         $('#cpmkTableBody').html(html);
                         updateTotalBobot(); // Hitung total bobot setelah memuat data baru
-                        $('#simpanBobot').prop('disabled', false);
+                        $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan hingga bobot valid
                     },
                     error: function(xhr) {
                         toastr.error('Gagal memuat CPMK! Status: ' + xhr.status + ', Response: ' + xhr.responseText, {
@@ -123,18 +125,55 @@
             $('.bobot-input').each(function() {
                 let bobot = parseInt($(this).val()) || 0; // Gunakan parseInt untuk integer
                 if (isNaN(bobot)) {
-                    bobot = 0; // Pastkan tidak ada NaN
+                    bobot = 0; // Pastikan tidak ada NaN
                 }
                 total += bobot;
                 console.log('Bobot for cpmk_id ' + $(this).data('cpmk') + ': ' + bobot + ', type: ' + typeof bobot);
             });
             $('#totalBobot').text(total.toFixed(0)); // Tampilkan tanpa desimal untuk integer
-            $('#simpanBobot').prop('disabled', total !== 100);
+
+            // Logika peringatan untuk total bobot
+            const warningElement = $('#bobotWarning');
+            const warningTextElement = $('#bobotWarningText');
+            if (total < 100) {
+                warningElement.removeClass('d-none').addClass('d-flex');
+                warningTextElement.text('Total bobot kurang dari 100%! Silakan sesuaikan.');
+                // Debounce untuk toast
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    toastr.warning('Total bobot kurang dari 100%! Silakan sesuaikan.', {
+                        position: 'top-right',
+                        timeOut: 5000,
+                        progressBar: true,
+                        iconClass: 'toast-warning'
+                    });
+                }, 2000); // Tunggu 2 detik sebelum menampilkan toast
+                $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan
+            } else if (total > 100) {
+                warningElement.removeClass('d-none').addClass('d-flex');
+                warningTextElement.text('Total bobot melebihi 100%! Silakan sesuaikan.');
+                // Debounce untuk toast
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    toastr.warning('Total bobot melebihi 100%! Silakan sesuaikan.', {
+                        position: 'top-right',
+                        timeOut: 5000,
+                        progressBar: true,
+                        iconClass: 'toast-warning'
+                    });
+                }, 2000); // Tunggu 2 detik sebelum menampilkan toast
+                $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan
+            } else {
+                warningElement.removeClass('d-flex').addClass('d-none');
+                clearTimeout(debounceTimeout); // Hapus timeout jika tidak diperlukan
+                $('#simpanBobot').prop('disabled', false); // Aktifkan tombol simpan jika total bobot 100%
+            }
         }
 
-        // Perbarui total bobot saat input berubah
+        // Perbarui total bobot saat input berubah dengan debounce
         $(document).on('input', '.bobot-input', function() {
-            updateTotalBobot();
+            clearTimeout(debounceTimeout); // Hapus timeout sebelumnya
+            debounceTimeout = setTimeout(updateTotalBobot, 2000); // Tunggu 2 detik sebelum update
         });
 
         // Simpan bobot dan refresh data setelah berhasil
@@ -159,7 +198,7 @@
                 if (cpmk_id && bobot) {
                     let parsedBobot = parseInt(bobot) || 0;
                     if (isNaN(parsedBobot)) {
-                        parsedBobot = 0; // Pastkan tidak ada NaN
+                        parsedBobot = 0; // Pastikan tidak ada NaN
                     }
                     bobotData.push({ cpmk_id, bobot: parsedBobot });
                     console.log('Sending bobot for cpmk_id: ' + cpmk_id + ', bobot: ' + parsedBobot + ', type: ' + typeof parsedBobot);

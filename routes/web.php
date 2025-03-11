@@ -21,6 +21,7 @@ use App\Http\Controllers\SubCpmkCrudController;
 use App\Http\Controllers\NilaiMahasiswaController;
 use App\Http\Controllers\PenilaianCpmkController;
 use App\Http\Controllers\VisualisasiCpmkController;
+use App\Http\Controllers\PenilaianCplController;
 use App\Http\Controllers\Metode_penilaianController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Controller;
@@ -218,9 +219,15 @@ Route::group(['middleware' => 'auth'], function () {
 
 
 
-    // Route untuk Penilaian CPL
-    Route::get('/penilaian/cpl', [CplController::class, 'index'])->name('penilaian.cpl.index')->middleware('auth');
-    Route::get('/penilaian/cpl/{mahasiswa_id}', [CplController::class, 'show'])->name('penilaian.cpl.show')->middleware('auth');
+
+// Route untuk memilih mahasiswa
+Route::get('/penilaian/cpl/choose_mahasiswa', [PenilaianCplController::class, 'chooseMahasiswa'])
+    ->name('penilaian.cpl.choose_mahasiswa');
+
+// Route untuk menampilkan hasil penilaian CPL setelah mahasiswa dipilih
+Route::get('/penilaian/cpl/{mahasiswa_id}', [PenilaianCplController::class, 'index'])
+    ->name('penilaian.cpl.index');
+
 });
 
 

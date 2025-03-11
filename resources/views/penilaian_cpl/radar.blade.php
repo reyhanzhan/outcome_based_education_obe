@@ -51,7 +51,7 @@
             <div class="card">
                 <div class="card-header bg-primary d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Grafik Radar Penilaian CPL {{ $mahasiswa->nama }} untuk {{ $mk->kode_mk }} - {{ $mk->deskripsi }}</h3>
-                    <a href="{{ route('penilaian.cpl.choose_mk') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
+                    <a href="{{ route('penilaian.cpl.choose_mk', $mahasiswa->id) }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
@@ -72,11 +72,13 @@
                                 @foreach ($labels as $index => $label)
                                     @php
                                         $cplScore = $data[$index];
+                                        $cpl = $cpls[$index];
+                                        $minStandard = 55; // Standar minimum default, sesuaikan jika ada di session
                                     @endphp
                                     <tr>
                                         <td>{{ $label }}</td>
-                                        <td>{{ $cpls[$index]->deskripsi }}</td>
-                                        <td class="{{ $cplScore < 55 ? 'below-min' : '' }}"> <!-- Tetap tampilkan warna merah di bawah 55%, opsional -->
+                                        <td>{{ $cpl->deskripsi }}</td>
+                                        <td class="{{ $cplScore < $minStandard ? 'below-min' : '' }}">
                                             {{ number_format($cplScore, 0) }}%
                                         </td>
                                     </tr>
@@ -101,7 +103,7 @@
                 new Chart(ctx, {
                     type: 'radar',
                     data: {
-                        labels: @json($labels), // Kode CPL, misalnya "CPL01"
+                        labels: @json($labels), // Kode CPL, misalnya "CPL06"
                         datasets: [
                             {
                                 label: 'Nilai CPL {{ $mahasiswa->nama }}',
@@ -111,13 +113,15 @@
                                 borderColor: 'rgba(0, 123, 255, 1)', // Biru solid
                                 pointBackgroundColor: function(context) {
                                     const value = context.raw;
-                                    return value < 55 ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)'; // Opsional: tetap tandai di bawah 55% dengan merah
+                                    const min = @json($minStandard ?? 55);
+                                    return value < min ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
                                 },
                                 pointBorderColor: '#fff',
                                 pointHoverBackgroundColor: '#fff',
                                 pointHoverBorderColor: function(context) {
                                     const value = context.raw;
-                                    return value < 55 ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
+                                    const min = @json($minStandard ?? 55);
+                                    return value < min ? 'rgba(255, 99, 132, 1)' : 'rgba(0, 123, 255, 1)';
                                 }
                             }
                         ]

@@ -26,6 +26,14 @@
 
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="vendor/fontawesome-free-6.5.1-web/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="fonts/Poppins\Poppins.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 
     @yield('css') <!-- Untuk tambahan CSS di halaman lain -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
@@ -88,7 +96,9 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
 
-    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
 
 
 
@@ -119,120 +129,135 @@
         });
     </script>
 
-@section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let sidebarState = JSON.parse(sessionStorage.getItem("sidebarState")) || {};
+    @section('scripts')
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                let sidebarState = JSON.parse(sessionStorage.getItem("sidebarState")) || {};
 
-        // Aktifkan kembali menu yang terbuka setelah reload
-        $(".nav-item.has-treeview").each(function() {
-            let menuId = $(this).attr("data-id");
-            if (sidebarState[menuId]) {
-                $(this).addClass("menu-open");
-                $(this).find("> a").addClass("active");
-            }
-        });
+                // Aktifkan kembali menu yang terbuka setelah reload
+                $(".nav-item.has-treeview").each(function() {
+                    let menuId = $(this).attr("data-id");
+                    if (sidebarState[menuId]) {
+                        $(this).addClass("menu-open");
+                        $(this).find("> a").addClass("active");
+                    }
+                });
 
-        // Toggle state menu saat diklik
-        $(".nav-item.has-treeview > a").on("click", function(event) {
-            event.preventDefault(); // Hindari reload saat klik menu
-            let parent = $(this).parent();
-            let menuId = parent.attr("data-id");
+                // Toggle state menu saat diklik
+                $(".nav-item.has-treeview > a").on("click", function(event) {
+                    event.preventDefault(); // Hindari reload saat klik menu
+                    let parent = $(this).parent();
+                    let menuId = parent.attr("data-id");
 
-            // Toggle menu terbuka / tertutup
-            if (parent.hasClass("menu-open")) {
-                parent.removeClass("menu-open");
-                sidebarState[menuId] = false;
-            } else {
-                parent.addClass("menu-open");
-                sidebarState[menuId] = true;
-            }
+                    // Toggle menu terbuka / tertutup
+                    if (parent.hasClass("menu-open")) {
+                        parent.removeClass("menu-open");
+                        sidebarState[menuId] = false;
+                    } else {
+                        parent.addClass("menu-open");
+                        sidebarState[menuId] = true;
+                    }
 
-            // Simpan status menu di sessionStorage
-            sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-        });
+                    // Simpan status menu di sessionStorage
+                    sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+                });
 
-        // Pastikan sub-menu yang aktif juga tetap terbuka
-        $(".nav-link.active").each(function() {
-            let closestTreeview = $(this).closest(".nav-item.has-treeview");
-            if (closestTreeview.length) {
-                closestTreeview.addClass("menu-open");
-                let menuId = closestTreeview.attr("data-id");
-                sidebarState[menuId] = true;
-                sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-            }
-        });
-    });
-</script>
-@endsection
+                // Pastikan sub-menu yang aktif juga tetap terbuka
+                $(".nav-link.active").each(function() {
+                    let closestTreeview = $(this).closest(".nav-item.has-treeview");
+                    if (closestTreeview.length) {
+                        closestTreeview.addClass("menu-open");
+                        let menuId = closestTreeview.attr("data-id");
+                        sidebarState[menuId] = true;
+                        sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+                    }
+                });
+            });
+        </script>
+    @endsection
 
 
-@section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let sidebarState = JSON.parse(sessionStorage.getItem("sidebarState")) || {};
+    @section('scripts')
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                let sidebarState = JSON.parse(sessionStorage.getItem("sidebarState")) || {};
 
-        // Pastikan AdminLTE tidak menutup menu yang seharusnya terbuka
-        $(".nav-item.has-treeview").each(function() {
-            let menuId = $(this).attr("data-id");
-            if (sidebarState[menuId]) {
-                $(this).addClass("menu-open");
-                $(this).find("> a").addClass("active");
-            }
-        });
+                // Pastikan AdminLTE tidak menutup menu yang seharusnya terbuka
+                $(".nav-item.has-treeview").each(function() {
+                    let menuId = $(this).attr("data-id");
+                    if (sidebarState[menuId]) {
+                        $(this).addClass("menu-open");
+                        $(this).find("> a").addClass("active");
+                    }
+                });
 
-        // AdminLTE punya event "collapsed.lte.pushmenu" yang bisa menutup menu, kita cegah itu
-        $(document).on('collapsed.lte.pushmenu', function() {
-            sessionStorage.setItem("sidebarState", JSON.stringify({}));
-        });
+                // AdminLTE punya event "collapsed.lte.pushmenu" yang bisa menutup menu, kita cegah itu
+                $(document).on('collapsed.lte.pushmenu', function() {
+                    sessionStorage.setItem("sidebarState", JSON.stringify({}));
+                });
 
-        // Toggle state menu saat diklik
-        $(".nav-item.has-treeview > a").on("click", function(event) {
-            event.preventDefault();
-            let parent = $(this).parent();
-            let menuId = parent.attr("data-id");
+                // Toggle state menu saat diklik
+                $(".nav-item.has-treeview > a").on("click", function(event) {
+                    event.preventDefault();
+                    let parent = $(this).parent();
+                    let menuId = parent.attr("data-id");
 
-            if (parent.hasClass("menu-open")) {
-                parent.removeClass("menu-open");
-                sidebarState[menuId] = false;
-            } else {
-                parent.addClass("menu-open");
-                sidebarState[menuId] = true;
-            }
+                    if (parent.hasClass("menu-open")) {
+                        parent.removeClass("menu-open");
+                        sidebarState[menuId] = false;
+                    } else {
+                        parent.addClass("menu-open");
+                        sidebarState[menuId] = true;
+                    }
 
-            sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-        });
+                    sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+                });
 
-        // Pastikan sub-menu yang aktif juga tetap terbuka
-        $(".nav-link.active").each(function() {
-            let closestTreeview = $(this).closest(".nav-item.has-treeview");
-            if (closestTreeview.length) {
-                closestTreeview.addClass("menu-open");
-                let menuId = closestTreeview.attr("data-id");
-                sidebarState[menuId] = true;
-                sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
-            }
-        });
-    });
-</script>
-@endsection
+                // Pastikan sub-menu yang aktif juga tetap terbuka
+                $(".nav-link.active").each(function() {
+                    let closestTreeview = $(this).closest(".nav-item.has-treeview");
+                    if (closestTreeview.length) {
+                        closestTreeview.addClass("menu-open");
+                        let menuId = closestTreeview.attr("data-id");
+                        sidebarState[menuId] = true;
+                        sessionStorage.setItem("sidebarState", JSON.stringify(sidebarState));
+                    }
+                });
+            });
+        </script>
+    @endsection
 
-@section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        $('.nav-item.has-treeview > a').on('click', function(e) {
-            e.preventDefault();
-            let parent = $(this).parent();
-            if (parent.hasClass('menu-open')) {
-                parent.removeClass('menu-open');
-            } else {
-                $('.nav-item.has-treeview').removeClass('menu-open'); // Tutup semua sebelum buka yang diklik
-                parent.addClass('menu-open');
-            }
-        });
-    });
-</script>
-@endsection
+    @section('scripts')
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                $('.nav-item.has-treeview > a').on('click', function(e) {
+                    e.preventDefault();
+                    let parent = $(this).parent();
+                    if (parent.hasClass('menu-open')) {
+                        parent.removeClass('menu-open');
+                    } else {
+                        $('.nav-item.has-treeview').removeClass(
+                        'menu-open'); // Tutup semua sebelum buka yang diklik
+                        parent.addClass('menu-open');
+                    }
+                });
+            });
+        </script>
+    @endsection
 </body>
 
 </html>
+
+<style>
+    * {
+        outline: solid 1px green;
+        outline: solid 1px transparent;
+        /* max-width: 100% !important; */
+    }
+
+    html,
+    body {
+        overflow-x: hidden !important;
+        width: 100%;
+    }
+</style>

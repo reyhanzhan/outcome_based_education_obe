@@ -40,25 +40,6 @@ class Cpl extends Model
         return $this->belongsToMany(Mk::class, 'cpl_mk')->withPivot('bobot')->withTimestamps();
     }
 
-        // Relasi ke CPMK
-        // public function cpmks()
-        // {
-        //     return $this->belongsToMany(Cpmk::class, 'cpmk_cpl', 'cpl_id', 'cpmk_id','cpl_cpmk')->withPivot('bobot')->withTimestamps();
-        // }
-    
-    
-        // Relasi ke MK (Melalui CPMK)
-        // public function mks()
-        // {
-        //     return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id')->withPivot('bobot')->withTimestamps();
-        // }
-    
-        // public function bks()
-        // {
-        //     return $this->belongsToMany(Mk::class, 'cpl_bk', 'cpl_id', 'bk_id');
-        // }
-
-
     public function cpmkshasmany()
     {
         return $this->hasMany(Cpmk::class, 'cpl_id');
@@ -69,15 +50,11 @@ class Cpl extends Model
         return $this->hasMany(Mk::class, 'cpl_id');
     }
 
-
-
     // Relasi langsung CPL-MK jika ada
     public function directMks()
     {
         return $this->belongsToMany(Mk::class, 'cpl_mk', 'cpl_id', 'mk_id');
     }
-
-
 
     public function mahasiswas()
     {

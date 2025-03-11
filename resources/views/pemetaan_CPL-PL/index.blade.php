@@ -10,6 +10,7 @@
                     <h3 class="card-title">Pemetaan CPL - PL</h3>
                 </div>
                 <div class="card-body">
+                    <div class="table-responsive">
                     <table id="pemetaanTable" class="table table-bordered table-hover">
                         <thead>
                             <tr>
@@ -40,6 +41,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>
