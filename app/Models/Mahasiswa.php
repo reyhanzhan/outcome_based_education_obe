@@ -13,9 +13,15 @@ class Mahasiswa extends Model
 
     protected $fillable = ['nama', 'nim'];
 
+    public function krs()
+    {
+        return $this->hasMany(Krs::class, 'nim', 'nim');
+    }
+
+    
     public function nilaiCpmks()
     {
-        return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id');
+        return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id','nim');
     }
 
     public function cpls()

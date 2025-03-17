@@ -13,12 +13,19 @@ return new class extends Migration
     {
         Schema::create('mk', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->string('kode_mk');
+            $table->string('kode_mk')->unique();
             $table->string('deskripsi');
             $table->integer('sks');
-            $table->enum('wptwp', ['TWP', 'WP'])->nullable(false);
+            $table->string('jenis_mk');
+            $table->string('kode_prodi', 50)->nullable(); // Sesuai panjang di tabel program_studi
+            $table->decimal('nilai_lulus', 20, 6)->nullable(); // Sesuai format di database
+        
+            // Foreign key ke tabel program_studi
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('set null');
+        
+            $table->timestamps();
         });
+        
     }
 
     /**

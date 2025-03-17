@@ -12,8 +12,8 @@
             <div class="card-body">
                 <div class="form-group">
                     <label for="mkSelect">Pilih Mata Kuliah:</label>
-                    <select id="mkSelect" class="pembobotan-mk-select form-control">
-                        <option value="" disabled>-- Pilih Mata Kuliah --</option>
+                    <select id="mkSelect" class="form-control">
+                        <option value="">-- Pilih Mata Kuliah --</option> 
                         @foreach ($mks as $mk)
                             <option value="{{ $mk->id }}" @if ($defaultMk && $defaultMk->id == $mk->id) selected @endif>
                                 {{ $mk->kode_mk }} - {{ $mk->deskripsi }}
@@ -67,11 +67,17 @@
     $(document).ready(function() {
         let debounceTimeout; // Variabel untuk debounce
 
-        // Hitung total bobot secara otomatis saat halaman dimuat
+        // ✅ Inisialisasi Select2 (tanpa tombol "X")
+        $('#mkSelect').select2({
+            placeholder: "-- Pilih Mata Kuliah --",
+            allowClear: false, // Hilangkan tombol "X"
+            width: '100%'
+        });
+
+        // ✅ Hitung total bobot saat halaman dimuat
         updateTotalBobot();
 
-        // Pastikan tidak ada konflik dengan event listener lain
-        $('#mkSelect').off('change').on('change', function() {
+        $('#mkSelect').on('change', function() {
             var mk_id = $(this).val();
             console.log('Selected MK ID:', mk_id);
             if (mk_id) {
@@ -80,7 +86,6 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
-                        console.log('AJAX Response:', response);
                         let html = '';
                         if (response.length > 0) {
                             response.forEach(function(cpmk) {
@@ -99,17 +104,11 @@
                             html = '<tr><td colspan="3" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
                         }
                         $('#cpmkTableBody').html(html);
-                        updateTotalBobot(); // Hitung total bobot setelah memuat data baru
-                        $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan hingga bobot valid
+                        updateTotalBobot(); 
+                        $('#simpanBobot').prop('disabled', true);
                     },
                     error: function(xhr) {
-                        toastr.error('Gagal memuat CPMK! Status: ' + xhr.status + ', Response: ' + xhr.responseText, {
-                            position: 'top-right',
-                            timeOut: 5000,
-                            progressBar: true,
-                            iconClass: 'toast-error'
-                        });
-                        console.error('AJAX Error:', xhr.status, xhr.responseText);
+                        toastr.error('Gagal memuat CPMK! Status: ' + xhr.status + ', Response: ' + xhr.responseText);
                         $('#cpmkTableBody').html('<tr><td colspan="3" class="text-center">Gagal memuat data CPMK</td></tr>');
                         $('#simpanBobot').prop('disabled', true);
                     }
@@ -123,86 +122,40 @@
         function updateTotalBobot() {
             let total = 0;
             $('.bobot-input').each(function() {
-                let bobot = parseInt($(this).val()) || 0; // Gunakan parseInt untuk integer
-                if (isNaN(bobot)) {
-                    bobot = 0; // Pastikan tidak ada NaN
-                }
+                let bobot = parseInt($(this).val()) || 0;
                 total += bobot;
-                console.log('Bobot for cpmk_id ' + $(this).data('cpmk') + ': ' + bobot + ', type: ' + typeof bobot);
             });
-            $('#totalBobot').text(total.toFixed(0)); // Tampilkan tanpa desimal untuk integer
+            $('#totalBobot').text(total);
 
-            // Logika peringatan untuk total bobot
-            const warningElement = $('#bobotWarning');
-            const warningTextElement = $('#bobotWarningText');
             if (total < 100) {
-                warningElement.removeClass('d-none').addClass('d-flex');
-                warningTextElement.text('Total bobot kurang dari 100%! Silakan sesuaikan.');
-                // Debounce untuk toast
-                clearTimeout(debounceTimeout);
-                debounceTimeout = setTimeout(() => {
-                    toastr.warning('Total bobot kurang dari 100%! Silakan sesuaikan.', {
-                        position: 'top-right',
-                        timeOut: 5000,
-                        progressBar: true,
-                        iconClass: 'toast-warning'
-                    });
-                }, 2000); // Tunggu 2 detik sebelum menampilkan toast
-                $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan
+                toastr.warning('Total bobot kurang dari 100%! Silakan sesuaikan.');
+                $('#simpanBobot').prop('disabled', true);
             } else if (total > 100) {
-                warningElement.removeClass('d-none').addClass('d-flex');
-                warningTextElement.text('Total bobot melebihi 100%! Silakan sesuaikan.');
-                // Debounce untuk toast
-                clearTimeout(debounceTimeout);
-                debounceTimeout = setTimeout(() => {
-                    toastr.warning('Total bobot melebihi 100%! Silakan sesuaikan.', {
-                        position: 'top-right',
-                        timeOut: 5000,
-                        progressBar: true,
-                        iconClass: 'toast-warning'
-                    });
-                }, 2000); // Tunggu 2 detik sebelum menampilkan toast
-                $('#simpanBobot').prop('disabled', true); // Nonaktifkan tombol simpan
+                toastr.warning('Total bobot melebihi 100%! Silakan sesuaikan.');
+                $('#simpanBobot').prop('disabled', true);
             } else {
-                warningElement.removeClass('d-flex').addClass('d-none');
-                clearTimeout(debounceTimeout); // Hapus timeout jika tidak diperlukan
-                $('#simpanBobot').prop('disabled', false); // Aktifkan tombol simpan jika total bobot 100%
+                $('#simpanBobot').prop('disabled', false);
             }
         }
 
-        // Perbarui total bobot saat input berubah dengan debounce
         $(document).on('input', '.bobot-input', function() {
-            clearTimeout(debounceTimeout); // Hapus timeout sebelumnya
-            debounceTimeout = setTimeout(updateTotalBobot, 2000); // Tunggu 2 detik sebelum update
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(updateTotalBobot, 5000);
         });
 
-        // Simpan bobot dan refresh data setelah berhasil
         $('#simpanBobot').click(function() {
             let bobotData = [];
             let mk_id = $('#mkSelect').val();
-            console.log('Saving bobot with mk_id:', mk_id);
 
             if (!mk_id) {
-                toastr.error('Pilih mata kuliah terlebih dahulu!', {
-                    position: 'top-right',
-                    timeOut: 5000,
-                    progressBar: true,
-                    iconClass: 'toast-error'
-                });
+                toastr.error('Pilih mata kuliah terlebih dahulu!');
                 return;
             }
 
             $('.bobot-input').each(function() {
                 let cpmk_id = $(this).data('cpmk');
-                let bobot = $(this).val();
-                if (cpmk_id && bobot) {
-                    let parsedBobot = parseInt(bobot) || 0;
-                    if (isNaN(parsedBobot)) {
-                        parsedBobot = 0; // Pastikan tidak ada NaN
-                    }
-                    bobotData.push({ cpmk_id, bobot: parsedBobot });
-                    console.log('Sending bobot for cpmk_id: ' + cpmk_id + ', bobot: ' + parsedBobot + ', type: ' + typeof parsedBobot);
-                }
+                let bobot = parseInt($(this).val()) || 0;
+                bobotData.push({ cpmk_id, bobot });
             });
 
             if (bobotData.length > 0) {
@@ -215,69 +168,15 @@
                         bobotData: bobotData
                     },
                     success: function(response) {
-                        toastr.success("✅ Data berhasil disimpan!", {
-                            position: 'top-right',
-                            timeOut: 5000,
-                            progressBar: true,
-                            iconClass: 'toast-success'
-                        });
-                        // Refresh tabel untuk memuat data bobot terbaru
-                        $.ajax({
-                            url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id', mk_id),
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function(response) {
-                                console.log('Refresh AJAX Response:', response);
-                                let html = '';
-                                if (response.length > 0) {
-                                    response.forEach(function(cpmk) {
-                                        html += `
-                                            <tr>
-                                                <td>${cpmk.kode_cpmk || 'Kode tidak tersedia'}</td>
-                                                <td>${cpmk.deskripsi || 'Deskripsi tidak tersedia'}</td>
-                                                <td>
-                                                    <input type="number" class="bobot-input form-control"
-                                                        data-cpmk="${cpmk.id || ''}" value="${cpmk.bobot !== null ? cpmk.bobot : 0}" min="0" max="100" step="1">
-                                                </td>
-                                            </tr>
-                                        `;
-                                    });
-                                } else {
-                                    html = '<tr><td colspan="3" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
-                                }
-                                $('#cpmkTableBody').html(html);
-                                updateTotalBobot(); // Hitung ulang total bobot setelah refresh
-                                $('#simpanBobot').prop('disabled', false);
-                            },
-                            error: function(xhr) {
-                                toastr.error('Gagal refresh data setelah simpan! Status: ' + xhr.status + ', Response: ' + xhr.responseText, {
-                                    position: 'top-right',
-                                    timeOut: 5000,
-                                    progressBar: true,
-                                    iconClass: 'toast-error'
-                                });
-                                console.error('Refresh AJAX Error:', xhr.status, xhr.responseText);
-                            }
-                        });
+                        toastr.success("✅ Data berhasil disimpan!");
+                        updateTotalBobot();
                     },
                     error: function(xhr) {
-                        var response = JSON.parse(xhr.responseText);
-                        toastr.error(response.error, {
-                            position: 'top-right',
-                            timeOut: 5000,
-                            progressBar: true,
-                            iconClass: 'toast-error'
-                        });
-                        console.error('AJAX Error:', xhr.responseText);
+                        toastr.error('Gagal menyimpan data!');
                     }
                 });
             } else {
-                toastr.error('Tidak ada data bobot yang valid untuk disimpan!', {
-                    position: 'top-right',
-                    timeOut: 5000,
-                    progressBar: true,
-                    iconClass: 'toast-error'
-                });
+                toastr.error('Tidak ada data bobot yang valid untuk disimpan!');
             }
         });
     });

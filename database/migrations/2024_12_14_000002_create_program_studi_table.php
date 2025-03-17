@@ -4,16 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('mahasiswa', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama', 100)->nullable(false);
-            $table->string('nim', 20)->unique()->nullable(false); // Nomor Induk Mahasiswa
+        Schema::create('program_studi', function (Blueprint $table) {
+            $table->string('kode_prodi', 50)->primary();
+            $table->string('nama_prodi', 100);
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('mahasiswa');
+        Schema::dropIfExists('program_studi');
     }
 };

@@ -10,24 +10,15 @@ class DosenSeeder extends Seeder
 {
     public function run()
     {
-        // Tambahkan KPS
-        // $kps = Dosen::create([
-        //     'nama' => 'KPS Program Studi',
-        //     'email' => 'kps@example.com',
-        //     'role' => 'kps',
-        //     'nip' => 'KPS001',
-        //     'telepon' => '08123456789',
-        //     'password' => bcrypt('password123'), // Ganti dengan password yang aman
-        // ]);
 
         // Tambahkan Dosen
         $dosen1 = Dosen::create([
             'nama' => 'Dosen 1',
             'email' => 'dosen1@example.com',
             'role' => 'dosen',
-            // 'nip' => 'DOS001',
-            // 'telepon' => '08123456780',
-            // 'password' => bcrypt('password123'), // Ganti dengan password yang aman
+            'nip' => 'DOS001',
+            'telepon' => '08123456780',
+            'password' => bcrypt('password123'), // Ganti dengan password yang aman
         ]);
 
         $dosen2 = Dosen::create([

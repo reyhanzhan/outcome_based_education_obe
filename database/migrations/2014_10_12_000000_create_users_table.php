@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('jabatan');
-            $table->string('prodi');
+            $table->string('nip')->unique()->nullable(); // Kolom NIP tanpa after()
+            $table->enum('role', ['dosen', 'kps'])->default('dosen'); // Kolom role tanpa after()
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

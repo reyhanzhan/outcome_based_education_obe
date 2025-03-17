@@ -33,10 +33,16 @@
     <link rel="stylesheet" href="fonts/Poppins\Poppins.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Bootstrap Select CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
+
+
 
 
     @yield('css') <!-- Untuk tambahan CSS di halaman lain -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
 </head>
 
@@ -75,6 +81,7 @@
             </section>
 
         </div>
+        
 
         @include('partials.footer') <!-- Footer -->
 
@@ -97,6 +104,10 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+    
 
 
 
@@ -260,4 +271,5 @@
         overflow-x: hidden !important;
         width: 100%;
     }
+    
 </style>

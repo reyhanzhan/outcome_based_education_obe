@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('mk_dosen', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('dosen_id');
-            $table->unsignedBigInteger('mk_id');
-            $table->timestamps();
+            // $table->unsignedBigInteger('dosen_id');
+            // $table->unsignedBigInteger('mk_id');
+            // $table->timestamps();
         
-            $table->foreign('dosen_id')->references('id')->on('dosen')->onDelete('cascade');
-            $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');
-            $table->unique(['dosen_id', 'mk_id']); // Pastikan kombinasi unik
+            // $table->foreign('dosen_id')->references('id')->on('dosen')->onDelete('cascade');
+            // $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');
+            // $table->unique(['dosen_id', 'mk_id']); // Pastikan kombinasi unik
         });
     }
 

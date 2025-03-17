@@ -11,11 +11,16 @@ class Dosen extends Authenticatable
 
     protected $table = 'dosen'; // Sesuaikan dengan nama tabel yang benar di database
 
-    protected $fillable = ['nama', 'email', 'role', 'password'];
+    protected $fillable = ['nip','nama', 'email', 'role', 'password'];
     protected $hidden = ['password', 'remember_token'];
 
     public function mks()
     {
         return $this->belongsToMany(Mk::class, 'mk_dosen')->withTimestamps();
+    }
+
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class, 'nip', 'nip');
     }
 }

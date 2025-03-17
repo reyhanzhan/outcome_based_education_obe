@@ -3,15 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mk;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PembobotanCpmkMkController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
-        $mks = Mk::whereHas('cpmks')->get();
+        $user = Auth::user();
+        $mks = collect();
+
+        if ($user->role === 'dosen') {
+            $dosen = $user->dosen;
+            if (!$dosen) {
+                Log::warning('Dosen data not found for user: ' . $user->email);
+                return redirect()->route('home')->with('error', 'Data dosen tidak ditemukan.');
+            }
+
+            // Ambil mata kuliah yang diajar oleh dosen
+            $kelas = Kelas::where('nip', $dosen->nip)->with('mataKuliah')->get();
+            $mks = $kelas->map(function ($item) {
+                return $item->mataKuliah;
+            })->filter()->unique('id');
+        } elseif ($user->role === 'kps') {
+            // KPS bisa mengakses semua mata kuliah
+            $mks = Mk::whereHas('cpmks')->get();
+        } else {
+            Log::warning('Unauthorized role for user: ' . $user->email);
+            return redirect()->route('home')->with('error', 'Role tidak diizinkan.');
+        }
+
         $defaultMk = $mks->first();
         $cpmks = [];
 
@@ -35,13 +64,70 @@ class PembobotanCpmkMkController extends Controller
         return view('pembobotan_cpmk_mk.index', compact('mks', 'cpmks', 'defaultMk'));
     }
 
+    public function searchMk(Request $request)
+    {
+        $user = Auth::user();
+        $query = $request->input('q'); // Parameter pencarian dari Select2
+
+        $mksQuery = Mk::query()->whereHas('cpmks');
+
+        // Filter berdasarkan role
+        if ($user->role === 'dosen') {
+            $dosen = $user->dosen;
+            if (!$dosen) {
+                return response()->json(['results' => []], 403);
+            }
+
+            $kelas = Kelas::where('nip', $dosen->nip)->with('mataKuliah')->get();
+            $mkIds = $kelas->pluck('mataKuliah.id')->filter()->unique();
+            $mksQuery->whereIn('id', $mkIds);
+        }
+
+        // Pencarian berdasarkan kode_mk atau deskripsi
+        if ($query) {
+            $mksQuery->where(function ($q) use ($query) {
+                $q->where('kode_mk', 'like', "%{$query}%")
+                  ->orWhere('deskripsi', 'like', "%{$query}%");
+            });
+        }
+
+        $mks = $mksQuery->get()->map(function ($mk) {
+            return [
+                'id' => $mk->id,
+                'text' => "{$mk->kode_mk} - {$mk->deskripsi}",
+            ];
+        });
+
+        return response()->json(['results' => $mks]);
+    }
+
     public function getCpmks($mk_id)
     {
         try {
-            Log::info('Fetching CPMKs for mk_id: ' . $mk_id);
-            $mk = Mk::with(['cpmks' => function ($query) {
-                $query->select('cpmk.id', 'cpmk.kode_cpmk', 'cpmk.deskripsi')->withPivot('bobot');
-            }])->findOrFail($mk_id);
+            $user = Auth::user();
+            $mk = Mk::with([
+                'cpmks' => function ($query) {
+                    $query->select('cpmk.id', 'cpmk.kode_cpmk', 'cpmk.deskripsi')->withPivot('bobot');
+                }
+            ])->findOrFail($mk_id);
+
+            if ($user->role === 'dosen') {
+                $dosen = $user->dosen;
+                if (!$dosen) {
+                    Log::warning('Dosen data not found for user: ' . $user->email);
+                    return response()->json(['error' => 'Data dosen tidak ditemukan.'], 403);
+                }
+
+                // Validasi bahwa dosen mengajar mata kuliah ini
+                $kelas = Kelas::where('nip', $dosen->nip)
+                    ->where('kode_matakuliah', $mk->kode_mk)
+                    ->exists();
+
+                if (!$kelas) {
+                    Log::warning('Dosen ' . $dosen->nip . ' tidak mengajar MK: ' . $mk->kode_mk);
+                    return response()->json(['error' => 'Anda tidak berhak mengakses pembobotan untuk mata kuliah ini.'], 403);
+                }
+            }
 
             $cpmks = $mk->cpmks->map(function ($cpmk) use ($mk_id) {
                 Log::info('CPMK Data (getCpmks): ' . json_encode([
@@ -73,8 +159,8 @@ class PembobotanCpmkMkController extends Controller
             $request->validate([
                 'mk_id' => 'required|exists:mk,id',
                 'bobotData' => 'required|array',
-                'bobotData.*.bobot' => 'required|integer|min:0|max:100', // Validasi setiap bobot sebagai integer
-                'bobotData.*.cpmk_id' => 'required|exists:cpmk,id', // Validasi cpmk_id
+                'bobotData.*.bobot' => 'required|integer|min:0|max:100',
+                'bobotData.*.cpmk_id' => 'required|exists:cpmk,id',
             ]);
 
             $totalBobot = array_sum(array_column($request->bobotData, 'bobot'));
@@ -84,16 +170,33 @@ class PembobotanCpmkMkController extends Controller
             }
 
             $mk_id = $request->mk_id;
+            $user = Auth::user();
+            $mk = Mk::findOrFail($mk_id);
 
-            // Gunakan DB::table untuk menyimpan langsung ke tabel cpmk_mk, mirip dengan Cpmk_MkController
-            // Pastkan tidak ada konflik dengan data dari Cpmk_MkController
-            DB::beginTransaction(); // Mulai transaksi untuk memastkan konsistensi data
+            if ($user->role === 'dosen') {
+                $dosen = $user->dosen;
+                if (!$dosen) {
+                    Log::warning('Dosen data not found for user: ' . $user->email);
+                    return response()->json(['error' => 'Data dosen tidak ditemukan.'], 403);
+                }
+
+                // Validasi bahwa dosen mengajar mata kuliah ini
+                $kelas = Kelas::where('nip', $dosen->nip)
+                    ->where('kode_matakuliah', $mk->kode_mk)
+                    ->exists();
+
+                if (!$kelas) {
+                    Log::warning('Dosen ' . $dosen->nip . ' tidak mengajar MK: ' . $mk->kode_mk);
+                    return response()->json(['error' => 'Anda tidak berhak mengatur pembobotan untuk mata kuliah ini.'], 403);
+                }
+            }
+
+            DB::beginTransaction();
             try {
                 foreach ($request->bobotData as $data) {
                     $cpmk_id = $data['cpmk_id'];
-                    $bobot = (int) $data['bobot']; // Konversi bobot ke integer
+                    $bobot = (int) $data['bobot'];
 
-                    // Cek apakah entri sudah ada untuk menghindari duplikat atau konflik
                     $existing = DB::table('cpmk_mk')
                         ->where('mk_id', $mk_id)
                         ->where('cpmk_id', $cpmk_id)
@@ -105,7 +208,7 @@ class PembobotanCpmkMkController extends Controller
                             ->where('cpmk_id', $cpmk_id)
                             ->update([
                                 'bobot' => $bobot,
-                                'min_standard' => 50, // Sesuaikan dengan default di Cpmk_MkController
+                                'min_standard' => 50,
                                 'updated_at' => now()
                             ]);
                         Log::info('Updated bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot);
@@ -114,14 +217,13 @@ class PembobotanCpmkMkController extends Controller
                             'mk_id' => $mk_id,
                             'cpmk_id' => $cpmk_id,
                             'bobot' => $bobot,
-                            'min_standard' => 50, // Sesuaikan dengan default di Cpmk_MkController
+                            'min_standard' => 50,
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
                         Log::info('Inserted bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot);
                     }
 
-                    // Verifikasi penyimpanan di database
                     $pivotEntry = DB::table('cpmk_mk')
                         ->where('mk_id', $mk_id)
                         ->where('cpmk_id', $cpmk_id)
@@ -129,12 +231,12 @@ class PembobotanCpmkMkController extends Controller
                     Log::info('Pivot entry after save for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ': ' . json_encode($pivotEntry));
                 }
 
-                DB::commit(); // Commit transaksi jika berhasil
+                DB::commit();
                 Log::info('Bobot CPMK-MK updated/inserted for mk_id: ' . $request->mk_id . ', bobotData: ' . json_encode($request->bobotData));
 
                 return response()->json(['success' => 'Data pembobotan tersimpan!']);
             } catch (\Exception $e) {
-                DB::rollBack(); // Rollback transaksi jika ada error
+                DB::rollBack();
                 Log::error('Transaction error in update for mk_id ' . $mk_id . ': ' . $e->getMessage() . ', Trace: ' . $e->getTraceAsString());
                 return response()->json(['error' => 'Gagal menyimpan pembobotan: ' . $e->getMessage()], 500);
             }
