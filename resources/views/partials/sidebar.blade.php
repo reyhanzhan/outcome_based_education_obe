@@ -1,44 +1,44 @@
 <style>
+    /* Gaya dasar untuk semua nav-link di sidebar */
     .sidebar-light .nav-sidebar .nav-link {
         font-family: 'Poppins', sans-serif !important;
         font-weight: 500 !important;
-        /* Tebal */
-        color: #222 !important;
-        /* Warna hitam pekat */
+        color: #222 !important; /* Warna hitam pekat untuk teks */
         transition: all 0.3s ease-in-out;
     }
 
-    /* Warna menu saat aktif */
+    /* Ikon default */
+    .sidebar-light .nav-sidebar .nav-link i {
+        color: #222 !important; /* Ikon sama dengan teks */
+    }
+
+    /* Warna menu saat aktif (parent dan child) */
     .sidebar-light .nav-sidebar .nav-link.active {
-        color: white !important;
-        /* Pastikan teks berubah putih */
-        background-color: #004680 !important;
-        /* Latar belakang biru */
+        color: white !important; /* Teks putih */
+        background-color: #004680 !important; /* Latar belakang biru */
         font-weight: 500 !important;
-        /* Lebih tebal saat aktif */
+    }
+
+    /* Ikon saat menu aktif */
+    .sidebar-light .nav-sidebar .nav-link.active i {
+        color: white !important; /* Ikon putih saat aktif */
     }
 
     /* Warna menu saat di-hover */
     .sidebar-light .nav-sidebar .nav-link:hover {
-        color: rgb(0, 0, 0) !important;
-        /* Pastikan teks berubah putih */
-        background-color: #004680 !important;
+        color: white !important; /* Teks putih saat hover */
+        background-color: #004680 !important; /* Latar belakang biru */
     }
 
-    /* ikon juga berubah warna saat aktif atau hover */
-    .sidebar-light .nav-sidebar .nav-link.active i {
-        color: rgb(255, 255, 255) !important;
-    }
-
+    /* Ikon saat hover */
     .sidebar-light .nav-sidebar .nav-link:hover i {
-        color: rgb(0, 0, 0)portant;
+        color: white !important; /* Ikon putih saat hover */
     }
 
-    /* Warna submenu */
+    /* Gaya submenu */
     .sidebar-light .nav-sidebar .nav-treeview .nav-link {
         font-weight: 500 !important;
-        color: #333 !important;
-        /* Warna abu-abu lebih gelap agar tetap terbaca */
+        color: #333 !important; /* Abu-abu gelap untuk submenu */
     }
 
     /* Hover submenu */
@@ -47,56 +47,46 @@
         background-color: #004680 !important;
     }
 
-    /* Pastikan sidebar memiliki background putih di mode normal */
-    .sidebar-light {
-        background-color: #ffffff !important;
-        /* Putih */
+    /* Ikon submenu saat hover */
+    .sidebar-light .nav-sidebar .nav-treeview .nav-link:hover i {
+        color: white !important;
     }
 
-    /* Warna parent menu saat salah satu child aktif */
-    .nav-sidebar .nav-item.has-treeview.menu-open>.nav-link {
-        background-color: #dcdcdc !important;
-        /* Warna abu-abu */
-        color: #222 !important;
-        font-weight: bold;
-    }
-
-    /* Warna child menu saat aktif */
+    /* Submenu saat aktif */
     .nav-sidebar .nav-treeview .nav-link.active {
         background-color: #004680 !important;
         color: white !important;
     }
 
-
-    /* Pastikan sidebar tetap berwarna di mode mobile */
-    @media (max-width: 768px) {
-        .main-sidebar {
-            background-color: #ffffff !important;
-            /* Warna putih */
-        }
+    /* Ikon submenu saat aktif */
+    .nav-sidebar .nav-treeview .nav-link.active i {
+        color: white !important;
     }
 
-    /* Fix tambahan jika sidebar masih transparan */
-    @media (max-width: 768px) {
+    /* Warna parent menu saat salah satu child aktif */
+    .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link {
+        background-color: #dcdcdc !important; /* Abu-abu */
+        color: #222 !important;
+        font-weight: bold;
+    }
 
+    /* Ikon parent menu saat menu terbuka */
+    .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link i {
+        color: #222 !important;
+    }
+
+    /* Pastikan sidebar memiliki background putih */
+    .sidebar-light {
+        background-color: #ffffff !important;
+    }
+
+    /* Gaya sidebar di mode mobile */
+    @media (max-width: 768px) {
         .main-sidebar,
         .sidebar {
             background-color: #ffffff !important;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            /* Tambahkan bayangan agar tidak terlalu flat */
         }
-    }
-
-    /* Pastikan teks tetap hitam di sidebar */
-    .sidebar-light .nav-sidebar .nav-link {
-        color: #222 !important;
-    }
-
-    /* Warna menu saat aktif */
-    .sidebar-light .nav-sidebar .nav-link.active {
-        color: white !important;
-        background-color: #004680 !important;
-        font-weight: 500 !important;
     }
 </style>
 
@@ -251,9 +241,23 @@
                 <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
                     <li
-                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi/cpmk/*') ? 'menu-open' : '' }}">
+                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) ||
+                        request()->is('penilaian/cpl') ||
+                        request()->is('penilaian/cpmk/*') ||
+                        request()->is('visualisasi/cpmk/*') ||
+                        request()->is('nilai*') ||
+                        request()->is('penilaian*')
+                            ? 'menu-open'
+                            : '' }}">
                         <a href="#"
-                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) || request()->is('penilaian/cpl') || request()->is('penilaian/cpmk/*') || request()->is('visualisasi/cpmk/*') ? 'menu-open' : '' }}">
+                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) ||
+                            request()->is('penilaian/cpl') ||
+                            request()->is('penilaian/cpmk/*') ||
+                            request()->is('visualisasi/cpmk/*') ||
+                            request()->is('nilai*') ||
+                            request()->is('penilaian*')
+                                ? 'active'
+                                : '' }}">
                             <i class="nav-icon fas fa-chart-bar"></i>
                             <p>
                                 Penilaian
@@ -274,15 +278,17 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}"
-                                    class="nav-link {{ request()->is('nilai/mahasiswa/mata-kuliah*') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->is('nilai/nilai/mahasiswa/choose-mata-kuliah') ||
+                                    request()->is('mahasiswa/*/mata-kuliah/*') ||
+                                    request()->is('nilai/mahasiswa/*') ||
+                                    request()->is('get-kelas-by-periode')
+                                        ? 'active'
+                                        : '' }}">
                                     <i class="fas fa-edit nav-icon"></i>
                                     <p>Input Nilai Mahasiswa</p>
                                 </a>
                             </li>
                         </ul>
-                        
-                        
-                        
 
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -313,8 +319,6 @@
                                 </a>
                             </li>
                         </ul>
-
-
                     </li>
                 @endif
             </ul>

@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Kelas extends Model
+class Kurikulum extends Model
 {
-    protected $table = 'kelas';
-    protected $fillable = ['kode_prodi', 'tahun_kurikulum', 'kode_mk', 'periode', 'dosen'];
+    protected $table = 'kurikulum';
+    protected $fillable = ['tahun', 'kode_prodi', 'kode_mk', 'semester'];
 
     // Relasi ke Program Studi
     public function programStudi()
@@ -21,10 +21,11 @@ class Kelas extends Model
         return $this->belongsTo(Mk::class, 'kode_mk', 'kode_mk');
     }
 
-    // Relasi ke KRS (jika ada)
+    // Relasi ke Krs (jika diperlukan)
     public function krs()
     {
-        return $this->hasMany(Krs::class, 'kode_matakuliah', 'kode_mk')
-                    ->whereColumn('krs.periode', 'kelas.periode');
+        return $this->hasMany(Krs::class, 'tahun', 'tahun')
+                    ->where('kode_prodi', $this->kode_prodi)
+                    ->where('kode_mk', $this->kode_mk);
     }
 }

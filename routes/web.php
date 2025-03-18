@@ -118,61 +118,20 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/pembobotan/search-mk', [PembobotanCpmkMkController::class, 'searchMk'])->name('pembobotan.search-mk'); // Rute baru untuk pencarian MK
 });
 
-// Rute untuk Nilai Mahasiswa (untuk Dosen&kps)
-// Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
-//     Route::prefix('nilai')->group(function () {
-//         Route::get('/mahasiswa/choose', [NilaiMahasiswaController::class, 'chooseMahasiswa'])->name('nilai.mahasiswa.choose');
-//         Route::get('/mahasiswa/{nim}/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])->name('nilai.mahasiswa.choose_mata_kuliah');
-//         Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}', [NilaiMahasiswaController::class, 'index'])->name('nilai.mahasiswa.index');
-//         Route::post('/mahasiswa/store', [NilaiMahasiswaController::class, 'store'])->name('nilai.mahasiswa.store');
-//     });
-// });
-// Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
-//     Route::prefix('nilai')->group(function () {
-//         Route::get('/mahasiswa/choose', [NilaiMahasiswaController::class, 'chooseMahasiswa'])->name('nilai.mahasiswa.choose');
-//         Route::get('/mahasiswa/{nim}/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])->name('nilai.mahasiswa.choose_mata_kuliah');
-//         Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}', [NilaiMahasiswaController::class, 'index'])->name('nilai.mahasiswa.index');
-//         Route::post('/mahasiswa/store', [NilaiMahasiswaController::class, 'store'])->name('nilai.mahasiswa.store');
-//     });
-
-//     // Rute untuk mengambil mata kuliah berdasarkan mahasiswa & periode (AJAX)
-//     Route::get('/mahasiswa/get-mata-kuliah', [NilaiMahasiswaController::class, 'getMataKuliah'])->name('nilai.mahasiswa.get_mata_kuliah');
-// });
-// Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
-//     Route::prefix('nilai')->group(function () {
-//         // Halaman untuk memilih mahasiswa & periode (semuanya dalam satu halaman)
-//         Route::get('/mahasiswa/choose', [NilaiMahasiswaController::class, 'chooseMahasiswa'])
-//             ->name('nilai.mahasiswa.choose');
-
-//         // Menampilkan daftar mata kuliah setelah memilih mahasiswa & periode
-//         Route::get('/mahasiswa/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])
-//             ->name('nilai.mahasiswa.choose_mata_kuliah');
-
-//         // Halaman input nilai setelah memilih mata kuliah
-//         Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}', [NilaiMahasiswaController::class, 'index'])
-//             ->name('nilai.mahasiswa.index');
-
-//         // Menyimpan nilai mahasiswa
-//         Route::post('/mahasiswa/store', [NilaiMahasiswaController::class, 'store'])
-//             ->name('nilai.mahasiswa.store');
-//     });
-// });
 Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::prefix('nilai')->group(function () {
-        Route::get('/mahasiswa/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMahasiswaDanPeriode'])
-        ->name('nilai.mahasiswa.choose_mata_kuliah');
-
+        Route::get('/nilai/mahasiswa/choose-mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])->name('nilai.mahasiswa.choose_mata_kuliah');
+        Route::get('/nilai/mahasiswa/choose', [NilaiMahasiswaController::class, 'chooseMahasiswa'])
+            ->name('nilai.mahasiswa.choose_mahasiswa');
         // Halaman input nilai setelah memilih mata kuliah
         Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}', [NilaiMahasiswaController::class, 'index'])
             ->name('nilai.mahasiswa.index');
-
         // Menyimpan nilai mahasiswa
         Route::post('/mahasiswa/store', [NilaiMahasiswaController::class, 'store'])
             ->name('nilai.mahasiswa.store');
+        Route::get('/get-kelas-by-periode', [NilaiMahasiswaController::class, 'getKelasByPeriode'])->name('get.kelas.by.periode');
     });
 });
-
-
 
 
 
@@ -186,7 +145,7 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     // Route::get('nilai/mahasiswa/{nim}/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])
     // ->name('nilai.mahasiswa.choose_mata_kuliah');
     Route::get('nilai/mahasiswa/get-mata-kuliah', [NilaiMahasiswaController::class, 'getMataKuliah'])
-    ->name('nilai.mahasiswa.get_mata_kuliah');
+        ->name('nilai.mahasiswa.get_mata_kuliah');
 });
 
 // Rute untuk Visualisasi Grafik Radar (hanya untuk Dosen)

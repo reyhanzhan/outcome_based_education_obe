@@ -2,23 +2,44 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Krs extends Model
 {
-    use HasFactory;
-
     protected $table = 'krs';
-    protected $fillable = ['nim', 'kode_matakuliah', 'kelas', 'periode'];
+    protected $fillable = ['periode', 'kode_prodi', 'kode_mk', 'tahun', 'nama_kelas', 'nim'];
 
+    // Relasi ke Program Studi
+    public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
+
+    // Relasi ke Mata Kuliah (Mk)
+    public function mk()
+    {
+        return $this->belongsTo(Mk::class, 'kode_mk', 'kode_mk');
+    }
+
+    // Relasi ke Mahasiswa
     public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'nim', 'nim');
     }
 
-    public function mk()
+    // Relasi ke Kelas
+    public function kelas()
     {
-        return $this->belongsTo(Mk::class, 'kode_matakuliah', 'kode_mk');
+        return $this->hasOne(Kelas::class, 'kode_mk', 'kode_mk')
+                    ->where('periode', $this->periode);
+    }
+    
+
+    // Relasi ke Kurikulum
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'tahun', 'tahun')
+                    ->where('kode_prodi', $this->kode_prodi)
+                    ->where('kode_mk', $this->kode_mk);
     }
 }

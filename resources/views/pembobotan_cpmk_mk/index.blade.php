@@ -181,4 +181,27 @@
         });
     });
 </script>
+
+<style>
+    .form-group .select2-container {
+        width: 100% !important;
+    }
+
+    /* Atur tinggi dan posisi teks di dalam elemen input Select2 */
+    .select2-container--default .select2-selection--single {
+        height: 38px !important; /* Sesuaikan dengan tinggi input AdminLTE */
+        border: 1px solid #d2d6de; /* Warna border sesuai tema AdminLTE */
+        display: flex !important; /* Pastikan flex diterapkan */
+        align-items: center !important; /* Memaksa posisi vertikal tengah */
+    }
+
+    /* Atur tombol dropdown agar sejajar */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px !important; /* Sesuaikan dengan tinggi input */
+        top: 0 !important;
+        right: 10px !important;
+        display: flex !important;
+        align-items: center !important; /* Memastikan panah tetap di tengah */
+    }
+</style>
 @endsection
