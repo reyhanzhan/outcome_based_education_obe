@@ -5,7 +5,7 @@
 @section('css')
     <style>
         .card-header.bg-primary {
-            background-color: #007bff !important; /* Biru primer AdminLTE */
+            background-color: #007bff !important;
             color: #fff;
         }
 
@@ -15,27 +15,27 @@
         }
 
         .bobot-highlight {
-            background-color: #e9ecef; /* Abu-abu muda untuk bobot */
+            background-color: #e9ecef;
             font-weight: bold;
-            color: #000000; /* Hitam untuk kontras */
+            color: #000000;
         }
 
         .bg-light {
-            background-color: #f8f9fa; /* Abu-abu sangat muda untuk kontras */
+            background-color: #f8f9fa;
         }
 
         .below-min {
-            color: #dc3545; /* Merah untuk nilai di bawah standar minimum */
+            color: #dc3545;
             font-weight: bold;
         }
 
         .btn-secondary {
-            background-color: #6c757d; /* Abu-abu sekunder AdminLTE */
+            background-color: #6c757d;
             border-color: #6c757d;
         }
 
         .btn-secondary:hover {
-            background-color: #5a6268; /* Abu-abu lebih gelap saat hover */
+            background-color: #5a6268;
             border-color: #5a6268;
         }
     </style>
@@ -63,8 +63,7 @@
                                 <tr>
                                     <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
                                     @foreach ($cpmks as $cpmk)
-                                    {{-- Min: {{ $minStandard ?? 55 }}% --}}
-                                        <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0 }}%)</th>
+                                        <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)</th>
                                     @endforeach
                                     <th class="bg-light">Nilai Total MK</th>
                                 </tr>
@@ -76,8 +75,10 @@
                                         @foreach ($cpmks as $cpmk)
                                             <td>
                                                 @php
-                                                    $nilaiInput = $mahasiswa->nilaiCpmks()->where('mk_id', $mk->id)->where('cpmk_id', $cpmk->id)->first()->nilai ?? 0;
-                                                    $bobot = $cpmk->mks()->where('mk_id', $mk->id)->first()->pivot->bobot ?? 0;
+                                                    // Ambil nilai dari relasi yang sudah dimuat
+                                                    $nilaiCpmk = $cpmk->nilaiCpmks->where('mahasiswa_id', $mahasiswa->id)->first();
+                                                    $nilaiInput = $nilaiCpmk ? $nilaiCpmk->nilai : 0;
+                                                    $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
                                                     $nilaiAkhir = ($nilaiInput * $bobot) / 100;
                                                     $minStandard = $minStandard ?? 55;
                                                 @endphp
@@ -87,7 +88,7 @@
                                             </td>
                                         @endforeach
                                         <td class="bg-light">
-                                            {{ number_format($mk->calculateMkScore($mahasiswa->id), 0) }}
+                                            {{ number_format(app('App\Http\Controllers\PenilaianCpmkController')->calculateMkScore($mk->id, $mahasiswa->id), 0) }}
                                         </td>
                                     </tr>
                                 @endforeach

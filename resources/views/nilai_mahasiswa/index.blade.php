@@ -72,8 +72,9 @@
             <div class="card">
                 <div class="card-header bg-primary d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Input Nilai Mahasiswa: {{ $mahasiswa->nama }} ({{ $mahasiswa->nim }}) untuk {{ $mk->kode_mk }} - {{ $mk->deskripsi }}</h3>
-                    <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah', ['nim' => $mahasiswa->nim]) }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
+                    <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}?periode={{ session('previous_periode') }}&kelas={{ session('previous_kelas') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali </a>
                 </div>
+                
                 <div class="card-body">
                     @if (session('success'))
                         <div class="alert alert-success success-bg">{{ session('success') }}</div>
@@ -108,7 +109,7 @@
                                         @foreach ($cpmks as $cpmk)
                                             <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->pivot->bobot ?? 0 }}%)</th>
                                         @endforeach
-                                        <th class="bg-light">Nilai Total MK</th>
+                                        {{-- <th class="bg-light">Nilai Total MK</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -117,13 +118,18 @@
                                         @foreach ($cpmks as $cpmk)
                                             <td>
                                                 <div class="input-group">
-                                                    <input type="number" name="nilai_{{ $mahasiswa->id }}_{{ $cpmk->id }}" class="form-control nilai-input" data-min="{{ $minStandard }}" data-bobot="{{ $cpmk->pivot->bobot ?? 0 }}" value="{{ number_format($mahasiswa->nilaiCpmks()->where('mk_id', $mk->id)->where('cpmk_id', $cpmk->id)->first()->nilai ?? 0, 0) }}" min="0" max="100" step="0.01">
+                                                    <input type="number" name="nilai_{{ $mahasiswa->id }}_{{ $cpmk->id }}" 
+                                                           class="form-control nilai-input" 
+                                                           data-min="{{ $minStandard }}" 
+                                                           data-bobot="{{ $cpmk->pivot->bobot ?? 0 }}" 
+                                                           value="{{ number_format(old('nilai_' . $mahasiswa->id . '_' . $cpmk->id, $cpmk->nilaiCpmks->firstWhere('cpmk_id', $cpmk->id)->nilai ?? 0), 0) }}" 
+                                                           min="0" max="100" step="0.01">
                                                 </div>
                                             </td>
                                         @endforeach
-                                        <td class="bg-light total-mk">
+                                        {{-- <td class="bg-light total-mk">
                                             {{ number_format($mk->calculateMkScore($mahasiswa->nim), 0) }}
-                                        </td>
+                                        </td> --}}
                                     </tr>
                                 </tbody>
                             </table>

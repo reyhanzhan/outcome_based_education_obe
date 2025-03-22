@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('tahun_kurikulum');
             $table->string('kode_mk', 255);
             $table->string('periode');
-            $table->string('dosen');
+            $table->string('nip_dosen');
             $table->timestamps();
         });
     }

@@ -2,7 +2,6 @@
 
 @section('title', 'Pilih Periode & Kelas')
 
-
 @section('content')
     <section class="content">
         <div class="container-fluid">
@@ -49,11 +48,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Tombol Tampilkan -->
-                        {{-- <div class="text-right">
-                            <button type="submit" class="btn btn-warning"><i class="fas fa-search"></i> Tampilkan</button>
-                        </div> --}}
                     </form>
                 </div>
             </div>
@@ -74,7 +68,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
+                            <table id="mahasiswaTable" class="table table-bordered table-hover">
                                 <thead style="text-align: center;">
                                     <tr>
                                         <th>NIM</th>
@@ -87,7 +81,6 @@
                                 <tbody>
                                     @foreach ($mahasiswas as $mhs)
                                         @if ($mhs)
-                                            <!-- Pastikan $mhs tidak null -->
                                             <tr>
                                                 <td>{{ $mhs->nim ?? 'N/A' }}</td>
                                                 <td>{{ $mhs->nama ?? 'N/A' }}</td>
@@ -113,6 +106,9 @@
 @endsection
 
 @section('scripts')
+    <!-- JS DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
             // Inisialisasi Select2 untuk periode
@@ -150,8 +146,7 @@
 
                             // Isi dropdown dengan data dari AJAX
                             response.options.forEach(function(option) {
-                                let newOption = new Option(option.text, option.id, false,
-                                    false);
+                                let newOption = new Option(option.text, option.id, false, false);
                                 kelasSelect.append(newOption);
                                 if (option.id === currentValue) {
                                     newOption.selected = true;
@@ -188,6 +183,25 @@
                 if (periode) {
                     loadKelasOptions(periode);
                 }
+
+                // Inisialisasi DataTable dengan pagination dan pencarian
+                $('#mahasiswaTable').DataTable({
+                    paging: true, // Aktifkan pagination
+                    pageLength: 10, // Jumlah baris per halaman
+                    searching: true, // Aktifkan pencarian
+                    responsive: true, // Responsivitas
+                    order: [[0, 'asc']], // Urutkan berdasarkan kolom NIM (indeks 0)
+                    language: {
+                        search: "Cari Nama Mahasiswa:", // Ubah label pencarian
+                        paginate: {
+                            next: "Selanjutnya",
+                            previous: "Sebelumnya"
+                        },
+                        info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri", // Kustomisasi info
+                        infoEmpty: "Tidak ada data", // Info saat kosong
+                        lengthMenu: "Tampilkan _MENU_ entri" // Kustomisasi dropdown jumlah entri
+                    }
+                });
             });
 
             // Debugging saat submit
@@ -200,6 +214,8 @@
         });
     </script>
 
+    <!-- CSS DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     <style>
         .form-group .select2-container {
             width: 100% !important;
@@ -207,25 +223,49 @@
 
         /* Atur tinggi dan posisi teks di dalam elemen input Select2 */
         .select2-container--default .select2-selection--single {
-            height: 38px !important;
-            /* Sesuaikan dengan tinggi input AdminLTE */
-            border: 1px solid #d2d6de;
-            /* Warna border sesuai tema AdminLTE */
-            display: flex !important;
-            /* Pastikan flex diterapkan */
-            align-items: center !important;
-            /* Memaksa posisi vertikal tengah */
+            height: 38px !important; /* Sesuaikan dengan tinggi input AdminLTE */
+            border: 1px solid #d2d6de; /* Warna border sesuai tema AdminLTE */
+            display: flex !important; /* Pastikan flex diterapkan */
+            align-items: center !important; /* Memaksa posisi vertikal tengah */
         }
 
         /* Atur tombol dropdown agar sejajar */
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px !important;
-            /* Sesuaikan dengan tinggi input */
+            height: 38px !important; /* Sesuaikan dengan tinggi input */
             top: 0 !important;
             right: 10px !important;
             display: flex !important;
-            align-items: center !important;
-            /* Memastikan panah tetap di tengah */
+            align-items: center !important; /* Memastikan panah tetap di tengah */
+        }
+
+        /* Atur responsivitas tabel */
+        @media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table th,
+            .table td {
+                font-size: 12px !important;
+                padding: 8px !important;
+            }
         }
     </style>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        // Pastikan jQuery dimuat
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery tidak dimuat!');
+        } else {
+            // Aktifkan pushmenu secara manual jika diperlukan
+            $('[data-widget="pushmenu"]').on('click', function() {
+                $('body').toggleClass('sidebar-collapse');
+            });
+        }
+    });
+</script>
 @endsection

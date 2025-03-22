@@ -13,10 +13,11 @@
                     @if ($mahasiswas->isEmpty())
                         <div class="alert alert-warning">Tidak ada mahasiswa yang tersedia. Silakan tambahkan data mahasiswa terlebih dahulu.</div>
                     @else
-                        <form action="{{ route('penilaian.cpmk.choose_mk', ['mahasiswa_id' => ':mahasiswa_id']) }}" method="GET">
+                        <form action="{{ route('penilaian.cpmk.choose_mk', ['mahasiswa_id' => ':mahasiswa_id']) }}" method="GET" id="mahasiswaForm">
                             <div class="form-group">
                                 <label for="mahasiswa_id">Pilih Mahasiswa:</label>
-                                <select name="mahasiswa_id" id="mahasiswa_id" class="form-control" required>
+                                <select name="mahasiswa_id" id="mahasiswa_id" class="form-control select2" required>
+                                    <option value="" disabled selected>-- Pilih Mahasiswa --</option>
                                     @foreach ($mahasiswas as $mahasiswa)
                                         <option value="{{ $mahasiswa->id }}">{{ $mahasiswa->nama }} ({{ $mahasiswa->nim ?? '' }})</option>
                                     @endforeach
@@ -34,21 +35,25 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        if (typeof jQuery !== 'undefined') {
-            $('form').submit(function(e) {
-                e.preventDefault();
-                var mahasiswa_id = $('#mahasiswa_id').val();
-                if (mahasiswa_id) {
-                    window.location.href = "{{ route('penilaian.cpmk.choose_mk', ['mahasiswa_id' => ':mahasiswa_id']) }}".replace(':mahasiswa_id', mahasiswa_id);
-                } else {
-                    console.error('Pilih mahasiswa terlebih dahulu!');
-                    toastr.error('Pilih mahasiswa terlebih dahulu!');
-                }
-            });
-        } else {
-            console.error('jQuery tidak dimuat!');
-            toastr.error('Gagal memuat halaman. Silakan perbarui browser.');
-        }
+        // Inisialisasi Select2 untuk mahasiswa_id
+        $('#mahasiswa_id').select2({
+            placeholder: "-- Pilih Mahasiswa --",
+            width: '100%',
+            dropdownCssClass: 'custom-select2-dropdown',
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 1 // Mulai mencari setelah 1 karakter
+        });
+
+        // Handle form submission
+        $('#mahasiswaForm').submit(function(e) {
+            e.preventDefault();
+            var mahasiswa_id = $('#mahasiswa_id').val();
+            if (mahasiswa_id) {
+                window.location.href = "{{ route('penilaian.cpmk.choose_mk', ['mahasiswa_id' => ':mahasiswa_id']) }}".replace(':mahasiswa_id', mahasiswa_id);
+            } else {
+                toastr.error('Pilih mahasiswa terlebih dahulu!');
+            }
+        });
     });
 </script>
 @endsection

@@ -19,10 +19,16 @@ class Mahasiswa extends Model
     }
 
     
+    // public function nilaiCpmks()
+    // {
+    //     return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id','nim');
+    // }
+
     public function nilaiCpmks()
     {
-        return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id','nim');
+        return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id', 'id'); // Ubah 'nim' menjadi 'id'
     }
+    
 
     public function cpls()
     {

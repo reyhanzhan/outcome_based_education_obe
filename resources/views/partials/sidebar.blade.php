@@ -104,7 +104,8 @@
 
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
+        
         <!-- Sidebar user panel -->
         <div class=" mt-3 pb-0 mb-0 d-flex">
 
@@ -285,7 +286,7 @@
                                         ? 'active'
                                         : '' }}">
                                     <i class="fas fa-edit nav-icon"></i>
-                                    <p>Input Nilai Mahasiswa</p>
+                                    <p>Nilai Mahasiswa</p>
                                 </a>
                             </li>
                         </ul>

@@ -24,55 +24,41 @@ class PenilaianCpmkController extends Controller
         return view('penilaian_cpmk.choose_mk', compact('mahasiswa', 'mks'));
     }
 
-    public function showRadar($mahasiswa_id, $mk_id)
-    {
-        $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
-        $mk = Mk::findOrFail($mk_id);
-        $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
-            $query->where('mk_id', $mk_id);
-        })->with([
-                    'mks' => function ($query) use ($mk_id) {
-                        $query->where('mk_id', $mk_id)->first();
-                    }
-                ])->get();
-
-        $labels = [];
-        $data = [];
-        $minStandard = session('min_standard', 55); // Ambil standar minimum dari session atau default 55
-
-        foreach ($cpmks as $cpmk) {
-            $labels[] = $cpmk->kode_cpmk;
-            $nilaiInput = $mahasiswa->nilaiCpmks()->where('mk_id', $mk_id)->where('cpmk_id', $cpmk->id)->first()->nilai ?? 0;
-            $data[] = $nilaiInput; // Gunakan nilai input, bukan nilai akhir setelah bobot
-        }
-
-        return view('penilaian_cpmk.radar', compact('mahasiswa', 'mk', 'labels', 'data', 'cpmks', 'minStandard'));
-    }
-
     public function index($mk_id)
     {
         $mk = Mk::findOrFail($mk_id);
         $mahasiswas = Mahasiswa::all(); // Ambil semua mahasiswa untuk tampilan tabel
+
+        // Ambil CPMK yang terkait dengan MK ini
         $cpmks = Cpmk::with([
             'mks' => function ($query) use ($mk_id) {
                 $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+            },
+            'nilaiCpmks' => function ($query) use ($mk_id) {
+                $query->where('mk_id', $mk_id);
             }
         ])->whereHas('mks', function ($query) use ($mk_id) {
             $query->where('mk_id', $mk_id);
         })->get();
 
-        // Ambil min_standard dari tabel cpmk_mk untuk MK ini
-        $minStandard = $cpmks->first()->mks->first()->pivot->min_standard ?? session('min_standard_' . $mk_id, 55);
+        // Ambil min_standard dari tabel pivot cpmk_mk untuk MK ini
+        $minStandard = $cpmks->isNotEmpty() ? ($cpmks->first()->mks->first()->pivot->min_standard ?? 55) : 55;
 
         // Ambil mahasiswa_id dari query string atau sesi
         $mahasiswa_id = request()->input('mahasiswa_id') ?? request()->session()->get('current_mahasiswa_id');
         if (!$mahasiswa_id) {
             $mahasiswa_id = $mahasiswas->first()->id ?? null; // Default ke mahasiswa pertama jika tidak ada
         }
-        request()->session()->put('current_mahasiswa_id', $mahasiswa_id); // Simpan ke sesi
+        request()->session()->put('current_mahasiswa_id', $mahasiswa_id);
+
+        // Debug: Log data nilai CPMK
+        $nilaiCpmks = NilaiCpmk::where('mk_id', $mk_id)->get();
+        Log::info('Nilai CPMK untuk MK ID ' . $mk_id . ': ' . $nilaiCpmks->toJson());
 
         return view('penilaian_cpmk.index', compact('mk', 'mahasiswas', 'cpmks', 'minStandard', 'mahasiswa_id'));
     }
+
+    
 
     public function calculateMkScore($mk_id, $mahasiswa_id)
     {
@@ -82,17 +68,25 @@ class PenilaianCpmkController extends Controller
             ->get();
 
         $totalScore = 0;
-        $maxScore = 100; // Total bobot CPMK harus 100%
+        $totalBobot = 0;
 
         foreach ($nilaiCpmks as $nilaiCpmk) {
             $bobot = $nilaiCpmk->cpmk->mks()->where('mk_id', $mk_id)->first()->pivot->bobot ?? 0;
-            if ($bobot <= 0) {
+            if ($bobot > 0) {
+                // Hitung kontribusi per CPMK dan bulatkan ke 0 desimal
+                $kontribusi = round(($nilaiCpmk->nilai * $bobot) / 100, 0);
+                $totalScore += $kontribusi;
+                $totalBobot += $bobot;
+                Log::info("CPMK ID {$nilaiCpmk->cpmk_id}: Nilai = {$nilaiCpmk->nilai}, Bobot = {$bobot}, Kontribusi (dibulatkan) = {$kontribusi}");
+            } else {
                 Log::warning('Bobot CPMK belum disetel untuk CPMK: ' . $nilaiCpmk->cpmk_id . ', MK: ' . $mk_id);
-                continue;
             }
-            $totalScore += ($bobot * $nilaiCpmk->nilai) / 100;
         }
 
-        return $totalScore;
+        // Normalisasi total score berdasarkan total bobot
+        $finalScore = $totalBobot > 0 ? ($totalScore / ($totalBobot / 100)) : 0;
+        Log::info("Total Score untuk Mahasiswa ID {$mahasiswa_id}, MK ID {$mk_id}: {$finalScore}, Total Bobot: {$totalBobot}");
+
+        return $finalScore;
     }
 }
