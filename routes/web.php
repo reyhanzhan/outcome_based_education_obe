@@ -130,9 +130,11 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
         Route::post('/mahasiswa/store', [NilaiMahasiswaController::class, 'store'])
             ->name('nilai.mahasiswa.store');
         Route::get('/get-kelas-by-periode', [NilaiMahasiswaController::class, 'getKelasByPeriode'])->name('get.kelas.by.periode');
+        // route grafik
+        Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}/grafik', [NilaiMahasiswaController::class, 'grafik'])->name('nilai.mahasiswa.grafik');
+        
     });
 });
-
 
 
 
@@ -142,10 +144,10 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/penilaian/cpmk/choose_mk/{mahasiswa_id}', [PenilaianCpmkController::class, 'chooseMk'])->name('penilaian.cpmk.choose_mk');
     Route::get('/penilaian/cpmk/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
     Route::post('/penilaian/cpmk/store', [PenilaianCpmkController::class, 'store'])->name('penilaian.cpmk.store');
-    // Route::get('nilai/mahasiswa/{nim}/mata-kuliah', [NilaiMahasiswaController::class, 'chooseMataKuliah'])
-    // ->name('nilai.mahasiswa.choose_mata_kuliah');
+    Route::get('/penilaian/cpmk/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index'); 
     Route::get('nilai/mahasiswa/get-mata-kuliah', [NilaiMahasiswaController::class, 'getMataKuliah'])
         ->name('nilai.mahasiswa.get_mata_kuliah');
+    
 });
 
 // Rute untuk Visualisasi Grafik Radar (hanya untuk Dosen)

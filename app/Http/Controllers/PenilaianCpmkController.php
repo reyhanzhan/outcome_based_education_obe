@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mk;
 use App\Models\Mahasiswa;
 use App\Models\Cpmk;
+use App\Models\Krs;
 use App\Models\NilaiCpmk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -24,40 +25,70 @@ class PenilaianCpmkController extends Controller
         return view('penilaian_cpmk.choose_mk', compact('mahasiswa', 'mks'));
     }
 
-    public function index($mk_id)
-    {
-        $mk = Mk::findOrFail($mk_id);
-        $mahasiswas = Mahasiswa::all(); // Ambil semua mahasiswa untuk tampilan tabel
+    public function index($mahasiswa_id, $mk_id)
+{
+    Log::info('PenilaianCpmkController::index called', ['mahasiswa_id' => $mahasiswa_id, 'mk_id' => $mk_id]);
 
-        // Ambil CPMK yang terkait dengan MK ini
-        $cpmks = Cpmk::with([
-            'mks' => function ($query) use ($mk_id) {
-                $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
-            },
-            'nilaiCpmks' => function ($query) use ($mk_id) {
-                $query->where('mk_id', $mk_id);
-            }
-        ])->whereHas('mks', function ($query) use ($mk_id) {
-            $query->where('mk_id', $mk_id);
-        })->get();
+    // Ambil periode dan kelas dari session
+    $periode = session('previous_periode');
+    $kelasInput = session('previous_kelas');
+    Log::info('Session Data:', ['periode' => $periode, 'kelas' => $kelasInput]);
 
-        // Ambil min_standard dari tabel pivot cpmk_mk untuk MK ini
-        $minStandard = $cpmks->isNotEmpty() ? ($cpmks->first()->mks->first()->pivot->min_standard ?? 55) : 55;
-
-        // Ambil mahasiswa_id dari query string atau sesi
-        $mahasiswa_id = request()->input('mahasiswa_id') ?? request()->session()->get('current_mahasiswa_id');
-        if (!$mahasiswa_id) {
-            $mahasiswa_id = $mahasiswas->first()->id ?? null; // Default ke mahasiswa pertama jika tidak ada
-        }
-        request()->session()->put('current_mahasiswa_id', $mahasiswa_id);
-
-        // Debug: Log data nilai CPMK
-        $nilaiCpmks = NilaiCpmk::where('mk_id', $mk_id)->get();
-        Log::info('Nilai CPMK untuk MK ID ' . $mk_id . ': ' . $nilaiCpmks->toJson());
-
-        return view('penilaian_cpmk.index', compact('mk', 'mahasiswas', 'cpmks', 'minStandard', 'mahasiswa_id'));
+    if (!$periode || !$kelasInput) {
+        Log::warning('Periode or kelas not found in session');
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Silakan pilih periode dan kelas terlebih dahulu.');
     }
 
+    // Parse kelasInput (kode_mk|nama_kelas)
+    [$kodeMk, $namaKelas] = explode('|', $kelasInput);
+
+    // Ambil data mahasiswa berdasarkan mahasiswa_id
+    $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
+    Log::info('Mahasiswa found:', ['id' => $mahasiswa->id, 'nama' => $mahasiswa->nama]);
+
+    // Ambil data mata kuliah berdasarkan mk_id
+    $mk = Mk::findOrFail($mk_id);
+    Log::info('MK found:', ['id' => $mk->id, 'kode_mk' => $mk->kode_mk]);
+
+    // Validasi bahwa mata kuliah sesuai dengan periode dan kelas yang dipilih
+    $krs = Krs::where('nim', $mahasiswa->nim)
+        ->where('periode', $periode)
+        ->where('kode_mk', $kodeMk)
+        ->where('nama_kelas', $namaKelas)
+        ->exists();
+
+    if (!$krs) {
+        Log::warning('KRS data not found for mahasiswa', [
+            'nim' => $mahasiswa->nim,
+            'periode' => $periode,
+            'kode_mk' => $kodeMk,
+            'nama_kelas' => $namaKelas,
+        ]);
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini untuk periode dan kelas yang dipilih.');
+    }
+
+    // Ambil CPMK yang terkait dengan mata kuliah
+    $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
+        $query->where('mk_id', $mk_id);
+    })->with([
+        'mks' => function ($query) use ($mk_id) {
+            $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+        },
+        'nilaiCpmks' => function ($query) use ($mahasiswa_id, $mk_id) {
+            $query->where('mahasiswa_id', $mahasiswa_id)
+                ->where('mk_id', $mk_id);
+        }
+    ])->get();
+    Log::info('CPMKs found:', ['count' => $cpmks->count()]);
+
+    $minStandard = $cpmks->isNotEmpty() ? ($cpmks->first()->mks->first()->pivot->min_standard ?? 55) : 55;
+    Log::info('Min Standard:', ['minStandard' => $minStandard]);
+
+    // Kirim semua variabel yang diperlukan ke view
+    return view('penilaian_cpmk.index', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'periode', 'kelasInput'));
+}
     
 
     public function calculateMkScore($mk_id, $mahasiswa_id)

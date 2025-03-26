@@ -273,3 +273,43 @@
     }
     
 </style>
+
+<style>
+    /* Pastikan semua notifikasi Toastr memiliki opacity 1 */
+    .toast {
+        opacity: 1 !important; /* Selalu solid, tidak transparan */
+        transition: none !important; /* Hilangkan efek transisi opacity */
+    }
+
+    /* Pastikan opacity tetap 1 saat hover */
+    .toast:hover {
+        opacity: 1 !important; /* Tetap solid saat hover */
+    }
+
+    /* Warna latar belakang untuk setiap jenis notifikasi */
+    .toast-success {
+        background-color: #28a745 !important; /* Hijau untuk success */
+        color: #fff !important; /* Teks putih agar kontras */
+    }
+
+    .toast-error {
+        background-color: #dc3545 !important; /* Merah untuk error */
+        color: #fff !important;
+    }
+
+    .toast-warning {
+        background-color: #ffc107 !important; /* Kuning untuk warning */
+        color: #212529 !important; /* Teks gelap agar kontras */
+    }
+
+    .toast-info {
+        background-color: #17a2b8 !important; /* Biru untuk info */
+        color: #fff !important;
+    }
+
+    /* Pastikan teks di dalam notifikasi mudah dibaca */
+    .toast-message {
+        color: inherit !important; /* Warna teks mengikuti parent */
+        font-weight: 500 !important; /* Beri sedikit ketebalan pada teks */
+    }
+</style>

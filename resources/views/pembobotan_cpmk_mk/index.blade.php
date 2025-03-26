@@ -140,7 +140,8 @@
 
         $(document).on('input', '.bobot-input', function() {
             clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(updateTotalBobot, 5000);
+            // atur muncul notif berapa detik
+            debounceTimeout = setTimeout(updateTotalBobot, 3000);
         });
 
         $('#simpanBobot').click(function() {

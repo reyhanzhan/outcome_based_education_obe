@@ -291,7 +291,7 @@
                             </li>
                         </ul>
 
-                        <ul class="nav nav-treeview">
+                        {{-- <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('penilaian.cpmk.choose_mahasiswa') }}"
                                     class="nav-link {{ request()->is('penilaian/cpmk/choose_mahasiswa') || request()->is('penilaian/cpmk/choose_mk/*') || request()->is('penilaian/cpmk/*') ? 'active' : '' }}">
@@ -299,9 +299,9 @@
                                     <p>Penilaian CPMK</p>
                                 </a>
                             </li>
-                        </ul>
+                        </ul> --}}
 
-                        <ul class="nav nav-treeview">
+                        {{-- <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('visualisasi.cpmk.choose_mahasiswa') }}"
                                     class="nav-link {{ request()->is('visualisasi/cpmk/choose_mahasiswa') || request()->is('visualisasi/cpmk/choose_mk/*') || request()->is('visualisasi/cpmk/radar/*') ? 'active' : '' }}">
@@ -309,7 +309,7 @@
                                     <p>Visualisasi Grafik Radar</p>
                                 </a>
                             </li>
-                        </ul>
+                        </ul> --}}
 
                         <ul class="nav nav-treeview">
                             <li class="nav-item">

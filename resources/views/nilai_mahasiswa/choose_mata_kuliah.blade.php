@@ -63,8 +63,7 @@
             @if (isset($mahasiswas) && count($mahasiswas) > 0)
                 <div class="card mt-3">
                     <div class="card-header bg-secondary">
-                        <h3 class="card-title">Daftar Mahasiswa Kelas: {{ $selectedKelas->kode_mk }} -
-                            {{ $selectedKelas->nama_kelas }} (Periode: {{ $periode }})</h3>
+                        <h3 class="card-title">Daftar Mahasiswa Kelas: {{ $selectedKelas->kode_mk }} - {{ $namaMk }}  (Periode: {{ $periode }})</h3>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -87,10 +86,32 @@
                                                 <td>{{ $selectedKelas->kode_mk }}</td>
                                                 <td>{{ $namaMk }}</td>
                                                 <td>
-                                                    <a href="{{ route('nilai.mahasiswa.index', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
-                                                        class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-edit"></i> Input Nilai
-                                                    </a>
+                                                    <div class="action-buttons">
+                                                        <!-- Tombol Input Nilai -->
+                                                        <a href="{{ route('nilai.mahasiswa.index', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
+                                                            class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-edit"></i> Input Nilai
+                                                        </a>
+                                                        <!-- Tombol Penilaian CPMK -->
+                                                        @if (isset($mhs->id) && isset($selectedKelas->id))
+                                                            <a href="{{ route('penilaian.cpmk.index', ['mahasiswa_id' => $mhs->id, 'mk_id' => $selectedKelas->id]) }}"
+                                                                class="btn btn-info btn-sm">
+                                                                <i class="fas fa-chart-bar"></i> Penilaian CPMK
+                                                            </a>
+                                                            <!-- Tombol Grafik -->
+                                                            <a href="{{ route('nilai.mahasiswa.grafik', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
+                                                                class="btn btn-success btn-sm">
+                                                                <i class="fas fa-chart-line"></i> Grafik
+                                                            </a>
+                                                        @else
+                                                            <button class="btn btn-info btn-sm" disabled>
+                                                                <i class="fas fa-chart-bar"></i> Penilaian CPMK (Data Tidak Lengkap)
+                                                            </button>
+                                                            <button class="btn btn-success btn-sm" disabled>
+                                                                <i class="fas fa-chart-line"></i> Grafik (Data Tidak Lengkap)
+                                                            </button>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endif
@@ -190,7 +211,9 @@
                     pageLength: 10, // Jumlah baris per halaman
                     searching: true, // Aktifkan pencarian
                     responsive: true, // Responsivitas
-                    order: [[0, 'asc']], // Urutkan berdasarkan kolom NIM (indeks 0)
+                    order: [
+                        [0, 'asc']
+                    ], // Urutkan berdasarkan kolom NIM (indeks 0)
                     language: {
                         search: "Cari Nama Mahasiswa:", // Ubah label pencarian
                         paginate: {
@@ -223,19 +246,25 @@
 
         /* Atur tinggi dan posisi teks di dalam elemen input Select2 */
         .select2-container--default .select2-selection--single {
-            height: 38px !important; /* Sesuaikan dengan tinggi input AdminLTE */
-            border: 1px solid #d2d6de; /* Warna border sesuai tema AdminLTE */
-            display: flex !important; /* Pastikan flex diterapkan */
-            align-items: center !important; /* Memaksa posisi vertikal tengah */
+            height: 38px !important;
+            /* Sesuaikan dengan tinggi input AdminLTE */
+            border: 1px solid #d2d6de;
+            /* Warna border sesuai tema AdminLTE */
+            display: flex !important;
+            /* Pastikan flex diterapkan */
+            align-items: center !important;
+            /* Memaksa posisi vertikal tengah */
         }
 
         /* Atur tombol dropdown agar sejajar */
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px !important; /* Sesuaikan dengan tinggi input */
+            height: 38px !important;
+            /* Sesuaikan dengan tinggi input */
             top: 0 !important;
             right: 10px !important;
             display: flex !important;
-            align-items: center !important; /* Memastikan panah tetap di tengah */
+            align-items: center !important;
+            /* Memastikan panah tetap di tengah */
         }
 
         /* Atur responsivitas tabel */
@@ -251,21 +280,51 @@
                 padding: 8px !important;
             }
         }
+
+        /* Atur tata letak tombol menggunakan flexbox */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap; /* Izinkan tombol membungkus ke baris berikutnya jika tidak cukup ruang */
+            gap: 5px; /* Jarak antar tombol */
+            justify-content: center; /* Pusatkan tombol secara horizontal */
+        }
+
+        /* Atur ukuran tombol */
+        .action-buttons .btn {
+            min-width: 120px; /* Lebar minimum tombol */
+            text-align: center;
+            padding: 5px 10px; /* Padding tombol */
+            font-size: 12px; /* Ukuran font tombol */
+        }
+
+        /* Responsivitas untuk layar kecil */
+        @media (max-width: 576px) {
+            .action-buttons {
+                flex-direction: column; /* Tumpuk tombol secara vertikal */
+                align-items: center; /* Pusatkan tombol secara vertikal */
+            }
+
+            .action-buttons .btn {
+                width: 100%; /* Tombol mengambil lebar penuh */
+                max-width: 200px; /* Batasi lebar maksimum */
+                margin-bottom: 5px; /* Jarak antar tombol saat ditumpuk */
+            }
+        }
     </style>
 @endsection
 
 @section('scripts')
-<script>
-    $(document).ready(function() {
-        // Pastikan jQuery dimuat
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery tidak dimuat!');
-        } else {
-            // Aktifkan pushmenu secara manual jika diperlukan
-            $('[data-widget="pushmenu"]').on('click', function() {
-                $('body').toggleClass('sidebar-collapse');
-            });
-        }
-    });
-</script>
+    <script>
+        $(document).ready(function() {
+            // Pastikan jQuery dimuat
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery tidak dimuat!');
+            } else {
+                // Aktifkan pushmenu secara manual jika diperlukan
+                $('[data-widget="pushmenu"]').on('click', function() {
+                    $('body').toggleClass('sidebar-collapse');
+                });
+            }
+        });
+    </script>
 @endsection

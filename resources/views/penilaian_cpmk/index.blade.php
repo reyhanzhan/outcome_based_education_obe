@@ -46,36 +46,51 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header bg-primary d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Penilaian CPMK untuk {{ $mk->kode_mk }} - {{ $mk->deskripsi }}</h3>
-                    <a href="{{ route('penilaian.cpmk.choose_mk', $mahasiswa_id) }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Pilih Mata Kuliah</a>
+                    <h3 class="card-title">
+                        Penilaian CPMK untuk {{ $mahasiswa->nama }} ({{ $mahasiswa->nim }}) pada {{ $mk->kode_mk }} - {{ $mk->deskripsi }}
+                    </h3>
+                    <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}?periode={{ $periode }}&kelas={{ $kelasInput }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Mahasiswa
+                    </a>
                 </div>
                 <div class="card-body">
                     @if (session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
+                        <div class="alert alert-success success-bg">{{ session('success') }}</div>
                     @endif
                     @if (session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
+                        <div class="alert alert-danger error-bg">{{ session('error') }}</div>
                     @endif
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
-                                    @foreach ($cpmks as $cpmk)
-                                        <th class="bobot-highlight">{{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)</th>
-                                    @endforeach
-                                    <th class="bg-light">Nilai Total MK</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($mahasiswas as $mahasiswa)
+                    <!-- Tampilkan informasi periode dan kelas -->
+                    <div class="mb-3">
+                        <strong>Periode:</strong> {{ $periode }} <br>
+                        <strong>Kelas:</strong> {{ $kelasInput }}
+                    </div>
+
+                    @if ($cpmks->isEmpty())
+                        <div class="alert alert-warning">
+                            Tidak ada CPMK yang terkait dengan mata kuliah ini.
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
+                                        @foreach ($cpmks as $cpmk)
+                                            <th class="bobot-highlight">
+                                                {{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)
+                                            </th>
+                                        @endforeach
+                                        <th class="bg-light">Nilai Total MK</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <tr>
                                         <td class="bg-light">{{ $mahasiswa->nama }}</td>
                                         @foreach ($cpmks as $cpmk)
                                             <td>
                                                 @php
-                                                    // Ambil nilai dari relasi yang sudah dimuat
                                                     $nilaiCpmk = $cpmk->nilaiCpmks->where('mahasiswa_id', $mahasiswa->id)->first();
                                                     $nilaiInput = $nilaiCpmk ? $nilaiCpmk->nilai : 0;
                                                     $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
@@ -91,10 +106,10 @@
                                             {{ number_format(app('App\Http\Controllers\PenilaianCpmkController')->calculateMkScore($mk->id, $mahasiswa->id), 0) }}
                                         </td>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -102,13 +117,9 @@
 @endsection
 
 @section('scripts')
-<script>
-    if (typeof jQuery === 'undefined') {
-        console.error('jQuery tidak dimuat!');
-    } else {
-        $(document).ready(function() {
-            // Tidak perlu form di sini, hanya tampilan
-        });
-    }
-</script>
+    <script>
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery tidak dimuat!');
+        }
+    </script>
 @endsection
