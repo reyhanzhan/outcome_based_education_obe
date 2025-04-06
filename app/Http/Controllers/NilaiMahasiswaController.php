@@ -126,31 +126,59 @@ class NilaiMahasiswaController extends Controller
         return view('nilai_mahasiswa.choose_mata_kuliah', compact('periodes', 'kelasOptions', 'mahasiswas', 'selectedKelas', 'periode', 'namaMk'));
     }
 
+    // public function getKelasByPeriode(Request $request)
+    // {
+    //     $periode = $request->input('periode');
+
+    //     if (!$periode) {
+    //         return response()->json(['options' => []]);
+    //     }
+
+    //     // Ambil data kelas beserta deskripsi mata kuliah dari tabel mk
+    //     $kelasOptions = Krs::where('krs.periode', $periode) // Tambahkan prefiks krs.
+    //         ->join('mk', 'krs.kode_mk', '=', 'mk.kode_mk')
+    //         ->select('krs.kode_mk', 'krs.nama_kelas', 'mk.deskripsi')
+    //         ->distinct()
+    //         ->get()
+    //         ->map(function ($item) {
+    //             return [
+    //                 'id' => $item->kode_mk . '|' . $item->nama_kelas,
+    //                 'text' => $item->kode_mk . ' - ' . $item->deskripsi . ' (' . $item->nama_kelas . ')',
+    //             ];
+    //         });
+
+    //     Log::info('AJAX Kelas Options for Periode ' . $periode . ': ', $kelasOptions->toArray());
+
+    //     return response()->json(['options' => $kelasOptions]);
+    // }
     public function getKelasByPeriode(Request $request)
-    {
-        $periode = $request->input('periode');
+{
+    $periode = $request->input('periode');
 
-        if (!$periode) {
-            return response()->json(['options' => []]);
-        }
-
-        // Ambil data kelas beserta deskripsi mata kuliah dari tabel mk
-        $kelasOptions = Krs::where('krs.periode', $periode) // Tambahkan prefiks krs.
-            ->join('mk', 'krs.kode_mk', '=', 'mk.kode_mk')
-            ->select('krs.kode_mk', 'krs.nama_kelas', 'mk.deskripsi')
-            ->distinct()
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->kode_mk . '|' . $item->nama_kelas,
-                    'text' => $item->kode_mk . ' - ' . $item->deskripsi . ' (' . $item->nama_kelas . ')',
-                ];
-            });
-
-        Log::info('AJAX Kelas Options for Periode ' . $periode . ': ', $kelasOptions->toArray());
-
-        return response()->json(['options' => $kelasOptions]);
+    if (!$periode) {
+        Log::warning('No periode provided in getKelasByPeriode');
+        return response()->json(['options' => []]);
     }
+
+    // Ambil data kelas beserta deskripsi mata kuliah dari tabel mk
+    $kelasOptions = Krs::where('krs.periode', $periode)
+        ->whereNotNull('krs.kode_mk') // Pastikan kode_mk tidak null
+        ->whereNotNull('krs.nama_kelas') // Pastikan nama_kelas tidak null
+        ->join('mk', 'krs.kode_mk', '=', 'mk.kode_mk')
+        ->select('krs.kode_mk', 'krs.nama_kelas', 'mk.deskripsi')
+        ->distinct()
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->kode_mk . '|' . $item->nama_kelas,
+                'text' => $item->kode_mk . ' - ' . $item->deskripsi . ' (' . $item->nama_kelas . ')',
+            ];
+        });
+
+    Log::info('AJAX Kelas Options for Periode ' . $periode . ': ', $kelasOptions->toArray());
+
+    return response()->json(['options' => $kelasOptions]);
+}
 
     public function chooseMahasiswaDanPeriode(Request $request)
     {
@@ -229,20 +257,36 @@ class NilaiMahasiswaController extends Controller
             $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk) {
                 $query->where('mk_id', $mk->id);
             })->with([
-                'mks' => function ($query) use ($mk) {
-                    $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
-                },
-                'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
-                    $query->where('mahasiswa_id', $mahasiswa->id)
-                        ->where('mk_id', $mk->id);
-                }
-            ])->get();
+                        'mks' => function ($query) use ($mk) {
+                            $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard', 'jumlah_penilaian');
+                        },
+                        'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
+                            $query->where('mahasiswa_id', $mahasiswa->id)
+                                ->where('mk_id', $mk->id);
+                        }
+                    ])->get();
             Log::info('CPMKs found:', ['count' => $cpmks->count()]);
+
+            // Ambil jumlah penilaian dari tabel pivot cpmk_mk
+            $jumlahPenilaian = $cpmks->first() && $cpmks->first()->mks->isNotEmpty()
+                ? $cpmks->first()->mks->where('id', $mk->id)->first()->pivot->jumlah_penilaian
+                : 1;
+            Log::info('Jumlah Penilaian:', ['jumlahPenilaian' => $jumlahPenilaian]);
+
+            // Ambil nilai untuk setiap penilaian
+            $nilai = [];
+            for ($i = 1; $i <= $jumlahPenilaian; $i++) {
+                $nilai[$i] = NilaiCpmk::where('mahasiswa_id', $mahasiswa->id)
+                    ->where('mk_id', $mk->id)
+                    ->where('penilaian_ke', $i)
+                    ->pluck('nilai', 'cpmk_id')
+                    ->toArray();
+            }
 
             $minStandard = session('min_standard', 55);
             Log::info('Min Standard:', ['minStandard' => $minStandard]);
 
-            return view('nilai_mahasiswa.index', compact('mahasiswa', 'mk', 'cpmks', 'minStandard'));
+            return view('nilai_mahasiswa.index', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'jumlahPenilaian', 'nilai'));
         } catch (\Exception $e) {
             Log::error('Error in NilaiMahasiswaController::index', ['error' => $e->getMessage()]);
             return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
@@ -258,9 +302,19 @@ class NilaiMahasiswaController extends Controller
         $user = Auth::user();
         Log::info('Request data: ' . json_encode($request->all()));
 
+        // Validasi input
+        $request->validate([
+            'mk_id' => 'required|exists:mk,id',
+            'nim' => 'required|exists:mahasiswa,nim',
+            'penilaian_ke' => 'required|integer|min:1', // Pastikan penilaian_ke ada
+            'min_standard' => 'required|integer|min:0|max:100',
+        ]);
+
         $mk_id = $request->input('mk_id');
         $min_standard = $request->input('min_standard');
         $nim = $request->input('nim');
+        $penilaian_ke = $request->input('penilaian_ke');
+        Log::info('Received penilaian_ke: ' . $penilaian_ke); // Tambahkan log ini
 
         $mahasiswa = Mahasiswa::where('nim', $nim)->firstOrFail();
         $mahasiswa_id = $mahasiswa->id;
@@ -269,7 +323,7 @@ class NilaiMahasiswaController extends Controller
         $mk = Mk::findOrFail($mk_id);
         Log::info('MK ID: ' . $mk_id . ', Kode MK: ' . $mk->kode_mk);
 
-        // Validasi dosen (tetap sama)
+        // Validasi dosen
         if ($user->role === 'dosen') {
             $dosen = $user->dosen;
             if (!$dosen) {
@@ -297,23 +351,24 @@ class NilaiMahasiswaController extends Controller
         }
 
         // Simpan nilai
-        foreach ($request->except(['_token', 'mk_id', 'min_standard', 'nim']) as $key => $value) {
+        foreach ($request->except(['_token', 'mk_id', 'min_standard', 'nim', 'penilaian_ke']) as $key => $value) {
             if (preg_match('/nilai_(\d+)_(\d+)/', $key, $matches)) {
                 $input_mahasiswa_id = $matches[1];
                 $cpmk_id = $matches[2];
-                Log::info('Input: mahasiswa_id=' . $input_mahasiswa_id . ', cpmk_id=' . $cpmk_id . ', nilai=' . $value);
+                Log::info('Input: mahasiswa_id=' . $input_mahasiswa_id . ', cpmk_id=' . $cpmk_id . ', nilai=' . $value . ', penilaian_ke=' . $penilaian_ke);
 
                 $nilai = NilaiCpmk::updateOrCreate(
                     [
                         'mahasiswa_id' => $mahasiswa_id,
                         'mk_id' => $mk_id,
                         'cpmk_id' => $cpmk_id,
+                        'penilaian_ke' => $penilaian_ke,
                     ],
                     [
                         'nilai' => $value,
                     ]
                 );
-                Log::info('Saved Nilai: Mahasiswa ID ' . $mahasiswa_id . ', MK ID ' . $mk_id . ', CPMK ID ' . $cpmk_id . ', Nilai ' . $value);
+                Log::info('Saved Nilai: Mahasiswa ID ' . $mahasiswa_id . ', MK ID ' . $mk_id . ', CPMK ID ' . $cpmk_id . ', Penilaian Ke ' . $penilaian_ke . ', Nilai ' . $value);
             }
         }
 
@@ -364,7 +419,7 @@ class NilaiMahasiswaController extends Controller
                 $query->where('mk_id', $mk->id);
             })->with([
                         'mks' => function ($query) use ($mk) {
-                            $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
+                            $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard', 'jumlah_penilaian');
                         },
                         'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
                             $query->where('mahasiswa_id', $mahasiswa->id)
@@ -373,43 +428,74 @@ class NilaiMahasiswaController extends Controller
                     ])->get();
             Log::info('CPMKs found:', ['count' => $cpmks->count()]);
 
+            // Ambil jumlah penilaian dari tabel pivot cpmk_mk
+            $jumlahPenilaian = $cpmks->first() && $cpmks->first()->mks->isNotEmpty()
+                ? $cpmks->first()->mks->where('id', $mk->id)->first()->pivot->jumlah_penilaian
+                : 1;
+            Log::info('Jumlah Penilaian:', ['jumlahPenilaian' => $jumlahPenilaian]);
+
+            // Ambil nilai untuk setiap penilaian
+            $nilai = [];
+            for ($i = 1; $i <= $jumlahPenilaian; $i++) {
+                $nilai[$i] = NilaiCpmk::where('mahasiswa_id', $mahasiswa->id)
+                    ->where('mk_id', $mk->id)
+                    ->where('penilaian_ke', $i)
+                    ->pluck('nilai', 'cpmk_id')
+                    ->toArray();
+            }
+
             $minStandard = session('min_standard', 55);
             Log::info('Min Standard:', ['minStandard' => $minStandard]);
 
-            // Siapkan data untuk grafik radar
-            $labels = [];
-            $data = [];
-            $totalScore = 0;
-            $totalBobot = 0;
+            // Siapkan data untuk grafik radar per penilaian
+            $radarDataPerPenilaian = [];
+            $finalScores = [];
+            $labels = $cpmks->pluck('kode_cpmk')->toArray();
 
-            // Ambil semua nilai CPMK sekaligus
-            $nilaiCpmks = $mahasiswa->nilaiCpmks()->where('mk_id', $mk->id)->get()->keyBy('cpmk_id');
+            for ($i = 1; $i <= $jumlahPenilaian; $i++) {
+                $data = [];
+                $totalScore = 0;
+                $totalBobot = 0;
 
-            foreach ($cpmks as $cpmk) {
-                $labels[] = $cpmk->kode_cpmk;
-                $nilaiInput = $nilaiCpmks[$cpmk->id]->nilai ?? 0;
-                $bobot = $cpmk->mks->isNotEmpty() ? ($cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0) : 0;
-                $nilaiAkhir = ($nilaiInput * $bobot) / 100;
-                $data[] = $nilaiInput; // Gunakan nilai asli untuk grafik
+                foreach ($cpmks as $cpmk) {
+                    $nilaiInput = $nilai[$i][$cpmk->id] ?? 0;
+                    $bobot = $cpmk->mks->isNotEmpty() ? ($cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0) : 0;
+                    $nilaiAkhir = ($nilaiInput * $bobot) / 100;
+                    $data[] = $nilaiInput; // Gunakan nilai asli untuk grafik
 
-                // Hitung kontribusi untuk nilai total MK
-                $totalScore += $nilaiAkhir;
-                $totalBobot += $bobot;
+                    // Hitung kontribusi untuk nilai total MK
+                    $totalScore += $nilaiAkhir;
+                    $totalBobot += $bobot;
 
-                Log::info('CPMK Data', [
-                    'cpmk_id' => $cpmk->id,
-                    'kode_cpmk' => $cpmk->kode_cpmk,
-                    'nilaiInput' => $nilaiInput,
-                    'bobot' => $bobot,
-                    'nilaiAkhir' => $nilaiAkhir,
+                    Log::info('CPMK Data for Penilaian Ke ' . $i, [
+                        'cpmk_id' => $cpmk->id,
+                        'kode_cpmk' => $cpmk->kode_cpmk,
+                        'nilaiInput' => $nilaiInput,
+                        'bobot' => $bobot,
+                        'nilaiAkhir' => $nilaiAkhir,
+                    ]);
+                }
+
+                // Hitung nilai total MK untuk penilaian ini
+                $finalScore = $totalBobot > 0 ? ($totalScore / ($totalBobot / 100)) : 0;
+                $finalScores[$i] = $finalScore;
+
+                // Simpan data untuk grafik radar
+                $radarDataPerPenilaian[$i] = [
+                    'labels' => $labels,
+                    'data' => $data,
+                ];
+
+                Log::info('Radar Data for Penilaian Ke ' . $i, [
+                    'mahasiswa_id' => $mahasiswa->id,
+                    'mk_id' => $mk->id,
+                    'labels' => $labels,
+                    'data' => $data,
+                    'finalScore' => $finalScore,
                 ]);
             }
 
-            // Hitung nilai total MK
-            $finalScore = $totalBobot > 0 ? ($totalScore / ($totalBobot / 100)) : 0;
-            Log::info('Final Score:', ['finalScore' => $finalScore]);
-
-            return view('nilai_mahasiswa.grafik', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'labels', 'data', 'finalScore'));
+            return view('nilai_mahasiswa.grafik', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'jumlahPenilaian', 'radarDataPerPenilaian', 'nilai', 'finalScores'));
         } catch (\Exception $e) {
             Log::error('Error in NilaiMahasiswaController::grafik', ['error' => $e->getMessage()]);
             return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')

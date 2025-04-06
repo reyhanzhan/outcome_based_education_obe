@@ -101,6 +101,41 @@ class PembobotanCpmkMkController extends Controller
         return response()->json(['results' => $mks]);
     }
 
+    public function getJumlahPenilaian($mk_id)
+{
+    try {
+        $user = Auth::user();
+        $mk = Mk::findOrFail($mk_id);
+
+        if ($user->role === 'dosen') {
+            $dosen = $user->dosen;
+            if (!$dosen) {
+                Log::warning('Dosen data not found for user: ' . $user->email);
+                return response()->json(['error' => 'Data dosen tidak ditemukan.'], 403);
+            }
+
+            $kelas = Kelas::where('nip', $dosen->nip)
+                ->where('kode_matakuliah', $mk->kode_mk)
+                ->exists();
+
+            if (!$kelas) {
+                Log::warning('Dosen ' . $dosen->nip . ' tidak mengajar MK: ' . $mk->kode_mk);
+                return response()->json(['error' => 'Anda tidak berhak mengakses data ini.'], 403);
+            }
+        }
+
+        // Ambil jumlah penilaian dari tabel pivot cpmk_mk
+        $jumlahPenilaian = DB::table('cpmk_mk')
+            ->where('mk_id', $mk_id)
+            ->value('jumlah_penilaian') ?? 1;
+
+        return response()->json(['jumlah_penilaian' => $jumlahPenilaian]);
+    } catch (\Exception $e) {
+        Log::error('Error in getJumlahPenilaian for mk_id ' . $mk_id . ': ' . $e->getMessage());
+        return response()->json(['error' => 'Gagal memuat jumlah penilaian: ' . $e->getMessage()], 500);
+    }
+}
+
     public function getCpmks($mk_id)
     {
         try {
@@ -161,6 +196,7 @@ class PembobotanCpmkMkController extends Controller
                 'bobotData' => 'required|array',
                 'bobotData.*.bobot' => 'required|integer|min:0|max:100',
                 'bobotData.*.cpmk_id' => 'required|exists:cpmk,id',
+                'jumlah_penilaian' => 'required|integer|min:1|max:3', // Validasi jumlah penilaian
             ]);
 
             $totalBobot = array_sum(array_column($request->bobotData, 'bobot'));
@@ -170,6 +206,7 @@ class PembobotanCpmkMkController extends Controller
             }
 
             $mk_id = $request->mk_id;
+            $jumlahPenilaian = $request->jumlah_penilaian;
             $user = Auth::user();
             $mk = Mk::findOrFail($mk_id);
 
@@ -209,19 +246,21 @@ class PembobotanCpmkMkController extends Controller
                             ->update([
                                 'bobot' => $bobot,
                                 'min_standard' => 50,
+                                'jumlah_penilaian' => $jumlahPenilaian, // Simpan jumlah penilaian
                                 'updated_at' => now()
                             ]);
-                        Log::info('Updated bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot);
+                        Log::info('Updated bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot . ', jumlah_penilaian: ' . $jumlahPenilaian);
                     } else {
                         DB::table('cpmk_mk')->insert([
                             'mk_id' => $mk_id,
                             'cpmk_id' => $cpmk_id,
                             'bobot' => $bobot,
                             'min_standard' => 50,
+                            'jumlah_penilaian' => $jumlahPenilaian,
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
-                        Log::info('Inserted bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot);
+                        Log::info('Inserted bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot . ', jumlah_penilaian: ' . $jumlahPenilaian);
                     }
 
                     $pivotEntry = DB::table('cpmk_mk')

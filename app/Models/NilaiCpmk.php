@@ -11,7 +11,7 @@ class NilaiCpmk extends Model
 
     protected $table = 'nilai_cpmk'; // Sesuaikan dengan nama tabel yang benar di database
 
-    protected $fillable = ['mahasiswa_id', 'mk_id', 'cpmk_id', 'nilai'];
+    protected $fillable = ['mahasiswa_id', 'mk_id', 'cpmk_id', 'penilaian_ke', 'nilai'];
 
     public function mahasiswa()
     {

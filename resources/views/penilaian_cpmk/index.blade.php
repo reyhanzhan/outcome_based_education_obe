@@ -38,6 +38,15 @@
             background-color: #5a6268;
             border-color: #5a6268;
         }
+
+        /* Pastikan tab terlihat interaktif */
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 @endsection
 
@@ -72,42 +81,60 @@
                             Tidak ada CPMK yang terkait dengan mata kuliah ini.
                         </div>
                     @else
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
-                                        @foreach ($cpmks as $cpmk)
-                                            <th class="bobot-highlight">
-                                                {{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)
-                                            </th>
-                                        @endforeach
-                                        <th class="bg-light">Nilai Total MK</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="bg-light">{{ $mahasiswa->nama }}</td>
-                                        @foreach ($cpmks as $cpmk)
-                                            <td>
-                                                @php
-                                                    $nilaiCpmk = $cpmk->nilaiCpmks->where('mahasiswa_id', $mahasiswa->id)->first();
-                                                    $nilaiInput = $nilaiCpmk ? $nilaiCpmk->nilai : 0;
-                                                    $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
-                                                    $nilaiAkhir = ($nilaiInput * $bobot) / 100;
-                                                    $minStandard = $minStandard ?? 55;
-                                                @endphp
-                                                <span class="{{ $nilaiInput < $minStandard ? 'below-min' : '' }}">
-                                                    {{ number_format($nilaiAkhir, 0) }}
-                                                </span>
-                                            </td>
-                                        @endforeach
-                                        <td class="bg-light">
-                                            {{ number_format(app('App\Http\Controllers\PenilaianCpmkController')->calculateMkScore($mk->id, $mahasiswa->id), 0) }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- Tab Navigasi -->
+                        <ul class="nav nav-tabs" id="penilaianTab" role="tablist">
+                            @for ($i = 1; $i <= $jumlahPenilaian; $i++)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $i == 1 ? 'active' : '' }}" id="penilaian-{{ $i }}-tab" data-toggle="tab" href="#penilaian-{{ $i }}" role="tab" aria-controls="penilaian-{{ $i }}" aria-selected="{{ $i == 1 ? 'true' : 'false' }}">
+                                        Penilaian {{ $i }}
+                                    </a>
+                                </li>
+                            @endfor
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="penilaianTabContent">
+                            @for ($i = 1; $i <= $jumlahPenilaian; $i++)
+                                <div class="tab-pane fade {{ $i == 1 ? 'show active' : '' }}" id="penilaian-{{ $i }}" role="tabpanel" aria-labelledby="penilaian-{{ $i }}-tab">
+                                    <div class="table-responsive mt-3">
+                                        <table class="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th class="bg-light" style="width: 15%;">Nama Mahasiswa</th>
+                                                    @foreach ($cpmks as $cpmk)
+                                                        <th class="bobot-highlight">
+                                                            {{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)
+                                                        </th>
+                                                    @endforeach
+                                                    <th class="bg-light">Nilaiii Total MK</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="bg-light">{{ $mahasiswa->nama }}</td>
+                                                    @foreach ($cpmks as $cpmk)
+                                                        <td>
+                                                            @php
+                                                                $nilaiCpmk = isset($nilaiPerPenilaian[$i][$cpmk->id]) ? $nilaiPerPenilaian[$i][$cpmk->id] : null;
+                                                                $nilaiInput = $nilaiCpmk ? $nilaiCpmk->nilai : 0;
+                                                                $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
+                                                                $nilaiAkhir = ($nilaiInput * $bobot) / 100;
+                                                                $minStandard = $minStandard ?? 55;
+                                                            @endphp
+                                                            <span class="{{ $nilaiInput < $minStandard ? 'below-min' : '' }}">
+                                                                {{ number_format($nilaiAkhir, 0) }}
+                                                            </span>
+                                                        </td>
+                                                    @endforeach
+                                                    <td class="bg-light">
+                                                        {{ number_format(app('App\Http\Controllers\PenilaianCpmkController')->calculateMkScore($mk->id, $mahasiswa->id, $i), 0) }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endfor
                         </div>
                     @endif
                 </div>
@@ -118,8 +145,12 @@
 
 @section('scripts')
     <script>
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery tidak dimuat!');
-        }
+        $(document).ready(function() {
+            // Inisialisasi tab secara manual (sebagai fallback)
+            $('#penilaianTab a').on('click', function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
     </script>
 @endsection

@@ -7,10 +7,20 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header bg-primary">
-                    <h3 class="card-title">Pilih Periode & Kelas</h3>
+                    <h3 class="card-title">Pilih Periode & Kelas untuk Penilaian CPL</h3>
                 </div>
                 <div class="card-body">
-                    <form id="filterForm" method="GET" action="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}">
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    @if (!$periodes || $periodes->isEmpty())
+                        <div class="alert alert-warning">
+                            Tidak ada periode tersedia. Periksa data di tabel KRS.
+                        </div>
+                    @endif
+                    <form id="filterForm" method="GET" action="{{ route('penilaian.cpl.choose_periode_dan_kelas') }}">
                         <div class="row">
                             <!-- Pilih Periode -->
                             <div class="col-md-6">
@@ -37,12 +47,12 @@
                                         @if ($periode)
                                             @foreach ($kelasOptions as $kelasOption)
                                                 <option value="{{ $kelasOption->id }}"
-                                                    {{ old('kelas', request('kelas')) == $kelasOption->id || (isset($selectedKelas) && $selectedKelas->kode_mk . '|' . $selectedKelas->nama_kelas == $kelasOption->id) ? 'selected' : '' }}>
+                                                    {{ old('kelas', request('kelas')) == $kelasOption->id ? 'selected' : '' }}>
                                                     {{ $kelasOption->text }}
                                                 </option>
                                             @endforeach
                                         @else
-                                            <option value="" disabled>No classes available</option>
+                                            <option value="" disabled>Tidak ada kelas tersedia</option>
                                         @endif
                                     </select>
                                 </div>
@@ -53,18 +63,17 @@
             </div>
 
             <!-- Menampilkan peringatan jika tidak ada mahasiswa -->
-            @if (isset($mahasiswas) && count($mahasiswas) === 0)
+            @if (isset($mahasiswas) && $mahasiswas->isEmpty())
                 <div class="alert alert-warning mt-3">
                     <strong>Peringatan!</strong> Tidak ada mahasiswa yang terdaftar pada kelas dan periode ini.
                 </div>
             @endif
 
             <!-- Menampilkan Daftar Mahasiswa jika ada -->
-            @if (isset($mahasiswas) && count($mahasiswas) > 0)
+            @if (isset($mahasiswas) && !$mahasiswas->isEmpty())
                 <div class="card mt-3">
                     <div class="card-header bg-secondary">
-                        <h3 class="card-title">Daftar Mahasiswa Kelas: {{ $selectedKelas->kode_mk }} - {{ $namaMk }}
-                            (Periode: {{ $periode }})</h3>
+                        <h3 class="card-title">Daftar Mahasiswa Kelas: {{ $selectedKelas->kode_mk }} - {{ $namaMk }} (Periode: {{ $periode }})</h3>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -80,51 +89,26 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($mahasiswas as $mhs)
-                                        @if ($mhs)
-                                            <tr>
-                                                <td>{{ $mhs->nim ?? 'N/A' }}</td>
-                                                <td>{{ $mhs->nama ?? 'N/A' }}</td>
-                                                <td>{{ $selectedKelas->kode_mk }}</td>
-                                                <td>{{ $namaMk }}</td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <!-- Tombol Input Nilai -->
-                                                        <a href="{{ route('nilai.mahasiswa.index', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
-                                                            class="btn btn-primary btn-sm">
-                                                            <i class="fas fa-edit"></i> Input Nilai
+                                        <tr>
+                                            <td>{{ $mhs->nim ?? 'N/A' }}</td>
+                                            <td>{{ $mhs->nama ?? 'N/A' }}</td>
+                                            <td>{{ $selectedKelas->kode_mk }}</td>
+                                            <td>{{ $namaMk }}</td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    @if ($mhs->id)
+                                                        <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
+                                                            class="btn btn-info btn-sm">
+                                                            <i class="fas fa-chart-bar"></i> Penilaian CPL
                                                         </a>
-                                                        <!-- Tombol Penilaian CPMK -->
-                                                        @if (isset($mhs->id) && isset($selectedKelas->id))
-                                                            <a href="{{ route('penilaian.cpmk.index', ['mahasiswa_id' => $mhs->id, 'mk_id' => $selectedKelas->id]) }}"
-                                                                class="btn btn-info btn-sm">
-                                                                <i class="fas fa-chart-bar"></i> Penilaian CPMK
-                                                            </a>
-                                                            <!-- Tambahkan tombol Penilaian CPL -->
-                                                            <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
-                                                                class="btn btn-warning btn-sm">
-                                                                <i class="fas fa-chart-pie"></i> Penilaian CPL
-                                                            </a>
-                                                            
-                                                            <!-- Tombol Grafik -->
-                                                            <a href="{{ route('nilai.mahasiswa.grafik', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
-                                                                class="btn btn-success btn-sm">
-                                                                <i class="fas fa-chart-line"></i> Grafik
-                                                            </a>
-                                                        @else
-                                                            <button class="btn btn-info btn-sm" disabled>
-                                                                <i class="fas fa-chart-bar"></i> Penilaian CPMK (Data Tidak
-                                                                Lengkap)
-                                                            </button>
-                                                            
-                                                            <button class="btn btn-success btn-sm" disabled>
-                                                                <i class="fas fa-chart-line"></i> Grafik (Data Tidak
-                                                                Lengkap)
-                                                            </button>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endif
+                                                    @else
+                                                        <button class="btn btn-info btn-sm" disabled>
+                                                            <i class="fas fa-chart-bar"></i> Penilaian CPL (Data Tidak Lengkap)
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -137,9 +121,14 @@
 @endsection
 
 @section('scripts')
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <!-- JS DataTables -->
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
     <script>
         $(document).ready(function() {
             // Inisialisasi Select2 untuk periode
@@ -164,27 +153,23 @@
             function loadKelasOptions(periode) {
                 if (periode) {
                     $.ajax({
-                        url: '{{ route('get.kelas.by.periode') }}',
+                        url: '{{ route('penilaian.cpl.get_kelas_by_periode') }}',
                         method: 'GET',
-                        data: {
-                            periode: periode
-                        },
+                        data: { periode: periode },
                         success: function(response) {
                             let kelasSelect = $('#kelas');
-                            let currentValue = kelasSelect.val(); // Simpan nilai saat ini
-                            kelasSelect.empty(); // Kosongkan dropdown
+                            let currentValue = kelasSelect.val();
+                            kelasSelect.empty();
                             kelasSelect.append(new Option('-- Pilih Kelas --', '', true, true));
 
-                            // Isi dropdown dengan data dari AJAX
                             response.options.forEach(function(option) {
-                                let newOption = new Option(option.text, option.id, false,
-                                false);
+                                let newOption = new Option(option.text, option.id, false, false);
                                 kelasSelect.append(newOption);
                                 if (option.id === currentValue) {
                                     newOption.selected = true;
                                 }
                             });
-                            kelasSelect.trigger('change'); // Perbarui Select2
+                            kelasSelect.trigger('change');
                         },
                         error: function(xhr) {
                             console.log('Error fetching kelas: ', xhr);
@@ -210,40 +195,35 @@
             });
 
             // Muat ulang opsi kelas saat halaman dimuat
-            $(document).ready(function() {
-                let periode = $('#periode').val();
-                if (periode) {
-                    loadKelasOptions(periode);
-                }
+            let initialPeriode = $('#periode').val();
+            if (initialPeriode) {
+                loadKelasOptions(initialPeriode);
+            }
 
-                // Inisialisasi DataTable dengan pagination dan pencarian
-                $('#mahasiswaTable').DataTable({
-                    paging: true, // Aktifkan pagination
-                    pageLength: 10, // Jumlah baris per halaman
-                    searching: true, // Aktifkan pencarian
-                    responsive: true, // Responsivitas
-                    order: [
-                        [0, 'asc']
-                    ], // Urutkan berdasarkan kolom NIM (indeks 0)
-                    language: {
-                        search: "Cari Nama Mahasiswa:", // Ubah label pencarian
-                        paginate: {
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        },
-                        info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri", // Kustomisasi info
-                        infoEmpty: "Tidak ada data", // Info saat kosong
-                        lengthMenu: "Tampilkan _MENU_ entri" // Kustomisasi dropdown jumlah entri
-                    }
-                });
+            // Inisialisasi DataTable
+            $('#mahasiswaTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                searching: true,
+                responsive: true,
+                order: [[0, 'asc']],
+                language: {
+                    search: "Cari Nama Mahasiswa:",
+                    paginate: {
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    },
+                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri",
+                    infoEmpty: "Tidak ada data",
+                    lengthMenu: "Tampilkan _MENU_ entri"
+                }
             });
 
             // Debugging saat submit
             $('#filterForm').on('submit', function() {
                 let periode = $('#periode').val();
-                console.log('Form submitted with Periode: ' + periode);
-                console.log('Form submitted with Kelas: ' + $('#kelas').val());
-                loadKelasOptions(periode); // Muat ulang opsi kelas saat submit
+                let kelas = $('#kelas').val();
+                console.log('Form submitted with Periode: ' + periode + ', Kelas: ' + kelas);
             });
         });
     </script>
@@ -255,30 +235,21 @@
             width: 100% !important;
         }
 
-        /* Atur tinggi dan posisi teks di dalam elemen input Select2 */
         .select2-container--default .select2-selection--single {
             height: 38px !important;
-            /* Sesuaikan dengan tinggi input AdminLTE */
             border: 1px solid #d2d6de;
-            /* Warna border sesuai tema AdminLTE */
             display: flex !important;
-            /* Pastikan flex diterapkan */
             align-items: center !important;
-            /* Memaksa posisi vertikal tengah */
         }
 
-        /* Atur tombol dropdown agar sejajar */
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 38px !important;
-            /* Sesuaikan dengan tinggi input */
             top: 0 !important;
             right: 10px !important;
             display: flex !important;
             align-items: center !important;
-            /* Memastikan panah tetap di tengah */
         }
 
-        /* Atur responsivitas tabel */
         @media (max-width: 768px) {
             .table-responsive {
                 overflow-x: auto;
@@ -292,61 +263,31 @@
             }
         }
 
-        /* Atur tata letak tombol menggunakan flexbox */
         .action-buttons {
             display: flex;
             flex-wrap: wrap;
-            /* Izinkan tombol membungkus ke baris berikutnya jika tidak cukup ruang */
             gap: 5px;
-            /* Jarak antar tombol */
             justify-content: center;
-            /* Pusatkan tombol secara horizontal */
         }
 
-        /* Atur ukuran tombol */
         .action-buttons .btn {
             min-width: 120px;
-            /* Lebar minimum tombol */
             text-align: center;
             padding: 5px 10px;
-            /* Padding tombol */
             font-size: 12px;
-            /* Ukuran font tombol */
         }
 
-        /* Responsivitas untuk layar kecil */
         @media (max-width: 576px) {
             .action-buttons {
                 flex-direction: column;
-                /* Tumpuk tombol secara vertikal */
                 align-items: center;
-                /* Pusatkan tombol secara vertikal */
             }
 
             .action-buttons .btn {
                 width: 100%;
-                /* Tombol mengambil lebar penuh */
                 max-width: 200px;
-                /* Batasi lebar maksimum */
                 margin-bottom: 5px;
-                /* Jarak antar tombol saat ditumpuk */
             }
         }
     </style>
-@endsection
-
-@section('scripts')
-    <script>
-        $(document).ready(function() {
-            // Pastikan jQuery dimuat
-            if (typeof jQuery === 'undefined') {
-                console.error('jQuery tidak dimuat!');
-            } else {
-                // Aktifkan pushmenu secara manual jika diperlukan
-                $('[data-widget="pushmenu"]').on('click', function() {
-                    $('body').toggleClass('sidebar-collapse');
-                });
-            }
-        });
-    </script>
 @endsection

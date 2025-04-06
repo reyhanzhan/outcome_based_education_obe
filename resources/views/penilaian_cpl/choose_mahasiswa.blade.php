@@ -3,47 +3,49 @@
 @section('title', 'Pilih Mahasiswa untuk Penilaian CPL')
 
 @section('content')
-<section class="content">
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header bg-primary">
-                <h3 class="card-title">Pilih Mahasiswa</h3>
-            </div>
-            <div class="card-body">
-                @if ($mahasiswas->isEmpty())
-                    <div class="alert alert-warning">Tidak ada mahasiswa yang tersedia. Silakan tambahkan mahasiswa.</div>
-                @else
-                    <form action="{{ route('penilaian.cpl.index', ['mahasiswa_id' => ':mahasiswa_id']) }}" method="GET">
-                        <div class="form-group">
-                            <label for="mahasiswa_id">Pilih Mahasiswa:</label>
-                            <select name="mahasiswa_id" id="mahasiswa_id" class="form-control" required>
-                                @foreach ($mahasiswas as $mahasiswa)
-                                    <option value="{{ $mahasiswa->id }}">{{ $mahasiswa->nama }} ({{ $mahasiswa->nim ?? 'NIM Tidak Ada' }})</option>
-                                @endforeach
-                            </select>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Pilih Mahasiswa untuk Penilaian CPL (Periode: {{ $periode }})</h3>
+                    <a href="{{ route('penilaian.cpl.choose_periode_dan_kelas') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if ($mahasiswas->isEmpty())
+                        <div class="alert alert-warning">Tidak ada mahasiswa yang terdaftar pada periode dan kelas ini.</div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>NIM</th>
+                                        <th>Nama</th>
+                                        <th>Program Studi</th>
+                                        <th>Kelas</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($mahasiswas as $mahasiswa)
+                                        <tr>
+                                            <td>{{ $mahasiswa->nim }}</td>
+                                            <td>{{ $mahasiswa->nama }}</td>
+                                            <td>{{ $mahasiswa->program_studi }}</td>
+                                            <td>{{ $mahasiswa->kelas }}</td>
+                                            <td>
+                                                <a href="{{ route('penilaian.cpl.index', $mahasiswa->id) }}"
+                                                   class="btn btn-sm btn-primary">Lihat Penilaian CPL</a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
-                        <button type="submit" class="btn btn-primary">Lanjutkan</button>
-                    </form>
-                @endif
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
-</section>
-@endsection
-
-@section('scripts')
-<script>
-    $(document).ready(function() {
-        $('form').submit(function(e) {
-            e.preventDefault();
-            var mahasiswa_id = $('#mahasiswa_id').val();
-            if (mahasiswa_id) {
-                window.location.href = "{{ route('penilaian.cpl.index', ['mahasiswa_id' => ':mahasiswa_id']) }}"
-                    .replace(':mahasiswa_id', mahasiswa_id);
-            } else {
-                alert('Pilih mahasiswa terlebih dahulu!');
-            }
-        });
-    });
-</script>
+    </section>
 @endsection

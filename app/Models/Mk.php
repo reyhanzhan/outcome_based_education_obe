@@ -31,6 +31,20 @@ class Mk extends Model
     }
 
 
+    public function krs()
+    {
+        return $this->hasMany(Krs::class, 'kode_mk', 'kode_mk');
+    }
+
+    // Relasi lainnya (jika ada)
+    public function cpmks()
+    {
+        return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id')
+            ->withPivot('bobot', 'min_standard', 'jumlah_penilaian');
+    }
+
+
+
 
     public function cplsbelongsto()
     {
@@ -43,10 +57,7 @@ class Mk extends Model
     }
 
 
-    public function cpmks()
-    {
-        return $this->belongsToMany(Cpmk::class, 'cpmk_mk')->withPivot('bobot', 'min_standard')->withTimestamps();
-    }
+
 
 
     public function mksThroughCpmk()

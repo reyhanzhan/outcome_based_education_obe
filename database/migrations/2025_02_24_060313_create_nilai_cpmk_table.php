@@ -16,13 +16,15 @@ return new class extends Migration
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('mk_id');
             $table->unsignedBigInteger('cpmk_id');
+            $table->integer('penilaian_ke')->default(1); // Sudah ada default value
             $table->decimal('nilai', 5, 2)->default(0); // Nilai CPMK (0-100)
             $table->timestamps();
         
             $table->foreign('mahasiswa_id')->references('id')->on('mahasiswa')->onDelete('cascade');
             $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');
             $table->foreign('cpmk_id')->references('id')->on('cpmk')->onDelete('cascade');
-            $table->unique(['mahasiswa_id', 'mk_id', 'cpmk_id']); // Pastikan kombinasi unik
+            // Perbarui constraint unik untuk menyertakan penilaian_ke
+            $table->unique(['mahasiswa_id', 'mk_id', 'cpmk_id', 'penilaian_ke'], 'nilai_cpmk_unique_with_penilaian_ke');
         });
     }
 

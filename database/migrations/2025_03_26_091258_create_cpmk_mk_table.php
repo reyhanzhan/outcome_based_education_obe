@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade');
             $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');
             $table->integer('bobot')->default(0); // Tambahkan kolom bobot
+            $table->integer('jumlah_penilaian')->default(3);
             $table->decimal('min_standard', 5, 2)->default(0);
             $table->timestamps();
         });

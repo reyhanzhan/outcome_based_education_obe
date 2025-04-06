@@ -22,6 +22,16 @@
                     </select>
                 </div>
 
+                <!-- Tambahkan field untuk memilih jumlah penilaian -->
+                <div class="form-group">
+                    <label for="jumlahPenilaian">Jumlah Penilaian:</label>
+                    <select id="jumlahPenilaian" class="form-control" name="jumlah_penilaian">
+                        <option value="1" @if ($defaultMk && $defaultMk->jumlah_penilaian == 1) selected @endif>1 Kali Penilaian</option>
+                        <option value="2" @if ($defaultMk && $defaultMk->jumlah_penilaian == 2) selected @endif>2 Kali Penilaian</option>
+                        <option value="3" @if ($defaultMk && $defaultMk->jumlah_penilaian == 3) selected @endif>3 Kali Penilaian</option>
+                    </select>
+                </div>
+
                 <div class="table-responsive">
                     <table id="pembobotanTable" class="table table-bordered table-hover">
                         <thead>
@@ -67,14 +77,20 @@
     $(document).ready(function() {
         let debounceTimeout; // Variabel untuk debounce
 
-        // ✅ Inisialisasi Select2 (tanpa tombol "X")
+        // Inisialisasi Select2
         $('#mkSelect').select2({
             placeholder: "-- Pilih Mata Kuliah --",
-            allowClear: false, // Hilangkan tombol "X"
+            allowClear: false,
             width: '100%'
         });
 
-        // ✅ Hitung total bobot saat halaman dimuat
+        $('#jumlahPenilaian').select2({
+            placeholder: "-- Pilih Jumlah Penilaian --",
+            allowClear: false,
+            width: '100%'
+        });
+
+        // Hitung total bobot saat halaman dimuat
         updateTotalBobot();
 
         $('#mkSelect').on('change', function() {
@@ -106,6 +122,19 @@
                         $('#cpmkTableBody').html(html);
                         updateTotalBobot(); 
                         $('#simpanBobot').prop('disabled', true);
+
+                        // Ambil jumlah penilaian dari server
+                        $.ajax({
+                            url: '{{ route('pembobotan.get-jumlah-penilaian', ':mk_id') }}'.replace(':mk_id', mk_id),
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(response) {
+                                $('#jumlahPenilaian').val(response.jumlah_penilaian || 1).trigger('change');
+                            },
+                            error: function(xhr) {
+                                toastr.error('Gagal memuat jumlah penilaian!');
+                            }
+                        });
                     },
                     error: function(xhr) {
                         toastr.error('Gagal memuat CPMK! Status: ' + xhr.status + ', Response: ' + xhr.responseText);
@@ -140,13 +169,13 @@
 
         $(document).on('input', '.bobot-input', function() {
             clearTimeout(debounceTimeout);
-            // atur muncul notif berapa detik
             debounceTimeout = setTimeout(updateTotalBobot, 3000);
         });
 
         $('#simpanBobot').click(function() {
             let bobotData = [];
             let mk_id = $('#mkSelect').val();
+            let jumlahPenilaian = $('#jumlahPenilaian').val();
 
             if (!mk_id) {
                 toastr.error('Pilih mata kuliah terlebih dahulu!');
@@ -166,7 +195,8 @@
                     data: {
                         _token: "{{ csrf_token() }}",
                         mk_id: mk_id,
-                        bobotData: bobotData
+                        bobotData: bobotData,
+                        jumlah_penilaian: jumlahPenilaian // Kirim jumlah penilaian
                     },
                     success: function(response) {
                         toastr.success("✅ Data berhasil disimpan!");
@@ -188,21 +218,19 @@
         width: 100% !important;
     }
 
-    /* Atur tinggi dan posisi teks di dalam elemen input Select2 */
     .select2-container--default .select2-selection--single {
-        height: 38px !important; /* Sesuaikan dengan tinggi input AdminLTE */
-        border: 1px solid #d2d6de; /* Warna border sesuai tema AdminLTE */
-        display: flex !important; /* Pastikan flex diterapkan */
-        align-items: center !important; /* Memaksa posisi vertikal tengah */
+        height: 38px !important;
+        border: 1px solid #d2d6de;
+        display: flex !important;
+        align-items: center !important;
     }
 
-    /* Atur tombol dropdown agar sejajar */
     .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 38px !important; /* Sesuaikan dengan tinggi input */
+        height: 38px !important;
         top: 0 !important;
         right: 10px !important;
         display: flex !important;
-        align-items: center !important; /* Memastikan panah tetap di tengah */
+        align-items: center !important;
     }
 </style>
 @endsection

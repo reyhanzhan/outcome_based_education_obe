@@ -1,4 +1,4 @@
-@extends('layouts_adminlte.app')
+{{-- @extends('layouts_adminlte.app')
 
 @section('title', 'Pilih Mahasiswa untuk Input Nilai')
 
@@ -58,4 +58,4 @@
         });
     });
 </script>
-@endsection
+@endsection --}}
