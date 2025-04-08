@@ -106,7 +106,7 @@
                                                             {{ $cpmk->kode_cpmk }} (Bobot: {{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)
                                                         </th>
                                                     @endforeach
-                                                    <th class="bg-light">Nilaiii Total MK</th>
+                                                    <th class="bg-light">Nilai Total MK</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

@@ -126,7 +126,7 @@
                                             <option value="70" @if ($minStandard == 70) selected @endif>70</option>
                                             <option value="75" @if ($minStandard == 75) selected @endif>75</option>
                                         </select>
-                                        <small class="form-text text-muted">Pilih standar minimum untuk semua CPMK di MK ini. Dan klik cpmk untuk melihat deskripsinya.</small>
+                                        <small class="form-text text-muted">*Pilih standar minimum untuk semua CPMK di MK ini. Dan klik cpmk untuk melihat deskripsinya.</small>
                                     </div>
 
                                     <div class="table-responsive">

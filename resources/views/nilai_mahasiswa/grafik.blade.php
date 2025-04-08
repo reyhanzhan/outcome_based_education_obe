@@ -82,7 +82,7 @@
                         @for ($i = 1; $i <= $jumlahPenilaian; $i++)
                             <div class="tab-pane fade {{ $i == 1 ? 'show active' : '' }}" id="penilaian-{{ $i }}" role="tabpanel" aria-labelledby="penilaian-{{ $i }}-tab">
                                 <div class="mb-3">
-                                    <h4>Nilai Total MK: {{ number_format($finalScores[$i], 2) }}</h4>
+                                    <h4>Nilai Total MK Mahasiswa: {{ number_format($finalScores[$i], 2) }}</h4>
                                 </div>
 
                                 <div class="chart-container">

@@ -108,7 +108,7 @@
                                                             <!-- Tombol Grafik -->
                                                             <a href="{{ route('nilai.mahasiswa.grafik', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
                                                                 class="btn btn-success btn-sm">
-                                                                <i class="fas fa-chart-line"></i> Grafik
+                                                                <i class="fas fa-chart-line"></i> Grafik Cpmk
                                                             </a>
                                                         @else
                                                             <button class="btn btn-info btn-sm" disabled>
