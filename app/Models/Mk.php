@@ -40,11 +40,8 @@ class Mk extends Model
     public function cpmks()
     {
         return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id')
-            ->withPivot('bobot', 'min_standard', 'jumlah_penilaian');
+            ->withPivot('bobot', 'min_standard');
     }
-
-
-
 
     public function cplsbelongsto()
     {
@@ -55,10 +52,6 @@ class Mk extends Model
     {
         return $this->belongsToMany(Dosen::class, 'mk_dosen')->withTimestamps();
     }
-
-
-
-
 
     public function mksThroughCpmk()
     {

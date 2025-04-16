@@ -22,36 +22,23 @@
                     </select>
                 </div>
 
-                <!-- Tambahkan field untuk memilih jumlah penilaian -->
-                <div class="form-group">
-                    <label for="jumlahPenilaian">Pilih Tahap Penilaian:</label>
-                    <select id="jumlahPenilaian" class="form-control" name="jumlah_penilaian">
-                        @for ($i = 1; $i <= 15; $i++)
-                            <option value="{{ $i }}" @if ($defaultMk && $defaultMk->jumlah_penilaian == $i) selected @elseif ($i == 3 && !$defaultMk) selected @endif>{{ $i }} Kali Penilaian</option>
-                        @endfor
-                    </select>
-                </div>
-
                 <div class="table-responsive">
                     <table id="pembobotanTable" class="table table-bordered table-hover">
                         <tbody id="cpmkTableBody">
                             @if ($defaultMk && count($cpmks) > 0)
                                 @foreach ($cpmks as $cpmk)
-                                    <!-- Tambahkan thead untuk setiap CPMK -->
-                                    <thead>
-                                        <tr>
-                                            <th>CPMK</th>
-                                            <th>Deskripsi</th>
-                                        </tr>
-                                    </thead>
                                     <tr class="cpmk-row">
-                                        <td>{{ $cpmk->kode_cpmk }}</td>
-                                        <td>{{ $cpmk->deskripsi ?? 'Deskripsi tidak tersedia' }}</td>
+                                        <td>
+                                            <div class="cpmk-label">CPMK</div>
+                                            {{ $cpmk->kode_cpmk }}
+                                        </td>
+                                        <td>
+                                            <div class="cpmk-label">Deskripsi</div>
+                                            {{ $cpmk->deskripsi ?? 'Deskripsi tidak tersedia' }}
+                                        </td>
                                     </tr>
-                                    <!-- Tabel Teknik Penilaian -->
                                     <tr>
                                         <td colspan="2">
-                                            <h5>Teknik Penilaian untuk {{ $cpmk->kode_cpmk }}</h5>
                                             <table class="table table-bordered teknik-penilaian-table" data-cpmk="{{ $cpmk->id }}">
                                                 <thead>
                                                     <tr>
@@ -98,32 +85,18 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        let debounceTimeout; // Variabel untuk debounce
+        let debounceTimeout;
 
-        // Inisialisasi Select2
         $('#mkSelect').select2({
             placeholder: "-- Pilih Mata Kuliah --",
             allowClear: false,
             width: '100%'
         });
 
-        $('#jumlahPenilaian').select2({
-            placeholder: "-- Pilih Jumlah Penilaian --",
-            allowClear: false,
-            width: '100%'
-        });
-
-        // Set default jumlah penilaian ke 3 jika belum ada data
-        if (!$('#jumlahPenilaian').val()) {
-            $('#jumlahPenilaian').val(3).trigger('change');
-        }
-
-        // Hitung total bobot saat halaman dimuat
-        updateTotalBobot();
+        updateTotalBobot(); // Hitung total bobot saat halaman dimuat
 
         $('#mkSelect').on('change', function() {
             var mk_id = $(this).val();
-            console.log('Selected MK ID:', mk_id);
             if (mk_id) {
                 $.ajax({
                     url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id', mk_id),
@@ -133,20 +106,20 @@
                         let html = '';
                         if (response.length > 0) {
                             response.forEach(function(cpmk) {
+                                console.log('CPMK Teknik Penilaian:', cpmk.teknik_penilaian); // Debugging
                                 html += `
-                                    <thead>
-                                        <tr>
-                                            <th>CPMK</th>
-                                            <th>Deskripsi</th>
-                                        </tr>
-                                    </thead>
                                     <tr class="cpmk-row">
-                                        <td>${cpmk.kode_cpmk || 'Kode tidak tersedia'}</td>
-                                        <td>${cpmk.deskripsi || 'Deskripsi tidak tersedia'}</td>
+                                        <td>
+                                            <div class="cpmk-label">CPMK</div>
+                                            ${cpmk.kode_cpmk || 'Kode tidak tersedia'}
+                                        </td>
+                                        <td>
+                                            <div class="cpmk-label">Deskripsi</div>
+                                            ${cpmk.deskripsi || 'Deskripsi tidak tersedia'}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td colspan="2">
-                                            <h5>Teknik Penilaian untuk ${cpmk.kode_cpmk}</h5>
                                             <table class="table table-bordered teknik-penilaian-table" data-cpmk="${cpmk.id}">
                                                 <thead>
                                                     <tr>
@@ -157,59 +130,31 @@
                                                 <tbody>
                                                     <tr>
                                                         <td>Kehadiran</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="Kehadiran"
-                                                                value="${cpmk.teknik_penilaian?.Kehadiran || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Kehadiran" value="${cpmk.teknik_penilaian?.Kehadiran || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Kuis</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="Kuis"
-                                                                value="${cpmk.teknik_penilaian?.Kuis || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Kuis" value="${cpmk.teknik_penilaian?.Kuis || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Tugas</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="Tugas"
-                                                                value="${cpmk.teknik_penilaian?.Tugas || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Tugas" value="${cpmk.teknik_penilaian?.Tugas || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Presentasi</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="Presentasi"
-                                                                value="${cpmk.teknik_penilaian?.Presentasi || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Presentasi" value="${cpmk.teknik_penilaian?.Presentasi || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>UTS</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="UTS"
-                                                                value="${cpmk.teknik_penilaian?.UTS || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="UTS" value="${cpmk.teknik_penilaian?.UTS || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>UAS</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="UAS"
-                                                                value="${cpmk.teknik_penilaian?.UAS || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="UAS" value="${cpmk.teknik_penilaian?.UAS || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Tugas Kelompok</td>
-                                                        <td>
-                                                            <input type="number" class="teknik-bobot-input form-control"
-                                                                data-cpmk="${cpmk.id}" data-teknik="Tugas Kelompok"
-                                                                value="${cpmk.teknik_penilaian?.['Tugas Kelompok'] || 0}" min="0" max="100" step="1">
-                                                        </td>
+                                                        <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Tugas Kelompok" value="${cpmk.teknik_penilaian?.['Tugas Kelompok'] || 0}" min="0" max="100" step="1"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -223,30 +168,12 @@
                         }
                         $('#cpmkTableBody').html(html);
                         updateTotalBobot();
-                        $('#simpanBobot').prop('disabled', true);
-
-                        // Ambil jumlah penilaian dari server
-                        $.ajax({
-                            url: '{{ route('pembobotan.get-jumlah-penilaian', ':mk_id') }}'.replace(':mk_id', mk_id),
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function(response) {
-                                $('#jumlahPenilaian').val(response.jumlah_penilaian || 3).trigger('change'); // Default ke 3 jika belum ada data
-                            },
-                            error: function(xhr) {
-                                toastr.error('Gagal memuat jumlah penilaian!');
-                            }
-                        });
+                        $('#simpanBobot').prop('disabled', response.length === 0);
                     },
                     error: function(xhr) {
-                        toastr.error('Gagal memuat CPMK! Status: ' + xhr.status + ', Response: ' . xhr.responseText);
-                        $('#cpmkTableBody').html('<tr><td colspan="2" class="text-center">Gagal memuat data CPMK</td></tr>');
-                        $('#simpanBobot').prop('disabled', true);
+                        toastr.error('Gagal memuat CPMK! ' + xhr.responseText);
                     }
                 });
-            } else {
-                $('#cpmkTableBody').html('<tr><td colspan="2" class="text-center">Pilih mata kuliah terlebih dahulu</td></tr>');
-                $('#simpanBobot').prop('disabled', true);
             }
         });
 
@@ -264,11 +191,8 @@
             });
             $('#totalBobot').text(total);
 
-            if (total < 100) {
-                toastr.warning('Total bobot CPMK kurang dari 100%! Silakan sesuaikan.');
-                $('#simpanBobot').prop('disabled', true);
-            } else if (total > 100) {
-                toastr.warning('Total bobot CPMK melebihi 100%! Silakan sesuaikan.');
+            if (total !== 100) {
+                toastr.warning('Total bobot CPMK harus 100%! Silakan sesuaikan.');
                 $('#simpanBobot').prop('disabled', true);
             } else {
                 $('#simpanBobot').prop('disabled', false);
@@ -277,15 +201,12 @@
 
         $(document).on('input', '.teknik-bobot-input', function() {
             clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(function() {
-                updateTotalBobot();
-            }, 300);
+            debounceTimeout = setTimeout(updateTotalBobot, 300);
         });
 
         $('#simpanBobot').click(function() {
             let teknikData = [];
             let mk_id = $('#mkSelect').val();
-            let jumlahPenilaian = $('#jumlahPenilaian').val() || 3; // Default ke 3 jika tidak ada nilai
 
             if (!mk_id) {
                 toastr.error('Pilih mata kuliah terlebih dahulu!');
@@ -308,36 +229,29 @@
                     data: {
                         _token: "{{ csrf_token() }}",
                         mk_id: mk_id,
-                        teknikData: teknikData,
-                        jumlah_penilaian: jumlahPenilaian
+                        teknikData: teknikData
                     },
                     success: function(response) {
                         toastr.success("✅ Data berhasil disimpan!");
-                        updateTotalBobot();
+                        $('#mkSelect').trigger('change'); // Reload data setelah simpan
                     },
                     error: function(xhr) {
                         toastr.error('Gagal menyimpan data! ' + (xhr.responseJSON?.error || ''));
                     }
                 });
-            } else {
-                toastr.error('Tidak ada data bobot yang valid untuk disimpan!');
             }
         });
     });
 </script>
 
 <style>
-    .form-group .select2-container {
-        width: 100% !important;
-    }
-
+    .form-group .select2-container { width: 100% !important; }
     .select2-container--default .select2-selection--single {
         height: 38px !important;
         border: 1px solid #d2d6de;
         display: flex !important;
         align-items: center !important;
     }
-
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 38px !important;
         top: 0 !important;
@@ -345,10 +259,16 @@
         display: flex !important;
         align-items: center !important;
     }
-
-    /* Tambahkan jarak di bawah Total Bobot Teknik */
-    .total-bobot-teknik-p {
-        margin-bottom: 20px !important; /* Jarak 20px, bisa disesuaikan */
+    .total-bobot-teknik-p { margin-bottom: 20px !important; }
+    .cpmk-label {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #212529;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 0.5rem;
     }
+    .cpmk-row td { padding: 0.75rem; vertical-align: top; }
 </style>
 @endsection

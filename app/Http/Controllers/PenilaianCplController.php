@@ -21,111 +21,105 @@ class PenilaianCplController extends Controller
     public function index(Request $request, $mahasiswa_id)
     {
         try {
+            // Ambil periode dan kelas dari session
             $periode = session('previous_periode');
             $kelasInput = session('previous_kelas');
 
+            Log::info('Session Data:', ['periode' => $periode, 'kelasInput' => $kelasInput]);
+
             if (!$periode || !$kelasInput) {
                 return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                    ->with('error', 'Silakan pilih periode dan kelas terlebih dahulu di Penilaian CPMK.');
+                    ->with('error', 'Silakan pilih periode dan kelas terlebih dahulu.');
             }
 
             [$kodeMk, $namaKelas] = explode('|', $kelasInput);
 
+            // Scope: 'periode' (hanya periode tertentu) atau 'all' (semua periode hingga periode yang dipilih)
             $scope = $request->query('scope', 'periode');
 
             $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
             $cpls = Cpl::with(['cpmks.mks'])->get();
 
+            // Ambil daftar periode yang diambil mahasiswa
+            $periodeList = Krs::where('nim', $mahasiswa->nim)
+                ->distinct()
+                ->pluck('periode')
+                ->toArray();
+            sort($periodeList);
+            Log::info('Periode yang tersedia:', ['periodeList' => $periodeList]);
+
             $cplData = [];
             $labels = [];
-            $datasets = [];
+            $data = [];
             $minStandard = 55;
 
-            $bobotPenilaian = [
-                1 => 0.3, // Perkuliahan: 30%
-                2 => 0.3, // UTS: 30%
-                3 => 0.4, // UAS: 40%
-            ];
-
-            Log::info('Processing CPL for Mahasiswa: ' . $mahasiswa->nama . ', ID: ' . $mahasiswa_id . ', Periode: ' . $periode . ', Scope: ' . $scope);
-
-            // Siapkan data untuk grafik per tahap penilaian
-            $penilaianKeys = array_keys($bobotPenilaian); // [1, 2, 3]
-            $dataByPenilaian = [];
-            foreach ($penilaianKeys as $penilaianKe) {
-                $dataByPenilaian[$penilaianKe] = [];
-            }
+            Log::info('Memproses CPL untuk Mahasiswa: ' . $mahasiswa->nama . ', ID: ' . $mahasiswa_id . ', Periode: ' . $periode . ', Scope: ' . $scope);
 
             foreach ($cpls as $cpl) {
                 $totalScore = 0;
                 $totalMaxWeight = 0;
                 $contributions = [];
 
-                $cplScoresByPenilaian = [];
-                $totalMaxWeightByPenilaian = [];
-
-                Log::info('Processing CPL: ' . $cpl->kode_cpl . ', ID: ' . $cpl->id);
+                Log::info('Memproses CPL: ' . $cpl->kode_cpl . ', ID: ' . $cpl->id);
 
                 foreach ($cpl->cpmks as $cpmk) {
-                    Log::info('Processing CPMK: ' . $cpmk->kode_cpmk . ', ID: ' . $cpmk->id);
+                    Log::info('Memproses CPMK: ' . $cpmk->kode_cpmk . ', ID: ' . $cpmk->id);
 
                     foreach ($cpmk->mks as $mk) {
-                        Log::info('Processing MK: ' . $mk->kode_mk . ', ID: ' . $mk->id);
+                        Log::info('Memproses MK: ' . $mk->kode_mk . ', ID: ' . $mk->id);
 
-                        $nilaiCpmks = NilaiCpmk::where('mahasiswa_id', $mahasiswa_id)
+                        // Query nilai CPMK dengan filter KRS yang lebih fleksibel
+                        $query = NilaiCpmk::where('mahasiswa_id', $mahasiswa_id)
                             ->where('cpmk_id', $cpmk->id)
                             ->where('mk_id', $mk->id)
-                            ->whereExists(function ($query) use ($periode, $mahasiswa, $scope) {
+                            ->whereExists(function ($query) use ($periode, $mahasiswa, $scope, $mk) {
                                 $query->select(DB::raw(1))
                                     ->from('krs')
-                                    ->join('mk', 'krs.kode_mk', '=', 'mk.kode_mk')
-                                    ->whereColumn('mk.id', 'nilai_cpmk.mk_id')
-                                    ->where('krs.nim', $mahasiswa->nim);
-
+                                    ->where('krs.nim', $mahasiswa->nim)
+                                    ->where('krs.kode_mk', $mk->kode_mk);
                                 if ($scope === 'periode') {
                                     $query->where('krs.periode', $periode);
                                 }
-                            })
-                            ->get();
+                            });
 
-                        if ($nilaiCpmks->isNotEmpty()) {
-                            $nilaiAkhir = 0;
-                            $detailPenilaian = [];
+                        $nilaiCpmk = $query->first();
 
-                            // Hitung nilai akhir CPMK dan simpan detail penilaian
-                            foreach ($nilaiCpmks as $nilaiCpmk) {
-                                $penilaianKe = $nilaiCpmk->penilaian_ke;
-                                $nilai = $nilaiCpmk->nilai ?? 0;
-                                $bobot = $bobotPenilaian[$penilaianKe] ?? 0;
+                        Log::info('Query Nilai CPMK:', [
+                            'mahasiswa_id' => $mahasiswa_id,
+                            'cpmk_id' => $cpmk->id,
+                            'mk_id' => $mk->id,
+                            'found' => $nilaiCpmk ? true : false,
+                            'nilai' => $nilaiCpmk ? $nilaiCpmk->nilai : null,
+                        ]);
 
-                                $nilaiAkhir += $nilai * $bobot;
-
-                                $detailPenilaian[] = [
-                                    'penilaian_ke' => $penilaianKe,
-                                    'nilai' => $nilai,
-                                    'bobot' => $bobot * 100,
-                                    'kontribusi' => $nilai * $bobot,
-                                ];
-
-                                // Hitung CPL per tahap penilaian
-                                $bobotMk = $mk->pivot->bobot ?? 0;
-                                if ($bobotMk > 0) {
-                                    $scoreContribution = ($nilai * $bobotMk) / 100;
-
-                                    if (!isset($cplScoresByPenilaian[$penilaianKe])) {
-                                        $cplScoresByPenilaian[$penilaianKe] = 0;
-                                        $totalMaxWeightByPenilaian[$penilaianKe] = 0;
-                                    }
-
-                                    $cplScoresByPenilaian[$penilaianKe] += $scoreContribution;
-                                    $totalMaxWeightByPenilaian[$penilaianKe] += $bobotMk;
+                        // Periksa KRS
+                        $krsExists = Krs::where('nim', $mahasiswa->nim)
+                            ->where('kode_mk', $mk->kode_mk)
+                            ->where(function ($q) use ($periode, $scope) {
+                                if ($scope === 'periode') {
+                                    $q->where('periode', $periode);
                                 }
-                            }
+                            })
+                            ->exists();
+                        Log::info('KRS Exists:', [
+                            'nim' => $mahasiswa->nim,
+                            'kode_mk' => $mk->kode_mk,
+                            'periode' => $scope === 'periode' ? $periode : 'all',
+                            'exists' => $krsExists,
+                        ]);
 
+                        if ($nilaiCpmk) {
+                            $nilai = $nilaiCpmk->nilai ?? 0;
                             $bobotMk = $mk->pivot->bobot ?? 0;
 
+                            Log::info('Bobot MK:', [
+                                'mk_id' => $mk->id,
+                                'cpmk_id' => $cpmk->id,
+                                'bobot' => $bobotMk,
+                            ]);
+
                             if ($bobotMk > 0) {
-                                $scoreContribution = ($nilaiAkhir * $bobotMk) / 100;
+                                $scoreContribution = ($nilai * $bobotMk) / 100;
                                 $totalScore += $scoreContribution;
                                 $totalMaxWeight += $bobotMk;
 
@@ -134,80 +128,68 @@ class PenilaianCplController extends Controller
                                     'mk_deskripsi' => $mk->deskripsi,
                                     'cpmk_kode' => $cpmk->kode_cpmk,
                                     'cpmk_deskripsi' => $cpmk->deskripsi,
-                                    'nilai_akhir' => $nilaiAkhir,
+                                    'nilai' => $nilai,
                                     'bobot' => $bobotMk,
                                     'kontribusi' => $scoreContribution,
-                                    'detail_penilaian' => $detailPenilaian,
                                 ];
+                            } else {
+                                Log::warning('Bobot MK nol atau null untuk MK ID ' . $mk->id . ', CPMK ID ' . $cpmk->id);
                             }
-                        } else {
-                            Log::warning('No Nilai CPMK found for Mahasiswa ID ' . $mahasiswa_id . ', CPMK ID ' . $cpmk->id . ', MK ID ' . $mk->id);
                         }
                     }
                 }
 
+                // Hitung pencapaian CPL
                 $pencapaianCpl = $totalMaxWeight > 0 ? round(($totalScore / $totalMaxWeight) * 100, 2) : 0;
 
-                // Hitung pencapaian CPL untuk setiap tahap penilaian
-                $pencapaianCplByPenilaian = [];
-                foreach ($cplScoresByPenilaian as $penilaianKe => $score) {
-                    $totalMaxWeight = $totalMaxWeightByPenilaian[$penilaianKe] ?? 0;
-                    $pencapaianCplByPenilaian[$penilaianKe] = $totalMaxWeight > 0 ? round(($score / $totalMaxWeight) * 100, 2) : 0;
-                }
-
-                $cplData[] = [
-                    'kode_cpl' => $cpl->kode_cpl,
-                    'deskripsi' => $cpl->deskripsi,
-                    'nilai_cpl' => $totalScore,
-                    'pencapaian_cpl' => $pencapaianCpl,
-                    'pencapaian_cpl_by_penilaian' => $pencapaianCplByPenilaian,
-                    'contributions' => $contributions,
-                ];
-
-                // Hanya masukkan ke labels dan data jika ada kontribusi
-                if (!empty($pencapaianCplByPenilaian)) {
+                // Sertakan CPL jika ada kontribusi atau pencapaian > 0
+                if (!empty($contributions) || $pencapaianCpl > 0) {
+                    $cplData[] = [
+                        'kode_cpl' => $cpl->kode_cpl,
+                        'deskripsi' => $cpl->deskripsi,
+                        'pencapaian_cpl' => $pencapaianCpl,
+                        'contributions' => $contributions,
+                    ];
                     $labels[] = $cpl->kode_cpl;
-                    foreach ($penilaianKeys as $penilaianKe) {
-                        $dataByPenilaian[$penilaianKe][] = $pencapaianCplByPenilaian[$penilaianKe] ?? 0;
-                    }
+                    $data[] = $pencapaianCpl;
                 }
+
+                Log::info('CPL Processed:', [
+                    'kode_cpl' => $cpl->kode_cpl,
+                    'pencapaian_cpl' => $pencapaianCpl,
+                    'contributions_count' => count($contributions),
+                ]);
             }
 
-            // Siapkan datasets untuk grafik
-            $colors = [
-                1 => ['background' => 'rgba(0, 123, 255, 0.2)', 'border' => 'rgba(0, 123, 255, 1)'], // Penilaian 1
-                2 => ['background' => 'rgba(75, 192, 192, 0.2)', 'border' => 'rgba(75, 192, 192, 1)'], // Penilaian 2
-                3 => ['background' => 'rgba(255, 206, 86, 0.2)', 'border' => 'rgba(255, 206, 86, 1)'], // Penilaian 3
-            ];
+            Log::info('CPL Data:', ['cplData' => $cplData]);
 
-            foreach ($penilaianKeys as $penilaianKe) {
-                $datasets[] = [
-                    'label' => 'Pencapaian CPL (Penilaian ' . $penilaianKe . ')',
-                    'data' => $dataByPenilaian[$penilaianKe],
+            // Siapkan dataset untuk grafik radar
+            $datasets = [
+                [
+                    'label' => 'Pencapaian CPL (' . ($scope === 'periode' ? $periode : 'Semua Periode') . ')',
+                    'data' => $data,
                     'fill' => true,
-                    'backgroundColor' => $colors[$penilaianKe]['background'],
-                    'borderColor' => $colors[$penilaianKe]['border'],
+                    'backgroundColor' => 'rgba(0, 123, 255, 0.2)',
+                    'borderColor' => 'rgba(0, 123, 255, 1)',
                     'borderWidth' => 2,
                     'pointRadius' => 0,
                     'pointHoverRadius' => 0,
-                ];
-            }
-
-            // Tambahkan dataset untuk standar minimum
-            $datasets[] = [
-                'label' => 'Standar Minimum',
-                'data' => array_fill(0, count($labels), $minStandard),
-                'fill' => true,
-                'backgroundColor' => 'rgba(255, 99, 132, 0.2)',
-                'borderColor' => 'rgba(255, 99, 132, 1)',
-                'borderWidth' => 2,
-                'pointRadius' => 0,
-                'pointHoverRadius' => 0,
+                ],
+                [
+                    'label' => 'Standar Minimum',
+                    'data' => array_fill(0, count($labels), $minStandard),
+                    'fill' => false,
+                    'backgroundColor' => 'rgba(255, 99, 132, 0.2)',
+                    'borderColor' => 'rgba(255, 99, 132, 1)',
+                    'borderWidth' => 2,
+                    'pointRadius' => 0,
+                    'pointHoverRadius' => 0,
+                ],
             ];
 
-            return view('penilaian_cpl.index', compact('mahasiswa', 'cplData', 'labels', 'datasets', 'minStandard', 'periode', 'kodeMk', 'namaKelas', 'scope'));
+            return view('penilaian_cpl.index', compact('mahasiswa', 'cplData', 'labels', 'datasets', 'minStandard', 'periode', 'scope', 'periodeList'));
         } catch (\Exception $e) {
-            Log::error('Error in PenilaianCplController::index', ['error' => $e->getMessage()]);
+            Log::error('Error di PenilaianCplController::index', ['error' => $e->getMessage()]);
             return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

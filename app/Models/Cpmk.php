@@ -38,9 +38,14 @@ class Cpmk extends Model
     }
 
 
-    public function subcpmks()
+    public function teknikPenilaian()
     {
-        return $this->hasMany(SubCpmk::class, 'cpmk_id');
+        return $this->hasMany(TeknikPenilaian::class, 'cpmk_id');
+    }
+
+    public function nilaiTeknikPenilaian()
+    {
+        return $this->hasMany(NilaiTeknikPenilaian::class, 'cpmk_id');
     }
 
 }

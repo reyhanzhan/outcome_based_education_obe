@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class NilaiCpmk extends Model
+class NilaiTeknikPenilaian extends Model
 {
     use HasFactory;
 
-    protected $table = 'nilai_cpmk'; // Sesuaikan dengan nama tabel yang benar di database
+    protected $table = 'nilai_teknik_penilaian';
 
-    protected $fillable = ['mahasiswa_id', 'mk_id', 'cpmk_id', 'nilai'];
+    protected $fillable = ['mahasiswa_id', 'mk_id', 'cpmk_id', 'teknik', 'nilai'];
 
     public function mahasiswa()
     {
