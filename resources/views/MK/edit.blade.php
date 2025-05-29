@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="form-group">
                                 <label for="sks">SKS</label>
                                 <input type="number" 
@@ -52,7 +52,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <div class="form-group">
                                 <label for="wptwp">WP/TWP</label>
                                 <select class="form-control @error('wptwp') is-invalid @enderror" name="wptwp" id="wptwp">
@@ -66,7 +66,7 @@
                             </div>
                             
                             
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="card-footer">

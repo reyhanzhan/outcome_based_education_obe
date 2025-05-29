@@ -102,7 +102,7 @@
                                                             <!-- Tambahkan tombol Penilaian CPL -->
                                                             <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
                                                                 class="btn btn-warning btn-sm">
-                                                                <i class="fas fa-chart-pie"></i> Penilaian CPL
+                                                                <i class="fas fa-chart-pie"></i> Capaian Profil Lulusan
                                                             </a>
                                                             
                                                             <!-- Tombol Grafik -->

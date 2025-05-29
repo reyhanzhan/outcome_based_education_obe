@@ -21,8 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'profile_picture'
+        'jabatan',
+        'prodi', 
+        'nip_nidn',
+        'profile_picture',
+        'nip'
     ];
 
     /**
@@ -44,8 +47,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function dosen()
+    // public function dosen()
+    // {
+    //     return $this->hasOne(Dosen::class, 'nip', 'nip');
+    // }
+
+    public function mataKuliah()
     {
-        return $this->hasOne(Dosen::class, 'nip', 'nip');
+        return $this->hasMany(Kelas::class, 'nip_dosen','nip');
     }
 }

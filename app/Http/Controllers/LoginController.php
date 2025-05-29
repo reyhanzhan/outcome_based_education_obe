@@ -22,39 +22,94 @@ class LoginController extends Controller
         ]);
     }
 
+
+
+    // public function login(Request $request)
+    // {
+    //     // Validasi input
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required',
+    //     ], [
+    //         'email.required' => 'Email harus diisi',
+    //         'email.email' => 'Format email tidak valid',
+    //         'password.required' => 'Password harus diisi',
+    //     ]);
+
+    //     // Cek apakah email terdaftar
+    //     $user = User::where('email', $request->email)->first();
+    //     if (!$user) {
+    //         return back()
+    //             ->withInput($request->only('email'))
+    //             ->withErrors(['email' => 'Email tidak terdaftar']);
+    //     }
+
+    //     // Cek kredensial
+    //     if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+    //         $request->session()->regenerate();
+
+    //         // Jika login berhasil
+    //         if ($request->ajax()) {
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'redirect' => '/CPL/index'
+    //             ]);
+    //         }
+
+    //         return redirect()->intended('/CPL/index');
+    //     }
+
+    //     // Jika password salah
+    //     if ($request->ajax()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Password yang Anda masukkan salah'
+    //         ], 422);
+    //     }
+
+    //     return back()
+    //         ->withInput($request->only('email'))
+    //         ->withErrors(['password' => 'Password yang Anda masukkan salah']);
+    // }
+
     public function login(Request $request)
     {
         // Validasi input
         $request->validate([
-            'email' => 'required|email',
+            'nip' => 'required',
             'password' => 'required',
         ], [
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email tidak valid',
+            'nip.required' => 'NIP harus diisi',
             'password.required' => 'Password harus diisi',
         ]);
 
-        // Cek apakah email terdaftar
-        $user = User::where('email', $request->email)->first();
+        // Cek apakah NIP/NIDN terdaftar
+        $user = User::where('nip', $request->nip)->first();
         if (!$user) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'NIP tidak terdaftar'
+                ], 422);
+            }
             return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => 'Email tidak terdaftar']);
+                ->withInput($request->only('nip'))
+                ->withErrors(['nip' => 'NIP tidak terdaftar']);
         }
 
         // Cek kredensial
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        if (Auth::attempt(['nip' => $request->nip, 'password' => $request->password])) {
             $request->session()->regenerate();
 
             // Jika login berhasil
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'redirect' => '/CPL/index'
+                    'redirect' => '/dashboard' // Sesuaikan dengan halaman tujuan
                 ]);
             }
 
-            return redirect()->intended('/CPL/index');
+            return redirect()->intended('/dashboard');
         }
 
         // Jika password salah
@@ -66,7 +121,7 @@ class LoginController extends Controller
         }
 
         return back()
-            ->withInput($request->only('email'))
+            ->withInput($request->only('nip'))
             ->withErrors(['password' => 'Password yang Anda masukkan salah']);
     }
 

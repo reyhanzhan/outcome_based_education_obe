@@ -28,27 +28,15 @@ class MkController extends Controller
             'kode_mk' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'sks' => 'required|string',
-            'wptwp' => 'required|string',
 
         ]);
-
-        // Menyimpan data ke database
-        // Mk::create([
-        //     'kode_mk' => $request->kode_mk,
-        //     'deskripsi' => $request->deskripsi,
-        //     'sks' => $request->sks,
-        //     'wptwp' => $request->wptwp,
-
-        // ]);
 
         $mk = Mk::create([
             'kode_mk' => $request->kode_mk,
             'deskripsi' => $request->deskripsi,
             'sks' => $request->sks,
-            'wptwp' => $request->wptwp,
         ]);
 
-        // Redirect ke halaman daftar dengan pesan sukses
         // Redirect ke halaman daftar dengan pesan sukses dan ID baru
         return redirect()->route('mk.index')->with([
             'success' => 'Data MK berhasil ditambahkan!',
@@ -70,7 +58,7 @@ class MkController extends Controller
             'kode_mk' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'sks' => 'required|string',
-            'wptwp' => 'required|string',
+            // 'wptwp' => 'required|string',
 
         ]);
 
@@ -80,7 +68,7 @@ class MkController extends Controller
             'kode_mk' => $request->kode_mk,
             'deskripsi' => $request->deskripsi,
             'sks' => $request->sks,
-            'wptwp' => $request->wptwp,
+            // 'wptwp' => $request->wptwp,
         ]);
 
         // Redirect ke halaman daftar dengan pesan sukses

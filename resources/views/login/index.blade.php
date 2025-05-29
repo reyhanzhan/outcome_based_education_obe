@@ -11,13 +11,11 @@
     <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <link rel="icon" href="{{ asset('img/logo-uwp1.png') }}" type="image/x-icon" />
 
     <style>
         * {
-            outline: solid 1px green;
             outline: solid 1px transparent;
-
         }
 
         body {
@@ -28,7 +26,6 @@
             justify-content: center;
             align-items: center;
             background: url('{{ asset('img/pat_04.png') }}');
-
         }
 
         .login-container {
@@ -47,16 +44,13 @@
         .left-section {
             flex: 1;
             background: url('{{ asset('img/bg-login.jpg') }}') center/cover no-repeat;
-            /* Cover untuk menyesuaikan */
             height: 100%;
-            /* Menyesuaikan tinggi container */
             color: #fff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             padding: 2rem;
         }
-
 
         .left-section h1 {
             font-weight: 700;
@@ -105,6 +99,7 @@
             border-radius: 0;
             margin-bottom: 1.5rem;
             box-shadow: none;
+            padding-right: 2.5rem; /* Memberi ruang untuk ikon */
         }
 
         .form-control:focus {
@@ -113,17 +108,25 @@
             box-shadow: none;
         }
 
+        /* Menyembunyikan ikon mata bawaan browser (khusus Edge) */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
         .password-toggle {
             position: relative;
         }
 
         .password-toggle .toggle-icon {
             position: absolute;
-            top: 65%;
+            top: 50%;
             right: 10px;
             transform: translateY(-50%);
             cursor: pointer;
             color: #aaa;
+            font-size: 1.2rem; /* Ukuran ikon yang konsisten */
+            z-index: 1; /* Pastikan ikon di atas elemen lain */
         }
 
         .toggle-icon:hover {
@@ -150,9 +153,7 @@
 
         .right-section img {
             display: none;
-            /* Secara default gambar disembunyikan */
         }
-
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -166,9 +167,7 @@
 
             .right-section img {
                 display: block;
-                /* Gambar muncul hanya untuk layar di bawah 768px */
                 margin: 0 auto;
-                /* Mengatur gambar berada di tengah */
             }
         }
     </style>
@@ -200,11 +199,10 @@
 
             <form action="/login" method="POST">
                 @csrf
-                <!-- Email Input -->
                 <div class="mb-3">
-                    <label for="email"><i class="bx bx-envelope"></i> Email</label><span style="color:red">*</span>
-                    <input type="email" name="email" id="email" class="form-control"
-                        placeholder="Masukkan email yang terdaftar" value="{{ old('email') }}" required>
+                    <label for="nip"><i class="bx bx-id-card"></i> NIP</label><span style="color:red">*</span>
+                    <input type="text" name="nip" id="nip" class="form-control"
+                        placeholder="Masukkan NIP" value="{{ old('nip') }}" required>
                 </div>
 
                 <!-- Password Input -->
@@ -214,7 +212,6 @@
                         placeholder="Masukkan password" required>
                     <i class="bx bx-hide toggle-icon" id="togglePassword"></i>
                 </div>
-                <!-- Sign In Button -->
                 <button type="submit" class="btn btn-primary w-100">Sign In</button>
             </form>
         </div>
@@ -230,11 +227,11 @@
             const type = passwordField.type === 'password' ? 'text' : 'password';
             passwordField.type = type;
 
+            // Toggle ikon antara bx-show dan bx-hide
             this.classList.toggle('bx-show');
             this.classList.toggle('bx-hide');
         });
     </script>
-
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light"
-    style="height: 11.7vh; background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
+    style="height: 76px; background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item hamburger-menu">

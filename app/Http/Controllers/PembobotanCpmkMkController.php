@@ -22,19 +22,22 @@ class PembobotanCpmkMkController extends Controller
         $mks = collect();
 
         if ($user->role === 'dosen') {
-            $dosen = $user->dosen;
-            if (!$dosen) {
-                Log::warning('Dosen data not found for user: ' . $user->email);
-                return redirect()->route('home')->with('error', 'Data dosen tidak ditemukan.');
+            $nip = $user->nip;
+            if (!$nip) {
+                Log::warning('NIP not found for user: ' . $user->email);
+                return redirect()->route('/pembobotan')->with('error', 'NIP tidak ditemukan.');
             }
 
-            // Ambil mata kuliah yang diajar oleh dosen
-            $kelas = Kelas::where('nip', $dosen->nip)->with('mataKuliah')->get();
+            // Ambil mata kuliah yang diajar oleh dosen berdasarkan nip_dosen
+            $kelas = Kelas::where('nip_dosen', $nip)->with('mk')->get();
             $mks = $kelas->map(function ($item) {
-                return $item->mataKuliah;
+                return $item->mk;
             })->filter()->unique('id');
+
+            if ($mks->isEmpty()) {
+                Log::warning('No mata kuliah found for NIP: ' . $nip);
+            }
         } elseif ($user->role === 'kps') {
-            // KPS bisa mengakses semua mata kuliah
             $mks = Mk::whereHas('cpmks')->get();
         } else {
             Log::warning('Unauthorized role for user: ' . $user->email);
@@ -46,7 +49,6 @@ class PembobotanCpmkMkController extends Controller
 
         if ($defaultMk) {
             $cpmks = $defaultMk->cpmks()->withPivot('bobot')->get()->map(function ($cpmk) use ($defaultMk) {
-                // Ambil teknik penilaian untuk CPMK ini
                 $teknikPenilaian = DB::table('teknik_penilaian')
                     ->where('mk_id', $defaultMk->id)
                     ->where('cpmk_id', $cpmk->id)
@@ -77,23 +79,25 @@ class PembobotanCpmkMkController extends Controller
     public function searchMk(Request $request)
     {
         $user = Auth::user();
-        $query = $request->input('q'); // Parameter pencarian dari Select2
+        $query = $request->input('q');
 
         $mksQuery = Mk::query()->whereHas('cpmks');
 
-        // Filter berdasarkan role
         if ($user->role === 'dosen') {
-            $dosen = $user->dosen;
-            if (!$dosen) {
+            $nip = $user->nip;
+            if (!$nip) {
                 return response()->json(['results' => []], 403);
             }
 
-            $kelas = Kelas::where('nip', $dosen->nip)->with('mataKuliah')->get();
-            $mkIds = $kelas->pluck('mataKuliah.id')->filter()->unique();
+            $kelas = Kelas::where('nip_dosen', $nip)->with('mk')->get();
+            $mkIds = $kelas->pluck('mk.id')->filter()->unique();
             $mksQuery->whereIn('id', $mkIds);
+
+            if ($mkIds->isEmpty()) {
+                Log::warning('No mata kuliah IDs found for NIP: ' . $nip);
+            }
         }
 
-        // Pencarian berdasarkan kode_mk atau deskripsi
         if ($query) {
             $mksQuery->where(function ($q) use ($query) {
                 $q->where('kode_mk', 'like', "%{$query}%")
@@ -122,25 +126,23 @@ class PembobotanCpmkMkController extends Controller
             ])->findOrFail($mk_id);
 
             if ($user->role === 'dosen') {
-                $dosen = $user->dosen;
-                if (!$dosen) {
-                    Log::warning('Dosen data not found for user: ' . $user->email);
-                    return response()->json(['error' => 'Data dosen tidak ditemukan.'], 403);
+                $nip = $user->nip;
+                if (!$nip) {
+                    Log::warning('NIP not found for user: ' . $user->email);
+                    return response()->json(['error' => 'NIP tidak ditemukan.'], 403);
                 }
 
-                // Validasi bahwa dosen mengajar mata kuliah ini
-                $kelas = Kelas::where('nip', $dosen->nip)
-                    ->where('kode_matakuliah', $mk->kode_mk)
+                $kelas = Kelas::where('nip_dosen', $nip)
+                    ->where('kode_mk', $mk->kode_mk)
                     ->exists();
 
                 if (!$kelas) {
-                    Log::warning('Dosen ' . $dosen->nip . ' tidak mengajar MK: ' . $mk->kode_mk);
+                    Log::warning('Dosen ' . $nip . ' tidak mengajar MK: ' . $mk->kode_mk);
                     return response()->json(['error' => 'Anda tidak berhak mengakses pembobotan untuk mata kuliah ini.'], 403);
                 }
             }
 
             $cpmks = $mk->cpmks->map(function ($cpmk) use ($mk_id) {
-                // Ambil teknik penilaian untuk CPMK ini
                 $teknikPenilaian = DB::table('teknik_penilaian')
                     ->where('mk_id', $mk_id)
                     ->where('cpmk_id', $cpmk->id)
@@ -184,7 +186,6 @@ class PembobotanCpmkMkController extends Controller
                 'teknikData.*.bobot' => 'required|integer|min:0|max:100',
             ]);
 
-            // Hitung total bobot per CPMK berdasarkan teknik penilaian
             $teknikDataGrouped = collect($request->teknikData)->groupBy('cpmk_id');
             $bobotCpmkMap = [];
             foreach ($teknikDataGrouped as $cpmk_id => $teknikItems) {
@@ -192,7 +193,6 @@ class PembobotanCpmkMkController extends Controller
                 $bobotCpmkMap[$cpmk_id] = $totalBobotTeknik;
             }
 
-            // Validasi total bobot semua CPMK
             $totalBobot = array_sum($bobotCpmkMap);
             if ($totalBobot != 100) {
                 return response()->json(['error' => 'Total bobot semua CPMK harus 100%!'], 422);
@@ -203,26 +203,24 @@ class PembobotanCpmkMkController extends Controller
             $mk = Mk::findOrFail($mk_id);
 
             if ($user->role === 'dosen') {
-                $dosen = $user->dosen;
-                if (!$dosen) {
-                    Log::warning('Dosen data not found for user: ' . $user->email);
-                    return response()->json(['error' => 'Data dosen tidak ditemukan.'], 403);
+                $nip = $user->nip;
+                if (!$nip) {
+                    Log::warning('NIP not found for user: ' . $user->email);
+                    return response()->json(['error' => 'NIP tidak ditemukan.'], 403);
                 }
 
-                // Validasi bahwa dosen mengajar mata kuliah ini
-                $kelas = Kelas::where('nip', $dosen->nip)
-                    ->where('kode_matakuliah', $mk->kode_mk)
+                $kelas = Kelas::where('nip_dosen', $nip)
+                    ->where('kode_mk', $mk->kode_mk)
                     ->exists();
 
                 if (!$kelas) {
-                    Log::warning('Dosen ' . $dosen->nip . ' tidak mengajar MK: ' . $mk->kode_mk);
+                    Log::warning('Dosen ' . $nip . ' tidak mengajar MK: ' . $mk->kode_mk);
                     return response()->json(['error' => 'Anda tidak berhak mengatur pembobotan untuk mata kuliah ini.'], 403);
                 }
             }
 
             DB::beginTransaction();
             try {
-                // Simpan bobot CPMK (dihitung dari total bobot teknik penilaian)
                 foreach ($bobotCpmkMap as $cpmk_id => $bobot) {
                     $existing = DB::table('cpmk_mk')
                         ->where('mk_id', $mk_id)
@@ -252,17 +250,13 @@ class PembobotanCpmkMkController extends Controller
                     }
                 }
 
-                // Simpan teknik penilaian
-                // Hapus teknik penilaian lama untuk MK ini
                 DB::table('teknik_penilaian')->where('mk_id', $mk_id)->delete();
-
-                // Insert teknik penilaian baru
                 foreach ($request->teknikData as $teknik) {
                     $cpmk_id = $teknik['cpmk_id'];
                     $teknikNama = $teknik['teknik'];
                     $bobot = (int) $teknik['bobot'];
 
-                    if ($bobot > 0) { // Hanya simpan jika bobot lebih dari 0
+                    if ($bobot > 0) {
                         DB::table('teknik_penilaian')->insert([
                             'mk_id' => $mk_id,
                             'cpmk_id' => $cpmk_id,

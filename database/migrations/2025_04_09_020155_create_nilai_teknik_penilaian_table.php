@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('mahasiswa_id');
             $table->unsignedBigInteger('mk_id');
             $table->unsignedBigInteger('cpmk_id');
-            $table->string('teknik'); // Nama teknik: Kehadiran, Kuis, dll.
+            $table->string('teknik');
             $table->float('nilai', 5, 2); // Nilai teknik (0-100)
             $table->timestamps();
 

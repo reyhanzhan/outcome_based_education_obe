@@ -21,7 +21,7 @@
                                 <th>Kode MK</th>
                                 <th>Deskripsi</th>
                                 <th>SKS</th>
-                                <th>WPT/WP</th>
+                                {{-- <th>WPT/WP</th> --}}
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -32,7 +32,7 @@
                                     <td>{{ $item->kode_mk }}</td>
                                     <td>{{ $item->deskripsi }}</td>
                                     <td>{{ $item->sks }}</td>
-                                    <td>{{ $item->wptwp }}</td>
+                                    {{-- <td>{{ $item->wptwp }}</td> --}}
                                     <td class="text-center">
                                         <a href="{{ route('mk.edit', $item->id) }}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i>
@@ -56,7 +56,7 @@
                                 <th>Kode MK</th>
                                 <th>Deskripsi</th>
                                 <th>SKS</th>
-                                <th>WPT/WP</th>
+                                {{-- <th>WPT/WP</th> --}}
                                 <th>Aksi</th>
                             </tr>
                         </tfoot>

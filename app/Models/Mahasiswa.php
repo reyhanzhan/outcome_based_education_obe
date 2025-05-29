@@ -18,12 +18,6 @@ class Mahasiswa extends Model
         return $this->hasMany(Krs::class, 'nim', 'nim');
     }
 
-    
-    // public function nilaiCpmks()
-    // {
-    //     return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id','nim');
-    // }
-
     public function nilaiCpmks()
     {
         return $this->hasMany(NilaiCpmk::class, 'mahasiswa_id', 'id'); // Ubah 'nim' menjadi 'id'
@@ -41,7 +35,6 @@ class Mahasiswa extends Model
             ->withPivot('cpmk_id', 'nilai')
             ->withTimestamps();
     }
-
 
     public function calculateCpmkScore($cpmk_id, $mk_id)
     {

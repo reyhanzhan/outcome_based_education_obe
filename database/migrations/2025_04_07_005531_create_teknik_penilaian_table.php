@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('mk_id');
             $table->unsignedBigInteger('cpmk_id');
-            $table->string('teknik'); // Nama teknik penilaian (misalnya: Kuis, Tugas, UTS, UAS)
+            $table->string('teknik');
             $table->decimal('bobot', 5, 2); // Bobot dalam persen (misalnya: 5.00)
             $table->timestamps();
 

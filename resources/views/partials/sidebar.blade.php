@@ -82,7 +82,7 @@
 
     /* Tambahkan scroll pada sidebar */
     .sidebar {
-        height: calc(100vh - 60px); /* Sesuaikan dengan tinggi header/brand-link */
+        height: calc(100px - 60px); /* Sesuaikan dengan tinggi header/brand-link */
         overflow-y: auto; /* Aktifkan scroll vertikal */
         padding-bottom: 20px; /* Berikan padding bawah agar konten tidak terpotong */
     }

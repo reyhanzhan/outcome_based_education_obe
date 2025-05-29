@@ -43,17 +43,17 @@ class Cpmk_Cpl_Mk_Controller extends Controller
     }
 
 
-    public function pilihMetodePenilaian()
-    {
-        $pemetaan = DB::table('cpmk_cpl_mk')
-            ->join('cpmk', 'cpmk_cpl_mk.cpmk_id', '=', 'cpmk.id')
-            ->join('cpl', 'cpmk_cpl_mk.cpl_id', '=', 'cpl.id')
-            ->join('mk', 'cpmk_cpl_mk.mk_id', '=', 'mk.id')
-            ->select('cpmk_cpl_mk.id', 'cpl.kode_cpl', 'mk.kode_mk', 'cpmk.kode_cpmk')
-            ->get();
+    // public function pilihMetodePenilaian()
+    // {
+    //     $pemetaan = DB::table('cpmk_cpl_mk')
+    //         ->join('cpmk', 'cpmk_cpl_mk.cpmk_id', '=', 'cpmk.id')
+    //         ->join('cpl', 'cpmk_cpl_mk.cpl_id', '=', 'cpl.id')
+    //         ->join('mk', 'cpmk_cpl_mk.mk_id', '=', 'mk.id')
+    //         ->select('cpmk_cpl_mk.id', 'cpl.kode_cpl', 'mk.kode_mk', 'cpmk.kode_cpmk')
+    //         ->get();
 
-        return view('metode_penilaian.index', compact('pemetaan'));
-    }
+    //     return view('metode_penilaian.index', compact('pemetaan'));
+    // }
 
 
 }

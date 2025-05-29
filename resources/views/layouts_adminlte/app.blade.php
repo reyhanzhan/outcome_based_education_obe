@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'AdminLTE Dashboard')</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('/img/logo-uwp1.png') }}">
+    <title>@yield('title', 'Outcome Based Education')</title>
+    <link rel="icon" href="{{ asset('/img/logo-uwp1.png') }}" type="image/x-icon" />
 
     <!-- Google Font -->
     <link rel="stylesheet"
