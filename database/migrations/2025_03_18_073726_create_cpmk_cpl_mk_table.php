@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade'); // Relasi ke CPMK
             $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); 
-            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade'); 
+            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');
             $table->timestamps();
         });
     }

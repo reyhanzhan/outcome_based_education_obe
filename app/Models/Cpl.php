@@ -18,12 +18,19 @@ class Cpl extends Model
         'kode_cpl',
         'deskripsi',
         'kategori',
+        'kode_prodi',
     ];
+
+    public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
 
     public function pls()
     {
         return $this->belongsToMany(Pl::class, 'cpl_pl', 'cpl_id', 'pl_id');
     }
+    
 
     public function cpmks()
     {

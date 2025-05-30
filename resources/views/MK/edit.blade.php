@@ -36,6 +36,18 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label>Jenis MK</label>
+                        <select name="jenis_mk" class="form-control @error('jenis_mk') is-invalid @enderror" required>
+                            <option value="">-- Pilih Jenis MK --</option>
+                            <option value="Kuliah" {{ $mk->jenis_mk == 'Kuliah' ? 'selected' : '' }}>Kuliah</option>
+                            <option value="Skripsi" {{ $mk->jenis_mk == 'Skripsi' ? 'selected' : '' }}>Skripsi</option>
+                        </select>
+                        @error('jenis_mk')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -52,21 +64,7 @@
                                 @enderror
                             </div>
                         </div>
-                        {{-- <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="wptwp">WP/TWP</label>
-                                <select class="form-control @error('wptwp') is-invalid @enderror" name="wptwp" id="wptwp">
-                                    <option value="" selected disabled>Pilih TWP/WP</option>
-                                    <option value="TWP">TWP</option>
-                                    <option value="WP">WP</option>
-                                </select>
-                                @error('wptwp')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            
-                        </div> --}}
+                        
                     </div>
                 </div>
                 <div class="card-footer">

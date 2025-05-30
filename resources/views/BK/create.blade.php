@@ -31,7 +31,7 @@
                                   id="deskripsi" 
                                   name="deskripsi" 
                                   rows="3"
-                                  placeholder="Masukkan deskripsi Bahan Kajian')">{{ old('deskripsi') }}</textarea>
+                                  placeholder="Masukkan deskripsi Bahan Kajian">{{ old('deskripsi') }}</textarea>
                         @error('deskripsi')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

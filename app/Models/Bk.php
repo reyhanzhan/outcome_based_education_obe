@@ -14,7 +14,13 @@ class Bk extends Model
     protected $fillable = [
         'kode_bk',
         'deskripsi',
+        'kode_prodi',
     ];
+
+    public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
 
     public function cpls()
     {

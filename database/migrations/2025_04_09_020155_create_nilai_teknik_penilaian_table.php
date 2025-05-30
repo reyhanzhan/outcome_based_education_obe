@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('teknik');
             $table->float('nilai', 5, 2); // Nilai teknik (0-100)
             $table->timestamps();
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
 
             $table->foreign('mahasiswa_id')->references('id')->on('mahasiswa')->onDelete('cascade');
             $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');

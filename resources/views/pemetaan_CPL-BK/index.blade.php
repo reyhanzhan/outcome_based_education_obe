@@ -7,43 +7,47 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header bg-primary">
-                <h3 class="card-title">Pemetaan CPL - BK</h3>
+                <h3 class="card-title">Pemetaan CPL - BK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
             </div>
             <div class="card-body">
-                <div class="table-responsive"> <!-- ✅ Tambahkan ini agar tabel bisa di-scroll horizontal -->
-                    <table id="pemetaanTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th rowspan="2" class="align-middle text-center">No</th>
-                                <th rowspan="2" class="align-middle text-center">Kode BK</th>
-                                <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
-                            </tr>
-                            <tr>
-                                @foreach ($cpls as $cpl)
-                                    <th class="text-center">{{ $cpl->kode_cpl }}</th>
-                                @endforeach
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @foreach ($bks as $index => $bk)
+                @if ($cpls->isEmpty() || $bks->isEmpty())
+                    <div class="alert alert-warning">
+                        Tidak ada data CPL atau BK untuk dipetakan. Silakan tambahkan data terlebih dahulu.
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table id="pemetaanTable" class="table table-bordered table-hover">
+                            <thead>
                                 <tr>
-                                    <td class="text-center">{{ $index + 1 }}</td>
-                                    <td>{{ $bk->kode_bk }}</td>
-
+                                    <th rowspan="2" class="align-middle text-center">No</th>
+                                    <th rowspan="2" class="align-middle text-center">Kode BK</th>
+                                    <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
+                                </tr>
+                                <tr>
                                     @foreach ($cpls as $cpl)
-                                        <td class="text-center">
-                                            <input type="checkbox" class="update-mapping"
-                                                data-cpl="{{ $cpl->id }}"
-                                                data-bk="{{ $bk->id }}"
-                                                @if ($cpl->bks->contains($bk->id)) checked @endif>
-                                        </td>
+                                        <th class="text-center">{{ $cpl->kode_cpl }}</th>
                                     @endforeach
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div> <!-- ✅ Akhiran div table-responsive -->
+                            </thead>
+                            <tbody>
+                                @foreach ($bks as $index => $bk)
+                                    <tr>
+                                        <td class="text-center">{{ $index + 1 }}</td>
+                                        <td>{{ $bk->kode_bk }}</td>
+                                        @foreach ($cpls as $cpl)
+                                            <td class="text-center">
+                                                <input type="checkbox" class="update-mapping"
+                                                       data-cpl="{{ $cpl->id }}"
+                                                       data-bk="{{ $bk->id }}"
+                                                       @if (isset($pemetaan[$cpl->id . '-' . $bk->id])) checked @endif>
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -53,7 +57,6 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            // Inisialisasi DataTables
             var table = $("#pemetaanTable").DataTable({
                 "paging": true,
                 "lengthMenu": [10, 25, 50, 100],
@@ -79,11 +82,12 @@
                 }
             });
 
-            // Event delegation untuk checkbox agar tetap berfungsi setelah pagination
             $(document).on("change", ".update-mapping", function() {
                 var cpl_id = $(this).data("cpl");
                 var bk_id = $(this).data("bk");
-                var checked = $(this).prop("checked");
+                var checked = $(this).is(":checked");
+                var checkedValue = checked ? 1 : 0;
+                console.log("Sending data: ", { cpl_id, bk_id, checked: checkedValue });
 
                 $.ajax({
                     url: "{{ route('Cpl_Bk.update') }}",
@@ -92,20 +96,36 @@
                         _token: "{{ csrf_token() }}",
                         cpl_id: cpl_id,
                         bk_id: bk_id,
-                        checked: checked ? 1 : 0 // Kirim 1 jika dicentang, 0 jika dihapus
+                        checked: checkedValue
                     },
                     success: function(response) {
-                        if (checked) {
-                            toastr.success("Data berhasil disimpan!", "Sukses");
-                        } else {
-                            toastr.warning("Data telah dihapus!", "Perhatian");
+                        console.log("Success response: ", response);
+                        if (response.success) {
+                            toastr.success(response.success, "Sukses");
+                        } else if (response.error) {
+                            toastr.error(response.error, "Error");
+                            $(this).prop("checked", !checked);
                         }
                     },
-                    error: function() {
-                        toastr.error("Gagal menyimpan perubahan", "Error");
+                    error: function(xhr) {
+                        console.log("Error response: ", xhr.responseText);
+                        var errorMsg = xhr.responseJSON?.error || "Terjadi kesalahan saat memproses pemetaan.";
+                        toastr.error(errorMsg, "Error");
+                        $(this).prop("checked", !checked);
                     }
                 });
             });
         });
     </script>
+
+    @if (session('success'))
+        <script>
+            toastr.success('{{ session('success') }}', "Sukses", { position: 'top-right', timeOut: 5000 });
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            toastr.error('{{ session('error') }}', "Error", { position: 'top-right', timeOut: 5000 });
+        </script>
+    @endif
 @endsection

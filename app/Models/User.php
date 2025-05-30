@@ -25,7 +25,9 @@ class User extends Authenticatable
         'prodi', 
         'nip_nidn',
         'profile_picture',
-        'nip'
+        'nip',
+        'kode_prodi',
+        'role',
     ];
 
     /**
@@ -47,13 +49,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // public function dosen()
-    // {
-    //     return $this->hasOne(Dosen::class, 'nip', 'nip');
-    // }
-
     public function mataKuliah()
     {
         return $this->hasMany(Kelas::class, 'nip_dosen','nip');
+    }
+
+    public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
     }
 }

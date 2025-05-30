@@ -23,7 +23,14 @@ class Mk extends Model
         'deskripsi',
         'sks',
         'wptwp',
+        'jenis_mk',
+        'kode_prodi',
     ];
+
+     public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
 
     public function cpl()
     {

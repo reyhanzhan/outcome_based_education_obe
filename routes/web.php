@@ -108,6 +108,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-CPL.index');
     Route::post('/pemetaan_cpmkpl/update', [PemetaancpmkplController::class, 'update'])->name('pemetaan_CPMK-CPL.update');
     Route::post('/pemetaan-cpl-cpmk-mk/store', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('cpmk_cpl_mk.store');
+
+    Route::resource('pl', PlController::class);
 });
 
 // Rute untuk Pembobotan (untuk Dosen&Kps)

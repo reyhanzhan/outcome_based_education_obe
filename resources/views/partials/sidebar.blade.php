@@ -155,7 +155,8 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('pl.index') }}"
+                                <a href="{{ route('pl.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
+                                {{-- <a href="{{ route('pl.index') }}" --}}
                                     class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
                                     <i class="fas fa-user-graduate nav-icon"></i>
                                     <p>Profil Lulusan</p>
@@ -280,7 +281,8 @@
 
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('pembobotan.index') }}"
+                                <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
+                                {{-- <a href="{{ route('pembobotan.index') }}" --}}
                                     class="nav-link {{ strtolower(request()->segment(1)) == 'pembobotan' ? 'active' : '' }}">
                                     <i class="fas fa-balance-scale nav-icon"></i>
                                     <p>Pembobotan</p>

@@ -4,56 +4,90 @@ namespace App\Http\Controllers;
 
 use App\Models\Cpl;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Models\Cpmk;
+use App\Models\Mk;
 use Illuminate\Support\Facades\DB;
 
 class Cpmk_Cpl_Mk_Controller extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            if (Auth::user()->role !== 'kps') {
+                abort(403, 'Akses hanya untuk KPS.');
+            }
+            return $next($request);
+        });
+    }
 
     public function index()
     {
-        $cpls = Cpl::whereHas('cpmks', function ($query) {
-            $query->whereHas('mks'); // Pastikan CPMK memiliki MK terkait
-        })->with([
-                    'cpmks' => function ($query) {
-                        $query->whereHas('mks')->with([
-                            'mks' => function ($subQuery) {
-                                $subQuery->distinct(); // Ambil MK unik
-                            }
-                        ]);
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            if (!$kodeProdi) {
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
+            }
+
+            $cpls = Cpl::where('kode_prodi', $kodeProdi)
+                ->whereHas('cpmks', function ($query) use ($kodeProdi) {
+                    $query->where('kode_prodi', $kodeProdi)
+                        ->whereHas('mks', function ($subQuery) use ($kodeProdi) {
+                            $subQuery->where('kode_prodi', $kodeProdi);
+                        });
+                })
+                ->with([
+                    'cpmks' => function ($query) use ($kodeProdi) {
+                        $query->where('kode_prodi', $kodeProdi)
+                            ->whereHas('mks')
+                            ->with(['mks' => function ($subQuery) use ($kodeProdi) {
+                                $subQuery->where('kode_prodi', $kodeProdi)->distinct();
+                            }]);
                     },
-                ])->get();
-        return view('pemetaan_CPMK-CPL-MK.index', compact('cpls'));
+                ])
+                ->get();
+
+            Log::info("Successfully loaded pemetaan CPMK-CPL-MK for kode_prodi: {$kodeProdi}, CPL count: {$cpls->count()}");
+
+            return view('pemetaan_CPMK-CPL-MK.index', compact('cpls'));
+        } catch (\Exception $e) {
+            Log::error('Error loading pemetaan CPMK-CPL-MK: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
+        }
     }
 
     public function store(Request $request)
     {
-        $mappings = $request->input('mappings', []);
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            if (!$kodeProdi) {
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
+            }
 
-        foreach ($mappings as $mapping) {
-            [$cplId, $cpmkId, $mkId] = explode('|', $mapping);
+            $mappings = $request->input('mappings', []);
 
-            DB::table('cpmk_cpl_mk')->updateOrInsert(
-                ['cpl_id' => $cplId, 'cpmk_id' => $cpmkId, 'mk_id' => $mkId],
-                ['created_at' => now(), 'updated_at' => now()]
-            );
+            foreach ($mappings as $mapping) {
+                [$cplId, $cpmkId, $mkId] = explode('|', $mapping);
+
+                $cpl = Cpl::where('id', $cplId)->where('kode_prodi', $kodeProdi)->first();
+                $cpmk = Cpmk::where('id', $cpmkId)->where('kode_prodi', $kodeProdi)->first();
+                $mk = Mk::where('id', $mkId)->where('kode_prodi', $kodeProdi)->first();
+
+                if ($cpl && $cpmk && $mk) {
+                    DB::table('cpmk_cpl_mk')->updateOrInsert(
+                        ['cpl_id' => $cplId, 'cpmk_id' => $cpmkId, 'mk_id' => $mkId],
+                        ['created_at' => now(), 'updated_at' => now()]
+                    );
+                }
+            }
+
+            Log::info("Pemetaan CPMK-CPL-MK stored for kode_prodi: {$kodeProdi}, mappings count: " . count($mappings));
+            return redirect()->route('teknik_penilaian.index')->with('success', 'Pemetaan berhasil disimpan!');
+        } catch (\Exception $e) {
+            Log::error('Error storing pemetaan CPMK-CPL-MK: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan pemetaan: ' . $e->getMessage());
         }
-
-        return redirect()->route('teknik_penilaian.index')->with('success', 'Pemetaan berhasil disimpan!');
     }
-
-
-    // public function pilihMetodePenilaian()
-    // {
-    //     $pemetaan = DB::table('cpmk_cpl_mk')
-    //         ->join('cpmk', 'cpmk_cpl_mk.cpmk_id', '=', 'cpmk.id')
-    //         ->join('cpl', 'cpmk_cpl_mk.cpl_id', '=', 'cpl.id')
-    //         ->join('mk', 'cpmk_cpl_mk.mk_id', '=', 'mk.id')
-    //         ->select('cpmk_cpl_mk.id', 'cpl.kode_cpl', 'mk.kode_mk', 'cpmk.kode_cpmk')
-    //         ->get();
-
-    //     return view('metode_penilaian.index', compact('pemetaan'));
-    // }
-
-
 }

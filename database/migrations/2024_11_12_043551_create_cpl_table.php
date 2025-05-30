@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('kode_cpl');
             $table->string('deskripsi');
             $table->string('kategori');
+            $table->string('kode_prodi', 50)->nullable();
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
         });
     }
 

@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('nip')->unique()->nullable(); // Kolom NIP tanpa after()
             $table->enum('role', ['dosen', 'kps'])->default('dosen'); // Kolom role tanpa after()
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();
         });

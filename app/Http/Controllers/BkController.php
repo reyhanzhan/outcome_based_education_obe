@@ -4,80 +4,119 @@ namespace App\Http\Controllers;
 
 use App\Models\Bk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class BkController extends Controller
 {
-    // Method untuk menampilkan semua data CPL
+    public function __construct()
+    {
+        $this->middleware('auth'); // Pastikan hanya user yang login yang bisa akses
+        $this->middleware(function ($request, $next) {
+            if (Auth::user()->role !== 'kps') {
+                abort(403, 'Akses hanya untuk KPS.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
-        // Mengambil semua data CPL dari model
-        $bk = Bk::all();
-
-        // Mengirim data ke view CPL.index
+        $kodeProdi = Auth::user()->kode_prodi;
+        $bk = Bk::where('kode_prodi', $kodeProdi)->get();
         return view('BK.index', compact('bk'));
     }
 
     public function create()
     {
-        // Mengarahkan ke halaman create
         return view('BK.create');
     }
 
     public function store(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'kode_bk' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            if (!$kodeProdi) {
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
+            }
 
-        ]);
+            $request->validate([
+                'kode_bk' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('bk')->where(function ($query) use ($kodeProdi) {
+                        return $query->where('kode_prodi', $kodeProdi);
+                    }),
+                ],
+                'deskripsi' => 'required|string',
+            ]);
 
-        // Menyimpan data ke database
-        Bk::create([
-            'kode_bk' => $request->kode_bk,
-            'deskripsi' => $request->deskripsi,
+            $data = [
+                'kode_bk' => $request->kode_bk,
+                'deskripsi' => $request->deskripsi,
+                'kode_prodi' => $kodeProdi,
+            ];
 
-        ]);
+            $bk = Bk::create($data);
 
-        // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('bk.index')->with('success', 'Data berhasil ditambahkan');
+            if (!$bk) {
+                throw new \Exception('Gagal menyimpan data BK.');
+            }
+
+            return redirect()->route('bk.index')->with('success', 'Data BK berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 
     public function edit($id)
     {
-        // Menemukan data berdasarkan ID dan mengarahkan ke halaman edit
-        $bk = Bk::findOrFail($id);
+        $kodeProdi = Auth::user()->kode_prodi;
+        $bk = Bk::where('kode_prodi', $kodeProdi)->findOrFail($id);
         return view('BK.edit', compact('bk'));
     }
 
     public function update(Request $request, $id)
     {
-        // Validasi input
-        $request->validate([
-            'kode_bk' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            $bk = Bk::where('kode_prodi', $kodeProdi)->findOrFail($id);
 
-        ]);
+            $request->validate([
+                'kode_bk' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('bk')->where(function ($query) use ($kodeProdi) {
+                        return $query->where('kode_prodi', $kodeProdi);
+                    })->ignore($bk->id),
+                ],
+                'deskripsi' => 'required|string',
+            ]);
 
-        // Menemukan data berdasarkan ID dan memperbarui data
-        $bk = Bk::findOrFail($id);
-        $bk->update([
-            'kode_bk' => $request->kode_bk,
-            'deskripsi' => $request->deskripsi,
+            $bk->update([
+                'kode_bk' => $request->kode_bk,
+                'deskripsi' => $request->deskripsi,
+                'kode_prodi' => $kodeProdi,
+            ]);
 
-        ]);
-
-        // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('bk.index')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('bk.index')->with('success', 'Data BK berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
-        // Menemukan data berdasarkan ID dan menghapusnya
-        $bk = Bk::findOrFail($id);
-        $bk->delete();
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            $bk = Bk::where('kode_prodi', $kodeProdi)->findOrFail($id);
+            $bk->delete();
 
-        // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('bk.index')->with('success', 'Data berhasil dihapus');
+            return redirect()->route('bk.index')->with('success', 'Data BK berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
     }
 }

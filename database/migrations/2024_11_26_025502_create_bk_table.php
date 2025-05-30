@@ -16,6 +16,8 @@ return new class extends Migration
             $table->timestamps();
             $table->string('kode_bk');
             $table->string('deskripsi');
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
         });
     }
 

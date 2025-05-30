@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('teknik');
             $table->decimal('bobot', 5, 2); // Bobot dalam persen (misalnya: 5.00)
             $table->timestamps();
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
 
             // Foreign keys
             $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');

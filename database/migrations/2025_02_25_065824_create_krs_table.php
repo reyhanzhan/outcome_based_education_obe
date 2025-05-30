@@ -11,7 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->string('periode');
             // 🔥 Foreign Key ke `program_studi.kode_prodi`
-            $table->string('kode_prodi');
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
             // 🔥 Foreign Key ke `mk.kode_mk`
             $table->string('kode_mk');
             // 🔥 Foreign Key ke `kurikulum.tahun`

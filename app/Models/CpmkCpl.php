@@ -14,9 +14,15 @@ class CpmkCpl extends Model
     protected $fillable = [
         'cpmk_id',
         'cpl_id',
+        'kode_prodi',
     ];
 
     public $timestamps = false; // Jika tabel pivot tidak memiliki timestamps
+
+    public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
 
     // Relasi ke CPMK
     public function cpmk()

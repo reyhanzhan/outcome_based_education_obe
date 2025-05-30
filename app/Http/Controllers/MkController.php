@@ -2,86 +2,134 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Mk;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class MkController extends Controller
 {
-    /// Method untuk menampilkan semua data CPL
-    public function index(Request $request)
+    public function __construct()
     {
-        $mk = Mk::all();
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            if (Auth::user()->role !== 'kps') {
+                abort(403, 'Akses hanya untuk KPS.');
+            }
+            return $next($request);
+        });
+    }
+
+    public function index()
+    {
+        $kodeProdi = Auth::user()->kode_prodi;
+        $mk = Mk::where('kode_prodi', $kodeProdi)->get();
         return view('MK.index', compact('mk'));
     }
 
-
     public function create()
     {
-        // Mengarahkan ke halaman create
         return view('MK.create');
     }
 
     public function store(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'kode_mk' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'sks' => 'required|string',
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            if (!$kodeProdi) {
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
+            }
 
-        ]);
+            $request->validate([
+                'kode_mk' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('mk')->where(function ($query) use ($kodeProdi) {
+                        return $query->where('kode_prodi', $kodeProdi);
+                    }),
+                ],
+                'deskripsi' => 'required|string',
+                'sks' => 'required|integer|min:1',
+                'jenis_mk' => 'required|in:Kuliah,Skripsi', // Validasi untuk jenis_mk
+            ]);
 
-        $mk = Mk::create([
-            'kode_mk' => $request->kode_mk,
-            'deskripsi' => $request->deskripsi,
-            'sks' => $request->sks,
-        ]);
+            $data = [
+                'kode_mk' => $request->kode_mk,
+                'deskripsi' => $request->deskripsi,
+                'sks' => $request->sks,
+                'jenis_mk' => $request->jenis_mk, // Tambahkan jenis_mk
+                'kode_prodi' => $kodeProdi,
+            ];
 
-        // Redirect ke halaman daftar dengan pesan sukses dan ID baru
-        return redirect()->route('mk.index')->with([
-            'success' => 'Data MK berhasil ditambahkan!',
-            'new_id' => $mk->id // Mendapatkan ID dari data yang baru dibuat
-        ]);
+            
+
+            $mk = Mk::create($data);
+
+            if (!$mk) {
+                throw new \Exception('Gagal menyimpan data MK.');
+            }
+
+            return redirect()->route('mk.index')->with([
+                'success' => 'Data MK berhasil ditambahkan!',
+                'new_id' => $mk->id,
+            ]);
+        } catch (\Exception $e) {
+            back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 
     public function edit($id)
     {
-        // Menemukan data berdasarkan ID dan mengarahkan ke halaman edit
-        $mk = Mk::findOrFail($id);
+        $kodeProdi = Auth::user()->kode_prodi;
+        $mk = Mk::where('kode_prodi', $kodeProdi)->findOrFail($id);
         return view('MK.edit', compact('mk'));
     }
 
     public function update(Request $request, $id)
     {
-        // Validasi input
-        $request->validate([
-            'kode_mk' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'sks' => 'required|string',
-            // 'wptwp' => 'required|string',
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            $mk = Mk::where('kode_prodi', $kodeProdi)->findOrFail($id);
 
-        ]);
+            $request->validate([
+                'kode_mk' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('mk')->where(function ($query) use ($kodeProdi) {
+                        return $query->where('kode_prodi', $kodeProdi);
+                    })->ignore($mk->id),
+                ],
+                'deskripsi' => 'required|string',
+                'sks' => 'required|integer|min:1',
+                'jenis_mk' => 'required|in:Kuliah,Skripsi', // Validasi untuk jenis_mk
+            ]);
 
-        // Menemukan data berdasarkan ID dan memperbarui data
-        $mk = Mk::findOrFail($id);
-        $mk->update([
-            'kode_mk' => $request->kode_mk,
-            'deskripsi' => $request->deskripsi,
-            'sks' => $request->sks,
-            // 'wptwp' => $request->wptwp,
-        ]);
+            $mk->update([
+                'kode_mk' => $request->kode_mk,
+                'deskripsi' => $request->deskripsi,
+                'sks' => $request->sks,
+                'jenis_mk' => $request->jenis_mk, // Tambahkan jenis_mk
+                'kode_prodi' => $kodeProdi,
+            ]);
 
-        // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('mk.index')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('mk.index')->with('success', 'Data MK berhasil diperbarui');
+        } catch (\Exception $e) {
+            back()->with('error', 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
-        // Menemukan data berdasarkan ID dan menghapusnya
-        $mk = Mk::findOrFail($id);
-        $mk->delete();
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            $mk = Mk::where('kode_prodi', $kodeProdi)->findOrFail($id);
+            $mk->delete();
 
-        // Redirect ke halaman daftar dengan pesan sukses
-        return redirect()->route('mk.index')->with('success', 'Data berhasil dihapus');
+            return redirect()->route('mk.index')->with('success', 'Data MK berhasil dihapus');
+        } catch (\Exception $e) {
+            back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
     }
 }

@@ -23,6 +23,8 @@ return new class extends Migration
             $table->foreign('mahasiswa_id')->references('id')->on('mahasiswa')->onDelete('cascade');
             $table->foreign('mk_id')->references('id')->on('mk')->onDelete('cascade');
             $table->foreign('cpmk_id')->references('id')->on('cpmk')->onDelete('cascade');
+            $table->string('kode_prodi', 50);
+            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
             // Perbarui constraint unik untuk menyertakan penilaian_ke
             $table->unique(['mahasiswa_id', 'mk_id', 'cpmk_id', 'penilaian_ke'], 'nilai_cpmk_unique_with_penilaian_ke');
         });

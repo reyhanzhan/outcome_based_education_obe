@@ -7,7 +7,6 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    {{-- <h3 class="card-title">Daftar Profil Lulusan</h3> --}}
                     <a href="{{ route('pl.create') }}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Tambah Profil Lulusan
                     </a>
@@ -25,7 +24,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($pl as $index => $item)
+                                @foreach ($pls as $index => $item)
                                     <tr>
                                         <td class="text-center">{{ $index + 1 }}</td>
                                         <td>{{ $item->kode_pl }}</td>

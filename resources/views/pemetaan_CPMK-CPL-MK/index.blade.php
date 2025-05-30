@@ -10,65 +10,68 @@
     }
 
     .table-bordered th, .table-bordered td {
-        border: 2px solid #dee2e6 !important; /* Garis tabel lebih tebal dan kontras */
+        border: 2px solid #dee2e6 !important;
         vertical-align: middle;
         text-align: center;
-        padding: 12px; /* Padding lebih besar untuk kejelasan */
-        font-size: 0.9rem; /* Ukuran font sedikit lebih kecil untuk tabel besar */
-        color: #000; /* Warna teks hitam di semua sel */
+        padding: 12px;
+        font-size: 0.9rem;
+        color: #000;
     }
 
     .table-bordered thead th {
-        background-color: #e9ecef; /* Latar belakang abu-abu muda untuk header */
-        color: #000; /* Warna teks hitam di header */
+        background-color: #e9ecef;
+        color: #000;
         font-weight: bold;
     }
 
     .table-bordered tbody tr:nth-child(even) {
-        background-color: #f8f9fa; /* Warna abu-abu sangat muda untuk baris genap */
+        background-color: #f8f9fa;
     }
 
     .table-bordered tbody tr:nth-child(odd) {
-        background-color: #ffffff; /* Warna putih untuk baris ganjil */
+        background-color: #ffffff;
     }
 
     .rowspan-header {
-       
         /* font-weight: bold;
         color: #000; */
     }
 
     .table-responsive {
-        overflow-x: auto; /* Memastikan tabel scroll horizontal jika terlalu lebar */
+        overflow-x: auto;
     }
 
     .no-mk {
-        color: #6c757d; /* Warna abu-abu untuk data kosong */
+        color: #6c757d;
         font-style: italic;
     }
 
-    /* Responsive untuk perangkat kecil */
     @media (max-width: 768px) {
         .table-bordered th, .table-bordered td {
-            font-size: 0.8rem; /* Ukuran font lebih kecil di perangkat kecil */
-            padding: 8px; /* Padding lebih kecil di perangkat kecil */
+            font-size: 0.8rem;
+            padding: 8px;
         }
 
         .table-bordered th {
-            white-space: nowrap; /* Hindari patah baris di header */
+            white-space: nowrap;
         }
     }
 </style>
 @endsection
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid">
-            <div class="card">
-                <div class="card-header bg-primary">
-                    <h3 class="card-title">Pemetaan CPL - CPMK - MK</h3>
-                </div>
-                <div class="card-body">
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <h3 class="card-title">Pemetaan CPL - CPMK - MK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
+            </div>
+            <div class="card-body">
+                @if ($cpls->isEmpty())
+                    <div class="alert alert-warning">
+                        Tidak ada data CPL, CPMK, atau MK untuk ditampilkan. Silakan tambahkan data terlebih dahulu.
+                    </div>
+                @else
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
                             <thead>
@@ -83,7 +86,6 @@
                             <tbody>
                                 @foreach ($cpls as $cpl)
                                     @php
-                                        // Hitung total baris untuk CPMK dan MK
                                         $filteredCpmks = $cpl->cpmks;
                                         $totalRows = $filteredCpmks->reduce(function ($carry, $cpmk) {
                                             return $carry + max($cpmk->mks->count(), 1);
@@ -119,10 +121,11 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
-    </section>
+    </div>
+</section>
 @endsection
 
 @section('scripts')
@@ -134,4 +137,15 @@
         });
     });
 </script>
+
+@if (session('success'))
+    <script>
+        toastr.success('{{ session('success') }}', "Sukses", { position: 'top-right', timeOut: 5000 });
+    </script>
+@endif
+@if (session('error'))
+    <script>
+        toastr.error('{{ session('error') }}', "Error", { position: 'top-right', timeOut: 5000 });
+    </script>
+@endif
 @endsection

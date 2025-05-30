@@ -15,7 +15,13 @@ class Cpmk extends Model
         'kode_cpmk',
         'deskripsi',
         'min_standard',
+        'kode_prodi',
     ];
+
+     public function programStudi()
+    {
+        return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
+    }
 
     public function cpls()
     {
