@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header bg-primary">
-                    <h3 class="card-title">Pembobotan CPMK - MK</h3>
+                    <h3 class="card-title">Pembobotan CPMK - MK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -48,15 +48,25 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach (['Partisipasi(Kuis)', 'Observasi(Praktik/Tugas)', 'Unjuk Kerja(Presentasi)', 'Tes Tulis(UTS)', 'Tes Tulis(UAS)', 'Tes Lisan(Tugas Kelompok)'] as $teknik)
+                                                        @php
+                                                            $teknikList = [
+                                                                'Partisipasi(Kuis)' => 'Kuis',
+                                                                'Observasi(Praktik/Tugas)' => 'Tugas',
+                                                                'Unjuk Kerja(Presentasi)' => 'Presentasi',
+                                                                'Tes Tulis(UTS)' => 'UTS',
+                                                                'Tes Tulis(UAS)' => 'UAS',
+                                                                'Tes Lisan(Tugas Kelompok)' => 'Tugas Kelompok',
+                                                            ];
+                                                        @endphp
+                                                        @foreach ($teknikList as $label => $value)
                                                             <tr>
-                                                                <td>{{ $teknik }}</td>
+                                                                <td>{{ $label }}</td>
                                                                 <td>
                                                                     <input type="number"
                                                                         class="teknik-bobot-input form-control"
                                                                         data-cpmk="{{ $cpmk->id }}"
-                                                                        data-teknik="{{ $teknik }}"
-                                                                        value="{{ $cpmk->teknik_penilaian[$teknik] ?? 0 }}"
+                                                                        data-teknik="{{ $value }}"
+                                                                        value="{{ $cpmk->teknik_penilaian[$value] ?? 0 }}"
                                                                         min="0" max="100" step="1">
                                                                 </td>
                                                             </tr>
@@ -96,7 +106,24 @@
             $('#mkSelect').select2({
                 placeholder: "-- Pilih Mata Kuliah --",
                 allowClear: false,
-                width: '100%'
+                width: '100%',
+                ajax: {
+                    url: '{{ route('pembobotan.search-mk') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            _token: '{{ csrf_token() }}'
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
             });
 
             updateTotalBobot(); // Hitung total bobot saat halaman dimuat
@@ -105,16 +132,13 @@
                 var mk_id = $(this).val();
                 if (mk_id) {
                     $.ajax({
-                        url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id',
-                            mk_id),
+                        url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id', mk_id),
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
                             let html = '';
                             if (response.length > 0) {
                                 response.forEach(function(cpmk) {
-                                    console.log('CPMK Teknik Penilaian:', cpmk
-                                        .teknik_penilaian); // Debugging
                                     html += `
                                     <tr class="cpmk-row">
                                         <td>
@@ -136,7 +160,6 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    
                                                     <tr>
                                                         <td>Partisipasi(Kuis)</td>
                                                         <td><input type="number" class="teknik-bobot-input form-control" data-cpmk="${cpmk.id}" data-teknik="Kuis" value="${cpmk.teknik_penilaian?.Kuis || 0}" min="0" max="100" step="1"></td>
@@ -169,8 +192,7 @@
                                 `;
                                 });
                             } else {
-                                html =
-                                    '<tr><td colspan="2" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
+                                html = '<tr><td colspan="2" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
                             }
                             $('#cpmkTableBody').html(html);
                             updateTotalBobot();
@@ -246,8 +268,7 @@
                             $('#mkSelect').trigger('change'); // Reload data setelah simpan
                         },
                         error: function(xhr) {
-                            toastr.error('Gagal menyimpan data! ' + (xhr.responseJSON?.error ||
-                                ''));
+                            toastr.error('Gagal menyimpan data! ' + (xhr.responseJSON?.error || ''));
                         }
                     });
                 }

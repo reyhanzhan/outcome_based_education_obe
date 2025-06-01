@@ -90,24 +90,51 @@
                                                     <div class="action-buttons">
                                                         <!-- Tombol Input Nilai -->
                                                         <a href="{{ route('nilai.mahasiswa.index', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
-                                                            class="btn btn-primary btn-sm">
+                                                            class="btn btn-primary btn-sm {{ request()->routeIs('nilai.mahasiswa.index') && (string) request()->segment(2) === (string) ($mhs->nim ?? '') && (string) request()->segment(4) === (string) $selectedKelas->kode_mk ? 'active' : '' }}">
                                                             <i class="fas fa-edit"></i> Input Nilai
                                                         </a>
                                                         <!-- Tombol Penilaian CPMK -->
                                                         @if (isset($mhs->id) && isset($selectedKelas->id))
+                                                            <!-- Debugging -->
+                                                            @if (request()->routeIs('penilaian.cpmk.index'))
+                                                                <div style="color: red;">
+                                                                    Debug CPMK: Segment 3 = {{ request()->segment(3) }},
+                                                                    $mhs->id = {{ $mhs->id }}
+                                                                    ({{ gettype($mhs->id) }}),
+                                                                    Segment 4 = {{ request()->segment(4) }},
+                                                                    $selectedKelas->id = {{ $selectedKelas->id }}
+                                                                    ({{ gettype($selectedKelas->id) }})
+                                                                </div>
+                                                            @endif
                                                             <a href="{{ route('penilaian.cpmk.index', ['mahasiswa_id' => $mhs->id, 'mk_id' => $selectedKelas->id]) }}"
-                                                                class="btn btn-info btn-sm">
+                                                                class="btn btn-info btn-sm {{ request()->routeIs('penilaian.cpmk.index') && (string) request()->segment(3) === (string) $mhs->id && (string) request()->segment(4) === (string) $selectedKelas->id ? 'active' : '' }}">
                                                                 <i class="fas fa-chart-bar"></i> Penilaian CPMK
                                                             </a>
                                                             <!-- Tambahkan tombol Penilaian CPL -->
+                                                            @if (request()->routeIs('penilaian.cpl.index'))
+                                                                <div style="color: red;">
+                                                                    Debug CPL: Segment 3 = {{ request()->segment(3) }},
+                                                                    $mhs->id = {{ $mhs->id }}
+                                                                    ({{ gettype($mhs->id) }})
+                                                                </div>
+                                                            @endif
                                                             <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
-                                                                class="btn btn-warning btn-sm">
+                                                                class="btn btn-warning btn-sm {{ request()->routeIs('penilaian.cpl.index') && (string) request()->segment(3) === (string) $mhs->id ? 'active' : '' }}">
                                                                 <i class="fas fa-chart-pie"></i> Capaian Profil Lulusan
                                                             </a>
-                                                            
                                                             <!-- Tombol Grafik -->
+                                                            @if (request()->routeIs('nilai.mahasiswa.grafik'))
+                                                                <div style="color: red;">
+                                                                    Debug Grafik: Segment 2 = {{ request()->segment(2) }},
+                                                                    $mhs->nim = {{ $mhs->nim ?? '' }}
+                                                                    ({{ gettype($mhs->nim) }}),
+                                                                    Segment 4 = {{ request()->segment(4) }},
+                                                                    $selectedKelas->kode_mk = {{ $selectedKelas->kode_mk }}
+                                                                    ({{ gettype($selectedKelas->kode_mk) }})
+                                                                </div>
+                                                            @endif
                                                             <a href="{{ route('nilai.mahasiswa.grafik', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
-                                                                class="btn btn-success btn-sm">
+                                                                class="btn btn-success btn-sm {{ request()->routeIs('nilai.mahasiswa.grafik') && (string) request()->segment(2) === (string) ($mhs->nim ?? '') && (string) request()->segment(4) === (string) $selectedKelas->kode_mk ? 'active' : '' }}">
                                                                 <i class="fas fa-chart-line"></i> Grafik Cpmk
                                                             </a>
                                                         @else
@@ -115,7 +142,7 @@
                                                                 <i class="fas fa-chart-bar"></i> Penilaian CPMK (Data Tidak
                                                                 Lengkap)
                                                             </button>
-                                                            
+
                                                             <button class="btn btn-success btn-sm" disabled>
                                                                 <i class="fas fa-chart-line"></i> Grafik (Data Tidak
                                                                 Lengkap)
@@ -178,7 +205,7 @@
                             // Isi dropdown dengan data dari AJAX
                             response.options.forEach(function(option) {
                                 let newOption = new Option(option.text, option.id, false,
-                                false);
+                                    false);
                                 kelasSelect.append(newOption);
                                 if (option.id === currentValue) {
                                     newOption.selected = true;
@@ -251,6 +278,21 @@
     <!-- CSS DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     <style>
+        .btn.active {
+            background-color: #004680 !important;
+            color: white !important;
+            border-color: #004680 !important;
+            box-shadow: none !important;
+            /* Menghindari shadow default Bootstrap */
+        }
+
+        /* Hover effect untuk tombol aktif */
+        .btn.active:hover {
+            background-color: #003559 !important;
+            color: white !important;
+            border-color: #003559 !important;
+        }
+
         .form-group .select2-container {
             width: 100% !important;
         }

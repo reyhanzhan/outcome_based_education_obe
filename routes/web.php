@@ -162,21 +162,3 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
 Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/penilaian/cpl/{mahasiswa_id}', [PenilaianCplController::class, 'index'])->name('penilaian.cpl.index');
 });
-
-// Route::middleware(['auth', 'role:dosen|kps'])->group(function () { // Ubah ke 'dosen|kps' untuk konsistensi
-//     // Route untuk memilih periode dan kelas (Penilaian CPL)
-//     Route::get('/penilaian/cpl/choose-periode-dan-kelas', [PenilaianCplController::class, 'choosePeriodeDanKelas'])
-//         ->name('penilaian.cpl.choose_periode_dan_kelas');
-
-//     // Route untuk menampilkan daftar mahasiswa berdasarkan periode dan kelas
-//     Route::get('/penilaian/cpl/choose-mahasiswa', [PenilaianCplController::class, 'chooseMahasiswa'])
-//         ->name('penilaian.cpl.choose_mahasiswa');
-
-//     // Route untuk menampilkan penilaian CPL mahasiswa
-//     Route::get('/penilaian/cpl/{mahasiswa_id}', [PenilaianCplController::class, 'index'])
-//         ->name('penilaian.cpl.index');
-
-//     // Route untuk mendapatkan kelas berdasarkan periode (Penilaian CPL)
-//     Route::get('/penilaian/cpl/get-kelas-by-periode', [PenilaianCplController::class, 'getKelasByPeriode'])
-//         ->name('penilaian.cpl.get_kelas_by_periode');
-// });

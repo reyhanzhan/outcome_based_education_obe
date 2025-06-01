@@ -64,14 +64,14 @@
     }
 
     /* Warna parent menu saat salah satu child aktif */
-    .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link {
+    .nav-sidebar .nav-item.has-treeview.menu-open>.nav-link {
         background-color: #dcdcdc !important;
         color: #222 !important;
         font-weight: bold;
     }
 
     /* Ikon parent menu saat menu terbuka */
-    .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link i {
+    .nav-sidebar .nav-item.has-treeview.menu-open>.nav-link i {
         color: #222 !important;
     }
 
@@ -82,25 +82,32 @@
 
     /* Tambahkan scroll pada sidebar */
     .sidebar {
-        height: calc(100px - 60px); /* Sesuaikan dengan tinggi header/brand-link */
-        overflow-y: auto; /* Aktifkan scroll vertikal */
-        padding-bottom: 20px; /* Berikan padding bawah agar konten tidak terpotong */
+        height: calc(100px - 60px);
+        /* Sesuaikan dengan tinggi header/brand-link */
+        overflow-y: auto;
+        /* Aktifkan scroll vertikal */
+        padding-bottom: 20px;
+        /* Berikan padding bawah agar konten tidak terpotong */
     }
 
     /* Pastikan dropdown menu tidak terpotong */
     .nav-treeview {
         position: relative;
-        z-index: 1000; /* Pastikan dropdown di atas elemen lain */
+        z-index: 1000;
+        /* Pastikan dropdown di atas elemen lain */
     }
 
     /* Gaya sidebar di mode mobile */
     @media (max-width: 768px) {
+
         .main-sidebar,
         .sidebar {
             background-color: #ffffff !important;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            height: auto; /* Biarkan tinggi menyesuaikan konten di mobile */
-            overflow-y: auto; /* Tetap aktifkan scroll di mobile */
+            height: auto;
+            /* Biarkan tinggi menyesuaikan konten di mobile */
+            overflow-y: auto;
+            /* Tetap aktifkan scroll di mobile */
         }
     }
 </style>
@@ -117,7 +124,7 @@
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        
+
         <!-- Sidebar user panel -->
         <div class=" mt-3 pb-0 mb-0 d-flex">
 
@@ -156,7 +163,6 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('pl.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
-                                {{-- <a href="{{ route('pl.index') }}" --}}
                                     class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
                                     <i class="fas fa-user-graduate nav-icon"></i>
                                     <p>Profil Lulusan</p>
@@ -164,7 +170,7 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('cpl.list') }}"
-                                    class="nav-link {{ request()->path() == 'CPL/index' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
                                     <i class="fas fa-file-alt nav-icon"></i>
                                     <p>Capaian Profil Lulusan</p>
                                 </a>
@@ -253,25 +259,13 @@
                 @endif
 
                 <!-- Penilaian -->
+                <!-- Penilaian -->
+                <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
                     <li
-                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) ||
-                        request()->is('penilaian/cpl') ||
-                        request()->is('penilaian/cpmk/*') ||
-                        request()->is('visualisasi/cpmk/*') ||
-                        request()->is('nilai*') ||
-                        request()->is('penilaian*')
-                            ? 'menu-open'
-                            : '' }}">
+                        class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['pembobotan', 'nilai', 'penilaian']) ||
-                            request()->is('penilaian/cpl') ||
-                            request()->is('penilaian/cpmk/*') ||
-                            request()->is('visualisasi/cpmk/*') ||
-                            request()->is('nilai*') ||
-                            request()->is('penilaian*')
-                                ? 'active'
-                                : '' }}">
+                            class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-bar"></i>
                             <p>
                                 Penilaian
@@ -282,8 +276,7 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
-                                {{-- <a href="{{ route('pembobotan.index') }}" --}}
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'pembobotan' ? 'active' : '' }}">
+                                    class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">
                                     <i class="fas fa-balance-scale nav-icon"></i>
                                     <p>Pembobotan</p>
                                 </a>
@@ -293,27 +286,12 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}"
-                                    class="nav-link {{ request()->is('nilai/nilai/mahasiswa/choose-mata-kuliah') ||
-                                    request()->is('mahasiswa/*/mata-kuliah/*') ||
-                                    request()->is('nilai/mahasiswa/*') ||
-                                    request()->is('get-kelas-by-periode')
-                                        ? 'active'
-                                        : '' }}">
+                                    class="nav-link {{ request()->is('nilai*') || request()->is('mahasiswa*') || request()->is('penilaian/cpmk/*') || request()->is('penilaian/cpl/*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                                     <i class="fas fa-edit nav-icon"></i>
                                     <p>Nilai Mahasiswa</p>
                                 </a>
                             </li>
-                        </ul>                
-
-                        {{-- <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('penilaian.cpl.choose_periode_dan_kelas') }}"
-                                    class="nav-link {{ request()->is('penilaian/cpl/*') ? 'active' : '' }}">
-                                    <i class="fas fa-chart-line nav-icon"></i>
-                                    <p>Penilaian CPL</p>
-                                </a>
-                            </li>
-                        </ul> --}}
+                        </ul>
                     </li>
                 @endif
             </ul>

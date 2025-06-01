@@ -213,15 +213,22 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     $(document).ready(function() {
-        // Inisialisasi grafik radar
+        // Ambil data labels dari PHP
+        const labels = @json($labels);
+        const datasets = @json($datasets);
+
+        // Tentukan jenis grafik berdasarkan jumlah label
+        const chartType = labels.length < 3 ? 'bar' : 'radar';
+
+        // Inisialisasi grafik
         const ctx = document.getElementById('radarChart').getContext('2d');
         new Chart(ctx, {
-            type: 'radar',
+            type: chartType,
             data: {
-                labels: @json($labels),
-                datasets: @json($datasets)
+                labels: labels,
+                datasets: datasets
             },
-            options: {
+            options: chartType === 'radar' ? {
                 scales: {
                     r: {
                         suggestedMin: 0,
@@ -261,6 +268,46 @@
                 },
                 responsive: true,
                 maintainAspectRatio: false
+            } : {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
             }
         });
 
@@ -270,10 +317,9 @@
                 const cplId = $(this).data('cpl-id');
                 let cpl = $(this).data('cpl');
 
-                console.log('CPL ID:', cplId); // Debug: Periksa ID CPL
-                console.log('Raw CPL Data:', cpl); // Debug: Periksa data mentah
+                console.log('CPL ID:', cplId);
+                console.log('Raw CPL Data:', cpl);
 
-                // Parse data jika diperlukan
                 if (typeof cpl === 'string') {
                     try {
                         cpl = JSON.parse(cpl);
@@ -283,28 +329,25 @@
                     }
                 }
 
-                console.log('Parsed CPL Data:', cpl); // Debug: Periksa data setelah parse
+                console.log('Parsed CPL Data:', cpl);
 
                 if (!cpl || !cpl.kode_cpl) {
                     console.error('Data CPL tidak valid atau kosong');
                     return;
                 }
 
-                // Buka modal secara manual
                 $('#cplDetailModal').modal('show');
 
-                // Isi konten modal
                 $('#cpl-title').text(cpl.kode_cpl || 'N/A');
                 $('#cpl-deskripsi').text(cpl.deskripsi || 'N/A');
                 $('#cpl-pencapaian').text(cpl.pencapaian_cpl ? cpl.pencapaian_cpl.toFixed(2) : '0.00');
 
-                // Isi tabel kontribusi
                 const tbody = $('#cpl-contributions');
                 tbody.empty();
                 let totalBobot = 0;
                 let totalKontribusi = 0;
 
-                console.log('Contributions:', cpl.contributions); // Debug: Periksa contributions
+                console.log('Contributions:', cpl.contributions);
 
                 if (cpl.contributions && Array.isArray(cpl.contributions) && cpl.contributions.length > 0) {
                     cpl.contributions.forEach(contribution => {
@@ -335,7 +378,6 @@
             }
         });
 
-        // Debug tombol Tutup dan X
         $('.modal-footer .btn-secondary').on('click', function() {
             console.log('Tombol Tutup diklik');
             $('#cplDetailModal').modal('hide');
