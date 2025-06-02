@@ -147,6 +147,35 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
+                {{-- menu tambah dosen --}}
+                <!-- Pengelolaan Dosen -->
+                @if (Auth::check() && Auth::user()->role === 'kps')
+                    <li class="nav-item has-treeview {{ request()->is('dosen*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->is('dosen*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-user-tie"></i>
+                            <p>
+                                Pengelolaan Dosen
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('dosen.create') }}"
+                                    class="nav-link {{ request()->routeIs('dosen.create') ? 'active' : '' }}">
+                                    <i class="fas fa-plus nav-icon"></i>
+                                    <p>Tambah Dosen</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('dosen.index') }}"
+                                    class="nav-link {{ request()->routeIs('dosen.index') ? 'active' : '' }}">
+                                    <i class="fas fa-list nav-icon"></i>
+                                    <p>Daftar Dosen</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
 
                 <!-- Manajemen Data -->
                 @if (Auth::check() && Auth::user()->role === 'kps')

@@ -18,6 +18,7 @@ use App\Http\Controllers\NilaiMahasiswaController;
 use App\Http\Controllers\PenilaianCpmkController;
 use App\Http\Controllers\VisualisasiCpmkController;
 use App\Http\Controllers\PenilaianCplController;
+use App\Http\Controllers\DosenController;
 use Illuminate\Support\Facades\Route;
 
 // Rute untuk login (akses tanpa autentikasi)
@@ -48,6 +49,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/pl/{id}/edit', [PlController::class, 'edit'])->name('pl.edit');
     Route::put('/pl/{id}', [PlController::class, 'update'])->name('pl.update');
     Route::delete('/pl/{id}', [PlController::class, 'destroy'])->name('pl.destroy');
+    Route::post('/import', [PlController::class, 'import'])->name('pl.import');
+    Route::get('/template', [PlController::class, 'downloadTemplate'])->name('pl.template');
 });
 
 // Rute untuk CPMK (hanya untuk KPS)
@@ -58,6 +61,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/cpmk/{id}/edit', [CpmkController::class, 'edit'])->name('cpmk.edit');
     Route::put('/cpmk/{id}', [CpmkController::class, 'update'])->name('cpmk.update');
     Route::delete('/cpmk/{id}', [CpmkController::class, 'destroy'])->name('cpmk.destroy');
+    Route::get('cpmk/template', [CpmkController::class, 'downloadTemplate'])->name('cpmk.template');
+    Route::post('cpmk/import', [CpmkController::class, 'import'])->name('cpmk.import');
 });
 
 // Rute untuk BK (hanya untuk KPS)
@@ -68,6 +73,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/bk/{id}/edit', [BkController::class, 'edit'])->name('bk.edit');
     Route::put('/bk/{id}', [BkController::class, 'update'])->name('bk.update');
     Route::delete('/bk/{id}', [BkController::class, 'destroy'])->name('bk.destroy');
+    Route::get('bk/template', [BkController::class, 'downloadTemplate'])->name('bk.template');
+    Route::post('bk/import', [BkController::class, 'import'])->name('bk.import');
 });
 
 // Rute untuk MK (hanya untuk KPS)
@@ -78,6 +85,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/mk/{id}/edit', [MkController::class, 'edit'])->name('mk.edit');
     Route::put('/mk/{id}', [MkController::class, 'update'])->name('mk.update');
     Route::delete('/mk/{id}', [MkController::class, 'destroy'])->name('mk.destroy');
+    Route::get('mk/template', [MkController::class, 'downloadTemplate'])->name('mk.template');
+    Route::post('mk/import', [MkController::class, 'import'])->name('mk.import');
 });
 
 // Rute untuk CPL (hanya untuk KPS)
@@ -89,6 +98,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/CPL/{id}/edit', [CplController::class, 'edit'])->name('cpl.edit');
     Route::put('/CPL/{id}', [CplController::class, 'update'])->name('cpl.update');
     Route::delete('/CPL/{id}', [CplController::class, 'destroy'])->name('cpl.destroy');
+    Route::get('cpl/template', [CplController::class, 'downloadTemplate'])->name('cpl.template');
+    Route::post('cpl/import', [CplController::class, 'import'])->name('cpl.import');
 });
 
 // Rute untuk Pemetaan (hanya untuk KPS)
@@ -135,7 +146,7 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
         Route::get('/get-kelas-by-periode', [NilaiMahasiswaController::class, 'getKelasByPeriode'])->name('get.kelas.by.periode');
         // route grafik
         Route::get('/mahasiswa/{nim}/mata-kuliah/{kode_mk}/grafik', [NilaiMahasiswaController::class, 'grafik'])->name('nilai.mahasiswa.grafik');
-        
+
     });
 });
 
@@ -147,7 +158,7 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/penilaian/cpmk/choose_mk/{mahasiswa_id}', [PenilaianCpmkController::class, 'chooseMk'])->name('penilaian.cpmk.choose_mk');
     Route::get('/penilaian/cpmk/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
     Route::post('/penilaian/cpmk/store', [PenilaianCpmkController::class, 'store'])->name('penilaian.cpmk.store');
-    Route::get('/penilaian/cpmk/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index'); 
+    Route::get('/penilaian/cpmk/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
     Route::get('nilai/mahasiswa/get-mata-kuliah', [NilaiMahasiswaController::class, 'getMataKuliah'])
         ->name('nilai.mahasiswa.get_mata_kuliah');
 });
@@ -161,4 +172,16 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
 
 Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/penilaian/cpl/{mahasiswa_id}', [PenilaianCplController::class, 'index'])->name('penilaian.cpl.index');
+});
+
+
+Route::middleware(['auth', 'role:kps'])->group(function () {
+    Route::prefix('dosen')->group(function () {
+        Route::get('/tambah', [DosenController::class, 'create'])->name('dosen.create');
+        Route::post('/store', [DosenController::class, 'store'])->name('dosen.store');
+        Route::get('/daftar', [DosenController::class, 'index'])->name('dosen.index');
+        Route::get('/edit/{id}', [DosenController::class, 'edit'])->name('dosen.edit');
+        Route::put('/update/{id}', [DosenController::class, 'update'])->name('dosen.update');
+        Route::delete('/delete/{id}', [DosenController::class, 'destroy'])->name('dosen.destroy');
+    });
 });

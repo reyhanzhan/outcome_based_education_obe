@@ -6,10 +6,29 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <a href="{{ route('pl.create') }}" class="btn btn-success">
-                        <i class="fas fa-plus"></i> Tambah Profil Lulusan
-                    </a>
+                <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
+                    <div class="mx-3">
+                        <a href="{{ route('pl.create') }}" class="btn btn-success" data-toggle="tooltip" title="Tambah data profil lulusan baru">
+                            <i class="fas fa-plus"></i> Tambah Profil Lulusan
+                        </a>
+                    </div>
+                    <div class="mx-3">
+                        <a href="{{ route('pl.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data">
+                            <i class="fas fa-download"></i> Download Template
+                        </a>
+                    </div>
+                    <div class="mx-3">
+                        <form action="{{ route('pl.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
+                            @csrf
+                            <div class="custom-file" style="width: 200px;">
+                                <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
+                                <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip" title="Impor data dari file Excel">
+                                <i class="fas fa-upload"></i> Impor
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -31,7 +50,7 @@
                                         <td>{{ $item->deskripsi }}</td>
                                         <td>{{ $item->kategori }}</td>
                                         <td class="text-center">
-                                            <a href="{{ route('pl.edit', $item->id) }}" class="btn btn-warning btn-sm">
+                                            <a href="{{ route('pl.edit', $item->id) }}" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Edit data">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form action="{{ route('pl.destroy', $item->id) }}" method="POST"
@@ -39,7 +58,7 @@
                                                 onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                <button type="submit" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Hapus data">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -67,6 +86,7 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            // Inisialisasi DataTables
             $("#example1").DataTable({
                 "responsive": true,
                 "autoWidth": false,
@@ -79,13 +99,10 @@
                 "columnDefs": [{
                         "orderable": true,
                         "targets": 0
-                    }, // Hanya kolom No yang bisa sorting
-                    {
+                    }, {
                         "orderable": false,
                         "targets": "_all"
-                    } // Nonaktifkan sorting di semua kolom lain
-                ],
-                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                    }],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
                     "zeroRecords": "Data tidak ditemukan",
@@ -108,6 +125,15 @@
                     });
                 }
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+
+            // Custom file input label
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
+            });
+
+            // Aktifkan tooltip
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 @endsection

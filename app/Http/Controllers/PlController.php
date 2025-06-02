@@ -6,6 +6,11 @@ use App\Models\Pl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Imports\PlImport;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 
 class PlController extends Controller
 {
@@ -68,7 +73,7 @@ class PlController extends Controller
 
             return redirect()->route('pl.index')->with('success', 'Data PL berhasil ditambahkan.');
         } catch (\Exception $e) {
-            
+
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
     }
@@ -108,7 +113,7 @@ class PlController extends Controller
 
             return redirect()->route('pl.index')->with('success', 'Data PL berhasil diperbarui');
         } catch (\Exception $e) {
-            
+
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage());
         }
     }
@@ -122,8 +127,65 @@ class PlController extends Controller
 
             return redirect()->route('pl.index')->with('success', 'Data PL berhasil dihapus');
         } catch (\Exception $e) {
-            
+
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
+    }
+
+    public function import(Request $request)
+{
+    try {
+        // Validasi file
+        $request->validate([
+            'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
+        ]);
+
+        // Periksa apakah file ada dan valid
+        if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+            return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('pl.template') . '">Download template</a>.');
+        }
+
+        $file = $request->file('file');
+        $kodeProdi = Auth::user()->kode_prodi;
+
+        // Impor file menggunakan PlImport
+        Excel::import(new PlImport($kodeProdi), $file);
+
+        return redirect()->route('pl.index')->with('success', 'Data Profil Lulusan berhasil diimpor.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', $e->getMessage());
+    }
+}
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set header
+        $sheet->setCellValue('A1', 'Kode PL');
+        $sheet->setCellValue('B1', 'Deskripsi');
+        $sheet->setCellValue('C1', 'Kategori');
+
+        // Set contoh data (opsional)
+        // $sheet->setCellValue('A2', 'PL01');
+        // $sheet->setCellValue('B2', 'Lulusan mampu menguasai keahlian teknis');
+        // $sheet->setCellValue('C2', 'Keterampilan');
+
+        // Set header style (opsional)
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true); // Ubah D1 jadi C1
+        $sheet->getStyle('A1:C1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Auto-size columns
+        foreach (range('A', 'C') as $columnID) { // Ubah D jadi C
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Simpan file sementara
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'pl_template');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, 'template_pl.xlsx')->deleteFileAfterSend(true);
     }
 }

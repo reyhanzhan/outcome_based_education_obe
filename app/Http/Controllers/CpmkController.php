@@ -6,6 +6,10 @@ use App\Models\Cpmk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Imports\CpmkImport;
 
 class CpmkController extends Controller
 {
@@ -117,6 +121,57 @@ class CpmkController extends Controller
             return redirect()->route('cpmk.index')->with('success', 'Data CPMK berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set header
+        $sheet->setCellValue('A1', 'Kode CPMK');
+        $sheet->setCellValue('B1', 'Deskripsi');
+
+        // Set header style
+        $sheet->getStyle('A1:B1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Auto-size columns
+        foreach (range('A', 'B') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Simpan file sementara
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'cpmk_template');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, 'template_cpmk.xlsx')->deleteFileAfterSend(true);
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            // Validasi file
+            $request->validate([
+                'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
+            ]);
+
+            // Periksa apakah file ada dan valid
+            if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+                return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('cpmk.template') . '">Download template</a>.');
+            }
+
+            $file = $request->file('file');
+            $kodeProdi = Auth::user()->kode_prodi;
+
+            // Impor file menggunakan CpmkImport
+            Excel::import(new CpmkImport($kodeProdi), $file);
+
+            return redirect()->route('cpmk.index')->with('success', 'Data CPMK berhasil diimpor.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }
