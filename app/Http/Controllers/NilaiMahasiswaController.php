@@ -214,14 +214,14 @@ class NilaiMahasiswaController extends Controller
             $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk) {
                 $query->where('mk_id', $mk->id);
             })->with([
-                'mks' => function ($query) use ($mk) {
-                    $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
-                },
-                'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
-                    $query->where('mahasiswa_id', $mahasiswa->id)
-                        ->where('mk_id', $mk->id);
-                }
-            ])->get();
+                        'mks' => function ($query) use ($mk) {
+                            $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
+                        },
+                        'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
+                            $query->where('mahasiswa_id', $mahasiswa->id)
+                                ->where('mk_id', $mk->id);
+                        }
+                    ])->get();
             Log::info('CPMKs found:', ['count' => $cpmks->count()]);
 
             if ($cpmks->isEmpty()) {
@@ -302,16 +302,16 @@ class NilaiMahasiswaController extends Controller
             $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk) {
                 $query->where('mk_id', $mk->id);
             })->with([
-                'mks' => function ($query) use ($mk) {
-                    $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
-                },
-                'teknikPenilaian' => function ($query) use ($mk) {
-                    $query->where('mk_id', $mk->id);
-                },
-                'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
-                    $query->where('mahasiswa_id', $mahasiswa->id)->where('mk_id', $mk->id);
-                }
-            ])->get();
+                        'mks' => function ($query) use ($mk) {
+                            $query->where('mk_id', $mk->id)->withPivot('bobot', 'min_standard');
+                        },
+                        'teknikPenilaian' => function ($query) use ($mk) {
+                            $query->where('mk_id', $mk->id);
+                        },
+                        'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
+                            $query->where('mahasiswa_id', $mahasiswa->id)->where('mk_id', $mk->id);
+                        }
+                    ])->get();
             Log::info('CPMKs found:', ['count' => $cpmks->count()]);
 
             if ($cpmks->isEmpty()) {
@@ -403,73 +403,83 @@ class NilaiMahasiswaController extends Controller
     //     }
 
     //     return redirect()->back()->with('success', 'Nilai berhasil disimpan!');
-        
+
     // }
     public function store(Request $request)
-{
-    $user = Auth::user();
-    Log::info('Request data: ' . json_encode($request->all()));
+    {
+        try {
+            $user = Auth::user();
+            Log::info('Request data: ' . json_encode($request->all()));
 
-    $request->validate([
-        'mk_id' => 'required|exists:mk,id',
-        'nim' => 'required|exists:mahasiswa,nim',
-        'min_standard' => 'required|integer|min:0|max:100',
-        'nilai' => 'required|array',
-        'nilai.*' => 'nullable|numeric|min:0|max:100',
-    ]);
+            $request->validate([
+                'mk_id' => 'required|exists:mk,id',
+                'nim' => 'required|exists:mahasiswa,nim',
+                'min_standard' => 'required|integer|min:0|max:100',
+                'nilai' => 'required|array',
+                'nilai.*' => 'nullable|numeric|min:0|max:100',
+            ]);
 
-    $periode = session('previous_periode');
-    if (!$periode) {
-        Log::warning('Periode not found in session');
-        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-            ->with('error', 'Silakan pilih periode terlebih dahulu.');
-    }
+            $periode = session('previous_periode');
+            if (!$periode) {
+                Log::warning('Periode not found in session');
+                return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+                    ->with('error', 'Silakan pilih periode terlebih dahulu.');
+            }
 
-    $mk_id = $request->input('mk_id');
-    $min_standard = $request->input('min_standard');
-    $nim = $request->input('nim');
-    $nilai = $request->input('nilai');
+            $mkId = $request->input('mk_id');
+            $minStandard = $request->input('min_standard');
+            $nim = $request->input('nim');
+            $nilai = $request->input('nilai');
 
-    $mahasiswa = Mahasiswa::where('nim', $nim)->firstOrFail();
-    $mahasiswa_id = $mahasiswa->id;
-    Log::info('Converted NIM: ' . $nim . ' to Mahasiswa ID: ' . $mahasiswa_id);
+            $mahasiswa = Mahasiswa::where('nim', $nim)->firstOrFail();
+            $mahasiswaId = $mahasiswa->id;
+            Log::info("Converted NIM: {$nim} to Mahasiswa ID: {$mahasiswaId}");
 
-    $mk = Mk::findOrFail($mk_id);
-    Log::info('MK ID: ' . $mk_id . ', Kode MK: ' . $mk->kode_mk);
+            $mk = Mk::findOrFail($mkId);
+            Log::info("MK ID: {$mkId}, Kode MK: {$mk->kode_mk}");
 
-    if ($user->role === 'dosen') {
-        $nip = $user->nip;
-        if (!$nip) {
-            Log::warning('NIP not found for user: ' . $user->email);
-            return redirect()->back()->with('error', 'NIP tidak ditemukan.');
+            if ($user->role === 'dosen') {
+                $nip = $user->nip;
+                if (!$nip) {
+                    Log::warning("NIP not found for user: {$user->email}");
+                    return redirect()->back()->with('error', 'NIP tidak ditemukan.');
+                }
+                Log::info("Saving nilai for NIP: {$nip}, Kode MK: {$mk->kode_mk}, NIM: {$nim}, Periode: {$periode}");
+            }
+
+            // Update min_standard untuk semua CPMK terkait MK
+            $cpmks = $mk->cpmks()->get();
+            foreach ($cpmks as $cpmk) {
+                $mk->cpmks()->updateExistingPivot($cpmk->id, ['min_standard' => $minStandard]);
+            }
+
+            // Pastikan semua CPMK memiliki entri nilai
+            foreach ($cpmks as $cpmk) {
+                $cpmkId = $cpmk->id;
+                $nilaiCpmk = $nilai[$cpmkId] ?? null;
+
+                NilaiCpmk::updateOrCreate(
+                    [
+                        'mahasiswa_id' => $mahasiswaId,
+                        'mk_id' => $mkId,
+                        'cpmk_id' => $cpmkId,
+                    ],
+                    [
+                        'nilai' => $nilaiCpmk !== null ? $nilaiCpmk : 0,
+                    ]
+                );
+                Log::info("Saved Nilai CPMK: Mahasiswa ID {$mahasiswaId}, MK ID {$mkId}, CPMK ID {$cpmkId}, Nilai " . ($nilaiCpmk ?? 0));
+            }
+
+            // Alihkan ke halaman penilaian CPMK
+            return redirect()->route('penilaian.cpmk.index', [
+                'mahasiswa_id' => $mahasiswaId,
+                'mk_id' => $mkId
+            ])->with('success', 'Nilai berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            Log::error('Error in store method: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
         }
-        Log::info('Saving nilai for NIP: ' . $nip . ', Kode MK: ' . $mk->kode_mk . ', NIM: ' . $nim . ', Periode: ' . $periode);
     }
-
-    // Update min_standard untuk semua CPMK terkait MK
-    $cpmks = $mk->cpmks()->get();
-    foreach ($cpmks as $cpmk) {
-        $mk->cpmks()->updateExistingPivot($cpmk->id, ['min_standard' => $min_standard]);
-    }
-
-    // Pastikan semua CPMK memiliki entri nilai, meskipun kosong
-    foreach ($cpmks as $cpmk) {
-        $cpmk_id = $cpmk->id;
-        $nilaiCpmk = isset($nilai[$cpmk_id]) ? $nilai[$cpmk_id] : null;
-
-        NilaiCpmk::updateOrCreate(
-            [
-                'mahasiswa_id' => $mahasiswa_id,
-                'mk_id' => $mk_id,
-                'cpmk_id' => $cpmk_id,
-            ],
-            [
-                'nilai' => $nilaiCpmk !== null ? $nilaiCpmk : 0,
-            ]
-        );
-        Log::info('Saved Nilai CPMK: Mahasiswa ID ' . $mahasiswa_id . ', MK ID ' . $mk_id . ', CPMK ID ' . $cpmk_id . ', Nilai ' . ($nilaiCpmk !== null ? $nilaiCpmk : 0));
-    }
-
-    return redirect()->back()->with('success', 'Nilai berhasil disimpan!');
-}
 }

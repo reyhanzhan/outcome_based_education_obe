@@ -115,12 +115,6 @@
                 </div>
 
                 <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success success-bg">{{ session('success') }}</div>
-                    @endif
-                    @if (session('error'))
-                        <div class="alert alert-danger error-bg">{{ session('error') }}</div>
-                    @endif
 
                     <form action="{{ route('nilai.mahasiswa.store') }}" method="POST" id="nilaiForm">
                         @csrf

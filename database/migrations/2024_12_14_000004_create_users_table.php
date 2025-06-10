@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            // $table->string('email')->unique();
             $table->string('nip')->unique()->nullable(); // Kolom NIP tanpa after()
             $table->enum('role', ['dosen', 'kps'])->default('dosen'); // Kolom role tanpa after()
             $table->string('password');

@@ -13,19 +13,25 @@ return new class extends Migration
     {
         Schema::create('mk', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_mk')->unique();
+            $table->string('kode_mk');
             $table->string('deskripsi');
             $table->integer('sks');
             $table->string('jenis_mk');
-            $table->string('kode_prodi', 50)->nullable(); // Sesuai panjang di tabel program_studi
-            $table->decimal('nilai_lulus', 20, 6)->nullable(); // Sesuai format di database
+            $table->string('kode_prodi', 50)->nullable();
+            $table->decimal('nilai_lulus', 20, 6)->nullable();
         
-            // Foreign key ke tabel program_studi
-            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('set null');
+            // Foreign key ke tabel program_studi dengan eksplisit karakter set
+            $table->foreign('kode_prodi')
+                  ->references('kode_prodi')
+                  ->on('program_studi')
+                  ->onDelete('set null')
+                  ->onUpdate('cascade');
+        
+            // Tambahkan constraint unik untuk kombinasi kode_mk dan kode_prodi
+            $table->unique(['kode_mk', 'kode_prodi'], 'mk_kode_mk_kode_prodi_unique');
         
             $table->timestamps();
         });
-        
     }
 
     /**
