@@ -22,6 +22,24 @@ return new class extends Migration {
             // 🔥 Foreign Key ke `mahasiswa.nim`
             $table->string('nim');
             $table->timestamps();
+
+            // Foreign Key ke mk.kode_mk
+        $table->foreign('kode_mk')
+            ->references('kode_mk')
+            ->on('mk')
+            ->onDelete('cascade');
+
+        // Foreign Key ke kurikulum.tahun
+        $table->foreign('tahun')
+            ->references('tahun')
+            ->on('kurikulum')
+            ->onDelete('cascade');
+
+        // Foreign Key ke mahasiswa.nim
+        $table->foreign('nim')
+            ->references('nim')
+            ->on('mahasiswa')
+            ->onDelete('cascade');
         });
     }
 

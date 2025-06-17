@@ -20,6 +20,9 @@ use App\Http\Controllers\VisualisasiCpmkController;
 use App\Http\Controllers\PenilaianCplController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\DosenController;
+use App\Http\Controllers\KurikulumController;
+use App\Http\Controllers\KelasController;
+use App\Http\Controllers\KrsController;
 use Illuminate\Support\Facades\Route;
 
 // Rute untuk login (akses tanpa autentikasi)
@@ -42,17 +45,37 @@ Route::get('/', function () {
     return redirect()->route('login'); // Jika role tidak valid, kembali ke login
 })->middleware('auth');
 
-// Rute untuk PL (hanya untuk KPS)
-Route::middleware(['auth', 'role:kps'])->group(function () {
-    Route::get('/PL/index', [PlController::class, 'index'])->name('pl.index');
-    Route::get('/PL/create', [PlController::class, 'create'])->name('pl.create');
-    Route::post('/PL/index', [PlController::class, 'store'])->name('pl.store');
-    Route::get('/pl/{id}/edit', [PlController::class, 'edit'])->name('pl.edit');
-    Route::put('/pl/{id}', [PlController::class, 'update'])->name('pl.update');
-    Route::delete('/pl/{id}', [PlController::class, 'destroy'])->name('pl.destroy');
-    Route::post('/import', [PlController::class, 'import'])->name('pl.import');
-    Route::get('/template', [PlController::class, 'downloadTemplate'])->name('pl.template');
+
+Route::middleware(['auth'])->group(function () {
+    // Rute untuk Pengelolaan Mahasiswa
+    Route::middleware(['role:kps'])->group(function () {
+        Route::prefix('mahasiswa')->group(function () {
+            Route::get('/daftar', [MahasiswaController::class, 'index'])->name('mahasiswa.index');
+            Route::get('/tambah', [MahasiswaController::class, 'create'])->name('mahasiswa.create');
+            Route::post('/store', [MahasiswaController::class, 'store'])->name('mahasiswa.store');
+            Route::get('/edit/{id}', [MahasiswaController::class, 'edit'])->name('mahasiswa.edit');
+            Route::put('/update/{id}', [MahasiswaController::class, 'update'])->name('mahasiswa.update');
+            Route::delete('/delete/{id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
+            Route::get('/template', [MahasiswaController::class, 'template'])->name('mahasiswa.template');
+            Route::post('/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+        });
+    });
+
+    // Rute untuk Pengelolaan Profil Lulusan
+    Route::middleware(['role:kps'])->group(function () {
+        Route::prefix('pl')->group(function () {
+            Route::get('/index', [PlController::class, 'index'])->name('pl.index');
+            Route::get('/create', [PlController::class, 'create'])->name('pl.create');
+            Route::post('/index', [PlController::class, 'store'])->name('pl.store');
+            Route::get('/{id}/edit', [PlController::class, 'edit'])->name('pl.edit');
+            Route::put('/{id}', [PlController::class, 'update'])->name('pl.update');
+            Route::delete('/{id}', [PlController::class, 'destroy'])->name('pl.destroy');
+            Route::post('/import', [PlController::class, 'import'])->name('pl.import');
+            Route::get('/template', [PlController::class, 'downloadTemplate'])->name('pl.template');
+        });
+    });
 });
+
 
 // Rute untuk CPMK (hanya untuk KPS)
 Route::middleware(['auth', 'role:kps'])->group(function () {
@@ -195,5 +218,41 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
         Route::get('/edit/{id}', [MahasiswaController::class, 'edit'])->name('mahasiswa.edit');
         Route::put('/update/{id}', [MahasiswaController::class, 'update'])->name('mahasiswa.update');
         Route::delete('/delete/{id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
+    });
+});
+
+
+Route::middleware(['auth', 'role:kps'])->group(function () {
+    Route::prefix('kurikulum')->group(function () {
+        Route::get('/index', [KurikulumController::class, 'index'])->name('kurikulum.index');
+        Route::get('/create', [KurikulumController::class, 'create'])->name('kurikulum.create');
+        Route::post('/store', [KurikulumController::class, 'store'])->name('kurikulum.store');
+        Route::get('/edit/{id}', [KurikulumController::class, 'edit'])->name('kurikulum.edit');
+        Route::put('/update/{id}', [KurikulumController::class, 'update'])->name('kurikulum.update');
+        Route::delete('/destroy/{id}', [KurikulumController::class, 'destroy'])->name('kurikulum.destroy');
+        Route::get('/template', [KurikulumController::class, 'template'])->name('kurikulum.template');
+        Route::post('/import', [KurikulumController::class, 'import'])->name('kurikulum.import');
+    });
+
+    Route::prefix('kelas')->group(function () {
+        Route::get('/index', [KelasController::class, 'index'])->name('kelas.index');
+        Route::get('/create', [KelasController::class, 'create'])->name('kelas.create');
+        Route::post('/store', [KelasController::class, 'store'])->name('kelas.store');
+        Route::get('/edit/{id}', [KelasController::class, 'edit'])->name('kelas.edit');
+        Route::put('/update/{id}', [KelasController::class, 'update'])->name('kelas.update');
+        Route::delete('/destroy/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
+        Route::get('/template', [KelasController::class, 'template'])->name('kelas.template');
+        Route::post('/import', [KelasController::class, 'import'])->name('kelas.import');
+    });
+
+    Route::prefix('krs')->group(function () {
+        Route::get('/index', [KrsController::class, 'index'])->name('krs.index');
+        Route::get('/create', [KrsController::class, 'create'])->name('krs.create');
+        Route::post('/store', [KrsController::class, 'store'])->name('krs.store');
+        Route::get('/edit/{id}', [KrsController::class, 'edit'])->name('krs.edit');
+        Route::put('/update/{id}', [KrsController::class, 'update'])->name('krs.update');
+        Route::delete('/destroy/{id}', [KrsController::class, 'destroy'])->name('krs.destroy');
+        Route::get('/template', [KrsController::class, 'template'])->name('krs.template');
+        Route::post('/import', [KrsController::class, 'import'])->name('krs.import');
     });
 });

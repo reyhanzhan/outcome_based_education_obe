@@ -24,14 +24,8 @@ return new class extends Migration {
                 ->on('program_studi')
                 ->onDelete('cascade');
         
-            // Foreign Key ke mk (mata kuliah)
-            $table->foreign('kode_mk')
-                ->references('kode_mk')
-                ->on('mk')
-                ->onDelete('cascade');
-        
             // 🔥 Pastikan kombinasi tahun, prodi, dan mk unik
-            $table->unique(['tahun', 'kode_prodi', 'kode_mk']);
+            // $table->unique(['tahun', 'kode_prodi', 'kode_mk']);
         });
         
     }

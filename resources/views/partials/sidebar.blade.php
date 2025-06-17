@@ -179,9 +179,11 @@
 
                 {{-- manajemen mhs --}}
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li class="nav-item has-treeview {{ request()->is('mhs*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('mhs*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-user-tie"></i>
+                    <li
+                        class="nav-item has-treeview {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-user-graduate"></i>
                             <p>
                                 Pengelolaan Mahasiswa
                                 <i class="right fas fa-angle-left"></i>
@@ -190,16 +192,57 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('mahasiswa.create') }}"
-                                    class="nav-link {{ request()->routeIs('mhs.create') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}">
                                     <i class="fas fa-plus nav-icon"></i>
                                     <p>Tambah Mahasiswa</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('mahasiswa.index') }}"
-                                    class="nav-link {{ request()->routeIs('mhs.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                     <i class="fas fa-list nav-icon"></i>
                                     <p>Daftar Mahasiswa</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
+
+                {{-- Pengelolaan Kurikulum, KRS, dan Kelas (di bawah Pengelolaan Mahasiswa) --}}
+                @if (Auth::check() && Auth::user()->role === 'kps')
+                    <li
+                        class="nav-item has-treeview {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book"></i>
+                            <p>
+                                Pengelolaan Kurikulum & Kelas
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Kurikulum -->
+                            <li class="nav-item">
+                                <a href="{{ route('kurikulum.index') }}"
+                                    class="nav-link {{ request()->is('kurikulum*') ? 'active' : '' }}">
+                                    <i class="fas fa-book-open nav-icon"></i>
+                                    <p>Kurikulum</p>
+                                </a>
+                            </li>
+                            <!-- Kelas -->
+                            <li class="nav-item">
+                                <a href="{{ route('kelas.index') }}"
+                                    class="nav-link {{ request()->is('kelas*') ? 'active' : '' }}">
+                                    <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                                    <p>Kelas</p>
+                                </a>
+                            </li>
+                            <!-- KRS -->
+                            <li class="nav-item">
+                                <a href="{{ route('krs.index') }}"
+                                    class="nav-link {{ request()->is('krs*') ? 'active' : '' }}">
+                                    <i class="fas fa-clipboard-list nav-icon"></i>
+                                    <p>KRS</p>
                                 </a>
                             </li>
                         </ul>
@@ -317,21 +360,20 @@
                     </li>
                 @endif
 
-                
-                
+
+
                 <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
                     <li
-                        class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
+                        class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-bar"></i>
                             <p>
                                 Penilaian
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
-
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
@@ -340,12 +382,9 @@
                                     <p>Pembobotan</p>
                                 </a>
                             </li>
-                        </ul>
-
-                        <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}"
-                                    class="nav-link {{ request()->is('nilai*') || request()->is('mahasiswa*') || request()->is('penilaian/cpmk/*') || request()->is('penilaian/cpl/*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->is('nilai/mahasiswa*') || request()->is('penilaian/cpmk/*') || request()->is('penilaian/cpl/*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                                     <i class="fas fa-edit nav-icon"></i>
                                     <p>Nilai Mahasiswa</p>
                                 </a>

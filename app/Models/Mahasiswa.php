@@ -11,7 +11,7 @@ class Mahasiswa extends Model
 
     protected $table = 'mahasiswa'; // Sesuaikan dengan nama tabel yang benar di database
 
-    protected $fillable = ['nama', 'nim'];
+    protected $fillable = ['nama', 'nim','periode_masuk', 'sistem_kuliah', 'jalur_penerimaan', 'gelombang_daftar', 'agama', 'kode_prodi'];
 
     public function krs()
     {

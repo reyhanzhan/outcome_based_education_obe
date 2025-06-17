@@ -19,6 +19,22 @@ return new class extends Migration {
             $table->string('periode');
             $table->string('nip_dosen');
             $table->timestamps();
+
+            $table->foreign('tahun_kurikulum')
+                ->references('tahun')
+                ->on('kurikulum')
+                ->onDelete('cascade');
+
+            $table->foreign('kode_mk')
+                ->references('kode_mk')
+                ->on('mk')
+                ->onDelete('cascade');
+
+            // Foreign Key ke dosen.nip
+            $table->foreign('nip_dosen')
+                ->references('nip')
+                ->on('dosen')
+                ->onDelete('cascade');
         });
     }
 

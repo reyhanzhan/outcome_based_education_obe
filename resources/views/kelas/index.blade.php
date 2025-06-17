@@ -1,73 +1,83 @@
 @extends('layouts_adminlte.app')
 
+@section('title', 'Daftar Kelas')
+
 @section('content')
     <section class="content">
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
                     <div class="mx-3">
-                        <a href="{{ route('mahasiswa.create') }}" class="btn btn-success" data-toggle="tooltip" title="Tambah data mahasiswa baru">
-                            <i class="fas fa-plus"></i> Tambah Mahasiswa
+                        <a href="{{ route('kelas.create') }}" class="btn btn-success" data-toggle="tooltip"
+                            title="Tambah data kelas baru">
+                            <i class="fas fa-plus"></i> Tambah Kelas
                         </a>
                     </div>
                     <div class="mx-3">
-                        <a href="{{ route('mahasiswa.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data">
+                        <a href="{{ route('kelas.template') }}" class="btn btn-info" data-toggle="tooltip"
+                            title="Download template Excel untuk impor data">
                             <i class="fas fa-download"></i> Download Template
                         </a>
                     </div>
                     <div class="mx-3">
-                        <form action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
+                        <form action="{{ route('kelas.import') }}" method="POST" enctype="multipart/form-data"
+                            class="d-inline-block">
                             @csrf
                             <div class="custom-file" style="width: 200px;">
-                                <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
-                                <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
+                                <input type="file" class="custom-file-input" id="file" name="file"
+                                    accept=".xls,.xlsx,.csv" required>
+                                <label class="custom-file-label" for="file"><i
+                                        class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
                             </div>
-                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip" title="Impor data dari file Excel">
+                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip"
+                                title="Impor data dari file Excel">
                                 <i class="fas fa-upload"></i> Impor
                             </button>
                         </form>
                     </div>
                 </div>
                 <div class="card-body">
-                    
+                    {{-- @if (session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif --}}
                     <div class="table-responsive">
-                        <table id="mahasiswaTable" class="table table-bordered table-striped">
+                        <table id="kelasTable" class="table table-bordered table-striped text-center">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">No</th>
-                                    <th style="width: 10%;">NIM</th>
-                                    <th style="width: 15%;">Nama</th>
-                                    <th style="width: 10%;">Periode Masuk</th>
-                                    <th style="width: 10%;">Sistem Kuliah</th>
-                                    <th style="width: 15%;">Jalur Penerimaan</th>
-                                    <th style="width: 10%;">Gelombang Daftar</th>
-                                    <th style="width: 10%;">Agama</th>
-                                    <th style="width: 10%;">Kode Prodi</th>
-                                    <th style="width: 15%; text-align: center;">Aksi</th>
+                                    <th>Tahun Kurikulum</th>
+                                    <th>Kode MK</th>
+                                    <th>Periode</th>
+                                    <th>NIP Dosen</th>
+                                    <th>Nama Dosen</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($mahasiswas as $index => $mahasiswa)
+                                @forelse ($kelas as $index => $k)
                                     <tr>
-                                        <td class="text-center">{{ $index + 1 }}</td>
-                                        <td>{{ $mahasiswa->nim }}</td>
-                                        <td>{{ $mahasiswa->nama }}</td>
-                                        <td>{{ $mahasiswa->periode_masuk }}</td>
-                                        <td>{{ $mahasiswa->sistem_kuliah }}</td>
-                                        <td>{{ $mahasiswa->jalur_penerimaan }}</td>
-                                        <td>{{ $mahasiswa->gelombang_daftar }}</td>
-                                        <td>{{ $mahasiswa->agama }}</td>
-                                        <td>{{ $mahasiswa->kode_prodi }}</td>
+                                        <td>{{ $k->tahun_kurikulum }}</td>
+                                        <td>{{ $k->kode_mk }}</td>
+                                        <td>{{ $k->periode }}</td>
+                                        <td>{{ $k->nip_dosen }}</td>
+                                        <td>{{ $k->user ? $k->user->name ?? 'N/A' : 'N/A' }}</td>
+                                        
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" class="btn btn-warning btn-sm mr-1" data-toggle="tooltip" title="Edit data">
+                                                <a href="{{ route('kelas.edit', $k->id) }}"
+                                                    class="btn btn-warning btn-sm mr-1" data-toggle="tooltip"
+                                                    title="Edit data">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('mahasiswa.destroy', $mahasiswa->id) }}" method="POST" class="d-inline"
-                                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                <form action="{{ route('kelas.destroy', $k->id) }}" method="POST"
+                                                    class="d-inline"
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Hapus data">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        data-toggle="tooltip" title="Hapus data">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -76,22 +86,19 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10" class="text-center">Tidak ada data mahasiswa.</td>
+                                        <td colspan="6" class="text-center">Tidak ada data kelas.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
+
                             <tfoot>
                                 <tr>
-                                    <th>No</th>
-                                    <th>NIM</th>
-                                    <th>Nama</th>
-                                    <th>Periode Masuk</th>
-                                    <th>Sistem Kuliah</th>
-                                    <th>Jalur Penerimaan</th>
-                                    <th>Gelombang Daftar</th>
-                                    <th>Agama</th>
-                                    <th>Kode Prodi</th>
-                                    <th class="text-center">Aksi</th>
+                                    <th>Tahun Kurikulum</th>
+                                    <th>Kode MK</th>
+                                    <th>Periode</th>
+                                    <th>NIP Dosen</th>
+                                    <th>Nama Dosen</th> <!-- Ubah menjadi kapital untuk konsistensi -->
+                                    <th>Aksi</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -106,7 +113,7 @@
     <script>
         $(document).ready(function() {
             // Inisialisasi DataTables
-            $("#mahasiswaTable").DataTable({
+            $("#kelasTable").DataTable({
                 "responsive": true,
                 "autoWidth": false,
                 "paging": true,
@@ -117,10 +124,10 @@
                 "ordering": true,
                 "columnDefs": [{
                         "orderable": true,
-                        "targets": 0 // Kolom No bisa diurutkan
+                        "targets": 0
                     }, {
                         "orderable": false,
-                        "targets": "_all" // Kolom lain tidak diurutkan
+                        "targets": "_all"
                     }],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
@@ -128,7 +135,7 @@
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",
-                    "searchPlaceholder": "Cari Mahasiswa...",
+                    "searchPlaceholder": "Cari Kurikulum...",
                     "search": "",
                     "paginate": {
                         "first": "Awal",

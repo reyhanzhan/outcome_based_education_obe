@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Kelas extends Model
 {
     protected $table = 'kelas';
-    protected $fillable = ['kode_prodi', 'tahun_kurikulum', 'kode_mk', 'periode','nip_dosen'];  
+    protected $fillable = ['kode_prodi', 'tahun_kurikulum', 'kode_mk', 'periode','nip_dosen'];
+    
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'nip_dosen', 'nip');
+    }
 
     public function dosen()
     {
