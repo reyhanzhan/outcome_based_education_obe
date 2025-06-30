@@ -3,215 +3,138 @@
 @section('title', 'Daftar Dosen')
 
 @section('content')
-<section class="content">
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header bg-primary d-flex justify-content-between align-items-center">
-                <h3 class="card-title text-white">Daftar Dosen</h3>
-                <div style="margin-left: 680px">
-                    <a href="{{ route('dosen.create') }}" class="btn btn-success btn-sm custom-btn">
-                        <i class="fas fa-plus-circle mr-1"></i> Tambah Dosen
-                    </a>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
+                    <div class="mx-3">
+                        <a href="{{ route('dosen.create') }}" class="btn btn-success" data-toggle="tooltip" title="Tambah data dosen baru">
+                            <i class="fas fa-plus"></i> Tambah Dosen
+                        </a>
+                    </div>
+                    <div class="mx-3">
+                        <a href="{{ route('dosen.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data">
+                            <i class="fas fa-download"></i> Download Template
+                        </a>
+                    </div>
+                    <div class="mx-3">
+                        <form action="{{ route('dosen.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
+                            @csrf
+                            <div class="custom-file" style="width: 200px;">
+                                <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
+                                <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip" title="Impor data dari file Excel">
+                                <i class="fas fa-upload"></i> Impor
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
-                {{-- @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-                @if ($dosens->isEmpty())
-                    <div class="alert alert-warning">Tidak ada data dosen tersedia.</div>
-                @else --}}
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>NIP</th>
-                                <th>Kode Prodi</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($dosens as $dosen)
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="dosenTable" class="table table-bordered table-striped">
+                            <thead>
                                 <tr>
-                                    <td>{{ $dosen->name }}</td>
-                                    <td>{{ $dosen->nip }}</td>
-                                    <td>{{ $dosen->kode_prodi }}</td>
-                                    <td class="text-center">
-                                        <button class="btn btn-warning btn-sm edit-dosen-btn custom-action-btn" data-id="{{ $dosen->id }}">
-                                            <i class="fas fa-edit mr-1"></i> Edit
-                                        </button>
-                                        <form action="{{ route('dosen.destroy', $dosen->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm custom-action-btn" onclick="return confirm('Apakah Anda yakin ingin menghapus dosen ini?')">
-                                                <i class="fas fa-trash-alt mr-1"></i> Hapus
-                                            </button>
-                                        </form>
-                                    </td>
+                                    <th style="width: 5%;">No</th>
+                                    <th style="width: 25%;">Nama</th>
+                                    <th style="width: 25%;">NIP</th>
+                                    <th style="width: 25%;">Kode Prodi</th>
+                                    <th style="width: 20%;" class="text-center">Aksi</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-            
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Modal untuk Edit Dosen -->
-<div class="modal fade" id="editDosenModal" tabindex="-1" role="dialog" aria-labelledby="editDosenModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editDosenModalLabel">Edit Dosen</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <form id="editDosenForm" method="POST">
-                <div class="modal-body">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="id" id="edit_dosen_id">
-                    <div class="form-group">
-                        <label for="edit_name">Nama Dosen</label>
-                        <input type="text" name="name" id="edit_name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_nip">NIP</label>
-                        <input type="text" name="nip" id="edit_nip" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_password">Password (kosongkan jika tidak ingin mengubah)</label>
-                        <input type="password" name="password" id="edit_password" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_kode_prodi">Kode Prodi</label>
-                        <input type="text" name="kode_prodi" id="edit_kode_prodi" class="form-control" readonly>
+                            </thead>
+                            <tbody>
+                                @forelse ($dosens as $index => $dosen)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $dosen->name }}</td>
+                                        <td>{{ $dosen->nip }}</td>
+                                        <td>{{ $dosen->kode_prodi }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ route('dosen.edit', $dosen->id) }}" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('dosen.destroy', $dosen->id) }}" method="POST"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">Tidak ada data dosen.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>NIP</th>
+                                    <th>Kode Prodi</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary custom-btn" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary custom-btn">Simpan</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
-</div>
-@endsection
-
-@section('styles')
-<style>
-    /* Styling untuk tombol Tambah Dosen */
-    .custom-btn {
-        transition: all 0.3s ease;
-        border-radius: 25px;
-        padding: 8px 20px;
-        font-weight: 500;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .custom-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Styling untuk tombol Edit dan Hapus */
-    .custom-action-btn {
-        margin-right: 10px; /* Jarak antar tombol */
-        border-radius: 20px;
-        padding: 6px 15px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .custom-action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Menyesuaikan warna tombol Edit */
-    .btn-warning.custom-action-btn {
-        background-color: #f7c948;
-        border-color: #f7c948;
-    }
-
-    .btn-warning.custom-action-btn:hover {
-        background-color: #e6b800;
-        border-color: #e6b800;
-    }
-
-    /* Menyesuaikan warna tombol Hapus */
-    .btn-danger.custom-action-btn {
-        background-color: #ff4d4f;
-        border-color: #ff4d4f;
-    }
-
-    .btn-danger.custom-action-btn:hover {
-        background-color: #f5222d;
-        border-color: #f5222d;
-    }
-
-    /* Menyesuaikan warna tombol Simpan dan Batal di modal */
-    .btn-primary.custom-btn {
-        background-color: #1890ff;
-        border-color: #1890ff;
-    }
-
-    .btn-primary.custom-btn:hover {
-        background-color: #40a9ff;
-        border-color: #40a9ff;
-    }
-
-    .btn-secondary.custom-btn {
-        background-color: #8c8c8c;
-        border-color: #8c8c8c;
-    }
-
-    .btn-secondary.custom-btn:hover {
-        background-color: #bfbfbf;
-        border-color: #bfbfbf;
-    }
-</style>
+    </section>
 @endsection
 
 @section('scripts')
-<script>
-    $(document).ready(function() {
-        $('.edit-dosen-btn').on('click', function() {
-            const dosenId = $(this).data('id');
-            $.ajax({
-                url: '{{ route("dosen.edit", ":id") }}'.replace(':id', dosenId),
-                method: 'GET',
-                success: function(data) {
-                    $('#edit_dosen_id').val(data.id);
-                    $('#edit_name').val(data.name);
-                    $('#edit_nip').val(data.nip);
-                    $('#edit_kode_prodi').val(data.kode_prodi);
-                    $('#editDosenModal').modal('show');
+    <script>
+        $(document).ready(function() {
+            $("#dosenTable").DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "paging": true,
+                "lengthMenu": [10, 25, 50, 100],
+                "pageLength": 10,
+                "searching": true,
+                "info": true,
+                "ordering": true,
+                "columnDefs": [
+                    { "orderable": true, "targets": 0 },
+                    { "orderable": false, "targets": "_all" }
+                ],
+                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "language": {
+                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                    "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
+                    "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
+                    "infoEmpty": "Tidak ada data tersedia",
+                    "infoFiltered": "(Disaring dari _MAX_ total data)",
+                    "searchPlaceholder": "Cari Dosen...",
+                    "search": "",
+                    "paginate": {
+                        "first": "Awal",
+                        "last": "Akhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    }
                 },
-                error: function() {
-                    alert('Gagal mengambil data dosen.');
+                "footerCallback": function(row, data, start, end, display) {
+                    var api = this.api();
+                    $(api.table().footer()).find('th').each(function(index) {
+                        $(this).text($(api.column(index).header()).text());
+                    });
                 }
-            });
-        });
+            }).buttons().container().appendTo('#dosenTable_wrapper .col-md-6:eq(0)');
 
-        $('#editDosenForm').on('submit', function(e) {
-            e.preventDefault();
-            const dosenId = $('#edit_dosen_id').val();
-            $.ajax({
-                url: '{{ route("dosen.update", ":id") }}'.replace(':id', dosenId),
-                method: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    window.location.href = '{{ route("dosen.index") }}';
-                },
-                error: function() {
-                    alert('Gagal memperbarui data dosen.');
-                }
+            // Custom file input label
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
             });
+
+            // Aktifkan tooltip
+            $('[data-toggle="tooltip"]').tooltip();
         });
-    });
-</script>
+    </script>
 @endsection

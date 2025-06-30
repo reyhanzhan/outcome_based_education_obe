@@ -43,7 +43,7 @@
         /* Left Side - Welcome Section */
         .left-section {
             flex: 1;
-            background: url('{{ asset('img/bg-login.jpg') }}') center/cover no-repeat;
+            background: url('{{ asset('img/bg-login.jpg') }}') right/cover no-repeat;
             height: 100%;
             color: #fff;
             display: flex;
@@ -178,8 +178,8 @@
     <div class="login-container">
         <!-- Left Section -->
         <div class="left-section" style="padding-bottom: 40%">
-            <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid mb-4"
-                style="max-width: 300px; height: auto; background-color: rgba(0, 0, 0, 0.5); border-radius: 3px;">
+            <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid mb-1"
+                style="max-width: 300px; height: auto; background-color: rgba(0, 0, 0, 0.5); border-radius: 3px; padding">
         </div>
 
         <!-- Right Section -->

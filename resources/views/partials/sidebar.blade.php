@@ -147,6 +147,60 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
+
+                <!-- Manajemen Data -->
+                @if (Auth::check() && Auth::user()->role === 'kps')
+                    <li
+                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
+                            <i class="nav-icon fas fa-folder"></i>
+                            <p>
+                                Manajemen Data
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('pl.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
+                                    <i class="fas fa-user-graduate nav-icon"></i>
+                                    <p>Profil Lulusan</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('cpl.list') }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
+                                    <i class="fas fa-file-alt nav-icon"></i>
+                                    <p>Capaian Profil Lulusan</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('bk.index') }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
+                                    <i class="fas fa-book nav-icon"></i>
+                                    <p>Bahan Kajian</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('cpmk.index') }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
+                                    <i class="fas fa-tasks nav-icon"></i>
+                                    <p>Capaian Pembelajaran Mata Kuliah</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('mk.index') }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
+                                    <i class="fas fa-book-open nav-icon"></i>
+                                    <p>Mata Kuliah</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
+
+
                 {{-- menu tambah dosen --}}
                 <!-- Pengelolaan Dosen -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
@@ -208,6 +262,9 @@
                     </li>
                 @endif
 
+                
+
+
                 {{-- Pengelolaan Kurikulum, KRS, dan Kelas (di bawah Pengelolaan Mahasiswa) --}}
                 @if (Auth::check() && Auth::user()->role === 'kps')
                     <li
@@ -249,58 +306,7 @@
                     </li>
                 @endif
 
-
-                <!-- Manajemen Data -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li
-                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
-                        <a href="#"
-                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
-                            <i class="nav-icon fas fa-folder"></i>
-                            <p>
-                                Manajemen Data
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('pl.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
-                                    <i class="fas fa-user-graduate nav-icon"></i>
-                                    <p>Profil Lulusan</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('cpl.list') }}"
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
-                                    <i class="fas fa-file-alt nav-icon"></i>
-                                    <p>Capaian Profil Lulusan</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('bk.index') }}"
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
-                                    <i class="fas fa-book nav-icon"></i>
-                                    <p>Bahan Kajian</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('cpmk.index') }}"
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
-                                    <i class="fas fa-tasks nav-icon"></i>
-                                    <p>Capaian Pembelajaran Mata Kuliah</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('mk.index') }}"
-                                    class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
-                                    <i class="fas fa-book-open nav-icon"></i>
-                                    <p>Mata Kuliah</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
                     <!-- Pemetaan -->
                     <li
                         class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
@@ -359,7 +365,6 @@
                         </ul>
                     </li>
                 @endif
-
 
 
                 <!-- Penilaian -->

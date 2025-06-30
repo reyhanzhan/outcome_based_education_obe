@@ -35,6 +35,7 @@
                         <table id="krsTable" class="table table-bordered table-striped text-center">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Periode</th>
                                     <th>NIM</th>
                                     <th>Kode MK</th>
@@ -46,6 +47,7 @@
                             <tbody>
                                 @forelse ($krs as $index => $k)
                                     <tr>
+                                        <td>{{ $index + 1 }}</td>
                                         <td>{{ $k->periode ?? 'N/A' }}</td>
                                         <td>{{ $k->mahasiswa ? $k->mahasiswa->nim ?? 'N/A' : 'N/A' }}</td>
                                         <td>{{ $k->kode_mk ?? 'N/A' }}</td>
@@ -68,13 +70,11 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data KRS.</td>
-                                    </tr>
                                 @endforelse
                             </tbody>
                             <tfoot>
                                 <tr>
+                                    <th>No</th>
                                     <th>Periode</th>
                                     <th>NIM</th>
                                     <th>Kode MK</th>
@@ -113,7 +113,7 @@
                     }],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
+                    "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",

@@ -6,7 +6,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
+                <div class="card-header bg-primary">
                     <h3 class="card-title">Tambah Kelas</h3>
                 </div>
                 <div class="card-body">
@@ -19,12 +19,12 @@
                             </ul>
                         </div>
                     @endif
-                    <form action="{{ route('kelas.store') }}" method="POST" class="text-center">
+                    <form action="{{ route('kelas.store') }}" method="POST">
                         @csrf
                         <div class="form-group">
                             <label for="tahun_kurikulum">Tahun Kurikulum</label>
                             <input type="text" name="tahun_kurikulum" id="tahun_kurikulum" class="form-control"
-                                placeholder="YYYY" required>
+                                   placeholder="YYYY" required>
                         </div>
                         <div class="form-group">
                             <label for="kode_mk">Mata Kuliah</label>
@@ -38,7 +38,7 @@
                         <div class="form-group">
                             <label for="periode">Periode</label>
                             <input type="text" name="periode" id="periode" class="form-control"
-                                placeholder="Contoh: 2024/2025 Ganjil" required>
+                                   placeholder="Contoh: 2024/2025 Ganjil" required>
                         </div>
                         <div class="form-group">
                             <label for="nip_dosen">NIP Dosen</label>
@@ -46,17 +46,16 @@
                                 <option value="">Pilih Dosen</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->nip }}">{{ $user->name }}</option>
-                                    <!-- Ganti nama sesuai kolom di users -->
                                 @endforeach
                             </select>
                         </div>
-                        <a href="{{ route('kelas.index') }}" class="btn btn-secondary mr-2" data-toggle="tooltip"
-                            title="Kembali ke daftar kelas">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
-                        <button type="submit" class="btn btn-primary mt-3" data-toggle="tooltip" title="Simpan data kelas">
+                        <button type="submit" class="btn btn-primary" data-toggle="tooltip" title="Simpan data kelas">
                             <i class="fas fa-save"></i> Simpan
                         </button>
+                        <a href="{{ route('kelas.index') }}" class="btn btn-secondary ml-2" data-toggle="tooltip"
+                           title="Kembali ke daftar kelas">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
                     </form>
                 </div>
             </div>

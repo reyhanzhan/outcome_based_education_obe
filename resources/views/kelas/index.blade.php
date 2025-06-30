@@ -37,33 +37,28 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {{-- @if (session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
-                    @if (session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif --}}
                     <div class="table-responsive">
-                        <table id="kelasTable" class="table table-bordered table-striped text-center">
+                        <table id="kelasTable" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>Tahun Kurikulum</th>
-                                    <th>Kode MK</th>
-                                    <th>Periode</th>
-                                    <th>NIP Dosen</th>
-                                    <th>Nama Dosen</th>
-                                    <th>Aksi</th>
+                                    <th style="width: 5%;">No</th>
+                                    <th style="width: 15%;">Tahun Kurikulum</th>
+                                    <th style="width: 15%;">Kode MK</th>
+                                    <th style="width: 15%;">Periode</th>
+                                    <th style="width: 15%;">NIP Dosen</th>
+                                    <th style="width: 20%;">Nama Dosen</th>
+                                    <th style="width: 15%;" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($kelas as $index => $k)
                                     <tr>
+                                        <td class="text-center">{{ $index + 1 }}</td>
                                         <td>{{ $k->tahun_kurikulum }}</td>
                                         <td>{{ $k->kode_mk }}</td>
                                         <td>{{ $k->periode }}</td>
                                         <td>{{ $k->nip_dosen }}</td>
                                         <td>{{ $k->user ? $k->user->name ?? 'N/A' : 'N/A' }}</td>
-                                        
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('kelas.edit', $k->id) }}"
@@ -85,20 +80,17 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data kelas.</td>
-                                    </tr>
                                 @endforelse
                             </tbody>
-
                             <tfoot>
                                 <tr>
+                                    <th>No</th>
                                     <th>Tahun Kurikulum</th>
                                     <th>Kode MK</th>
                                     <th>Periode</th>
                                     <th>NIP Dosen</th>
-                                    <th>Nama Dosen</th> <!-- Ubah menjadi kapital untuk konsistensi -->
-                                    <th>Aksi</th>
+                                    <th>Nama Dosen</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -122,20 +114,18 @@
                 "searching": true,
                 "info": true,
                 "ordering": true,
-                "columnDefs": [{
-                        "orderable": true,
-                        "targets": 0
-                    }, {
-                        "orderable": false,
-                        "targets": "_all"
-                    }],
+                "columnDefs": [
+                    { "orderable": true, "targets": 0 },
+                    { "orderable": false, "targets": "_all" }
+                ],
+                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
+                    "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",
-                    "searchPlaceholder": "Cari Kurikulum...",
+                    "searchPlaceholder": "Cari Kelas...",
                     "search": "",
                     "paginate": {
                         "first": "Awal",
@@ -149,8 +139,14 @@
                     $(api.table().footer()).find('th').each(function(index) {
                         $(this).text($(api.column(index).header()).text());
                     });
+                },
+                "initComplete": function(settings, json) {
+                    var api = this.api();
+                    if (api.data().length === 0) {
+                        api.clear().draw(); // Hapus data jika kosong
+                    }
                 }
-            });
+            }).buttons().container().appendTo('#kelasTable_wrapper .col-md-6:eq(0)');
 
             // Custom file input label
             $('.custom-file-input').on('change', function() {

@@ -98,7 +98,7 @@
             "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
             "language": {
                 "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                "zeroRecords": "Data tidak ditemukan",
+                "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
                 "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                 "infoEmpty": "Tidak ada data tersedia",
                 "infoFiltered": "(Disaring dari _MAX_ total data)",

@@ -35,6 +35,7 @@
                         <table id="kurikulumTable" class="table table-bordered table-striped text-center">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Tahun</th>
                                     <th>Kode MK</th>
                                     <th>Semester</th>
@@ -44,6 +45,7 @@
                             <tbody>
                                 @forelse ($kurikulum as $index => $k)
                                     <tr>
+                                        <td>{{ $index + 1 }}</td>
                                         <td>{{ $k->tahun }}</td>
                                         <td>{{ $k->kode_mk }}</td>
                                         <td>{{ $k->semester ?? 'N/A' }}</td>
@@ -64,13 +66,11 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center">Tidak ada data kurikulum.</td>
-                                    </tr>
                                 @endforelse
                             </tbody>
                             <tfoot>
                                 <tr>
+                                    <th>No</th>
                                     <th>Tahun</th>
                                     <th>Kode MK</th>
                                     <th>Semester</th>
@@ -107,7 +107,7 @@
                     }],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
+                    "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",
@@ -125,6 +125,13 @@
                     $(api.table().footer()).find('th').each(function(index) {
                         $(this).text($(api.column(index).header()).text());
                     });
+                },
+                // Penanganan tabel kosong
+                "initComplete": function(settings, json) {
+                    var api = this.api();
+                    if (api.data().length === 0) {
+                        api.clear().draw(); // Hapus data jika kosong
+                    }
                 }
             });
 

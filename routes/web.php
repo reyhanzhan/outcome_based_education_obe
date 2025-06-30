@@ -207,6 +207,8 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
         Route::get('/edit/{id}', [DosenController::class, 'edit'])->name('dosen.edit');
         Route::put('/update/{id}', [DosenController::class, 'update'])->name('dosen.update');
         Route::delete('/delete/{id}', [DosenController::class, 'destroy'])->name('dosen.destroy');
+        Route::get('/template', [DosenController::class, 'template'])->name('dosen.template');
+        Route::post('/import', [DosenController::class, 'import'])->name('dosen.import');
     });
 });
 
