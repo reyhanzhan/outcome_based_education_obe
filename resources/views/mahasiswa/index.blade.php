@@ -42,7 +42,7 @@
                                     <th style="width: 15%;">Jalur Penerimaan</th>
                                     <th style="width: 10%;">Gelombang Daftar</th>
                                     <th style="width: 10%;">Agama</th>
-                                    <th style="width: 10%;">Kode Prodi</th>
+                                    {{-- <th style="width: 10%;">Kode Prodi</th> --}}
                                     <th style="width: 15%; text-align: center;">Aksi</th>
                                 </tr>
                             </thead>
@@ -57,7 +57,7 @@
                                         <td>{{ $mahasiswa->jalur_penerimaan }}</td>
                                         <td>{{ $mahasiswa->gelombang_daftar }}</td>
                                         <td>{{ $mahasiswa->agama }}</td>
-                                        <td>{{ $mahasiswa->kode_prodi }}</td>
+                                        {{-- <td>{{ $mahasiswa->kode_prodi }}</td> --}}
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" class="btn btn-warning btn-sm mr-1" data-toggle="tooltip" title="Edit data">
@@ -87,7 +87,7 @@
                                     <th>Jalur Penerimaan</th>
                                     <th>Gelombang Daftar</th>
                                     <th>Agama</th>
-                                    <th>Kode Prodi</th>
+                                    {{-- <th>Kode Prodi</th> --}}
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </tfoot>

@@ -38,7 +38,7 @@
                                     <th style="width: 5%;">No</th>
                                     <th style="width: 25%;">Nama</th>
                                     <th style="width: 25%;">NIP</th>
-                                    <th style="width: 25%;">Kode Prodi</th>
+                                    {{-- <th style="width: 25%;">Kode Prodi</th> --}}
                                     <th style="width: 20%;" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -48,7 +48,7 @@
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $dosen->name }}</td>
                                         <td>{{ $dosen->nip }}</td>
-                                        <td>{{ $dosen->kode_prodi }}</td>
+                                        {{-- <td>{{ $dosen->kode_prodi }}</td> --}}
                                         <td class="text-center">
                                             <a href="{{ route('dosen.edit', $dosen->id) }}" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i>
@@ -75,7 +75,7 @@
                                     <th>No</th>
                                     <th>Nama</th>
                                     <th>NIP</th>
-                                    <th>Kode Prodi</th>
+                                    {{-- <th>Kode Prodi</th> --}}
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </tfoot>

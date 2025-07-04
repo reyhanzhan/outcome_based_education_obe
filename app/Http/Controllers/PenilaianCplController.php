@@ -10,6 +10,7 @@ use App\Models\Mk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PenilaianCplController extends Controller
 {
@@ -24,8 +25,10 @@ class PenilaianCplController extends Controller
             // Ambil periode dan kelas dari session
             $periode = session('previous_periode');
             $kelasInput = session('previous_kelas');
+            $user = Auth::user();
+            $kodeProdi = $user->kode_prodi;
 
-            Log::info('Session Data:', ['periode' => $periode, 'kelasInput' => $kelasInput]);
+            Log::info('Session Data:', ['periode' => $periode, 'kelasInput' => $kelasInput, 'kodeProdi' => $kodeProdi]);
 
             if (!$periode || !$kelasInput) {
                 return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
@@ -37,11 +40,25 @@ class PenilaianCplController extends Controller
             // Scope: 'periode' (hanya periode tertentu) atau 'all' (semua periode hingga periode yang dipilih)
             $scope = $request->query('scope', 'periode');
 
-            $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
-            $cpls = Cpl::with(['cpmks.mks'])->get();
+            $mahasiswa = Mahasiswa::where('id', $mahasiswa_id)->where('kode_prodi', $kodeProdi)->firstOrFail();
+            Log::info('Mahasiswa found:', ['id' => $mahasiswa->id, 'nama' => $mahasiswa->nama, 'kode_prodi' => $mahasiswa->kode_prodi]);
 
-            // Ambil daftar periode yang diambil mahasiswa
+            // Filter CPL berdasarkan kode_prodi dan pastikan relasi cpmks dan mks juga difilter
+            $cpls = Cpl::where('kode_prodi', $kodeProdi)
+                ->with(['cpmks' => function ($query) use ($kodeProdi) {
+                    $query->where('kode_prodi', $kodeProdi)
+                          ->with(['mks' => function ($query) use ($kodeProdi) {
+                              $query->where('kode_prodi', $kodeProdi);
+                          }]);
+                }])
+                ->get();
+            Log::info('CPLs found:', ['count' => $cpls->count(), 'kodeProdi' => $kodeProdi]);
+
+            // Ambil daftar periode yang diambil mahasiswa dengan filter kode_prodi
             $periodeList = Krs::where('nim', $mahasiswa->nim)
+                ->whereHas('mahasiswa', function ($query) use ($kodeProdi) {
+                    $query->where('kode_prodi', $kodeProdi);
+                })
                 ->distinct()
                 ->pluck('periode')
                 ->toArray();
@@ -72,13 +89,22 @@ class PenilaianCplController extends Controller
                         $query = NilaiCpmk::where('mahasiswa_id', $mahasiswa_id)
                             ->where('cpmk_id', $cpmk->id)
                             ->where('mk_id', $mk->id)
-                            ->whereExists(function ($query) use ($periode, $mahasiswa, $scope, $mk) {
+                            ->whereExists(function ($query) use ($periode, $mahasiswa, $scope, $mk, $kodeProdi, $periodeList) {
                                 $query->select(DB::raw(1))
-                                    ->from('krs')
-                                    ->where('krs.nim', $mahasiswa->nim)
-                                    ->where('krs.kode_mk', $mk->kode_mk);
+                                      ->from('krs')
+                                      ->whereColumn('krs.nim', '=', DB::raw("'" . $mahasiswa->nim . "'"))
+                                      ->where('krs.kode_mk', $mk->kode_mk)
+                                      ->whereExists(function ($subquery) use ($kodeProdi) {
+                                          $subquery->select(DB::raw(1))
+                                                   ->from('mahasiswa')
+                                                   ->whereColumn('mahasiswa.nim', 'krs.nim')
+                                                   ->where('mahasiswa.kode_prodi', $kodeProdi);
+                                      });
+                                // Untuk scope=all, ambil semua periode yang valid
                                 if ($scope === 'periode') {
                                     $query->where('krs.periode', $periode);
+                                } elseif ($scope === 'all' && !empty($periodeList)) {
+                                    $query->whereIn('krs.periode', $periodeList);
                                 }
                             });
 
@@ -92,12 +118,17 @@ class PenilaianCplController extends Controller
                             'nilai' => $nilaiCpmk ? $nilaiCpmk->nilai : null,
                         ]);
 
-                        // Periksa KRS
+                        // Periksa KRS dengan filter kode_prodi
                         $krsExists = Krs::where('nim', $mahasiswa->nim)
                             ->where('kode_mk', $mk->kode_mk)
-                            ->where(function ($q) use ($periode, $scope) {
+                            ->whereHas('mahasiswa', function ($query) use ($kodeProdi) {
+                                $query->where('kode_prodi', $kodeProdi);
+                            })
+                            ->where(function ($q) use ($periode, $scope, $periodeList) {
                                 if ($scope === 'periode') {
                                     $q->where('periode', $periode);
+                                } elseif ($scope === 'all' && !empty($periodeList)) {
+                                    $q->whereIn('periode', $periodeList);
                                 }
                             })
                             ->exists();
@@ -108,7 +139,7 @@ class PenilaianCplController extends Controller
                             'exists' => $krsExists,
                         ]);
 
-                        if ($nilaiCpmk) {
+                        if ($nilaiCpmk && $krsExists) {
                             $nilai = $nilaiCpmk->nilai ?? 0;
                             $bobotMk = $mk->pivot->bobot ?? 0;
 
