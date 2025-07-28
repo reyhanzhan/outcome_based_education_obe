@@ -69,13 +69,13 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="mahasiswaTable" class="table table-bordered table-hover">
-                                <thead style="text-align: center;">
+                                <thead>
                                     <tr>
-                                        <th>NIM</th>
-                                        <th>Nama Mahasiswa</th>
-                                        <th>Kode MK</th>
-                                        <th>Nama MK</th>
-                                        <th>Aksi</th>
+                                        <th class="text-center">NIM</th>
+                                        <th class="text-center">Nama Mahasiswa</th>
+                                        <th class="text-center">Kode MK</th>
+                                        <th class="text-center">Nama MK</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>

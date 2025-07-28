@@ -1,11 +1,9 @@
-<nav class="main-header navbar navbar-expand navbar-white navbar-light"
-    style="height: 76px; background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
+<nav class="main-header navbar navbar-expand-md navbar-white navbar-light"
+    style="height: 80px; background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
-        <li class="nav-item hamburger-menu">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                <i class="fas fa-bars"></i>
-            </a>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
     </ul>
 
@@ -39,71 +37,32 @@
     </ul>
 </nav>
 
-@section('css')
 <style>
-    /* Pastikan elemen hamburger menu terlihat secara default */
-    .hamburger-menu {
-        display: block;
+    /* Sembunyikan fas fa-bars pada layar >= 768px */
+@media (min-width: 768px) {
+    .main-header .navbar-nav .nav-item .nav-link .fas.fa-bars {
+        display: none !important;
     }
+}
 
-    /* Sembunyikan hamburger menu pada layar besar (>= 768px) */
-    @media (min-width: 768px) {
-        .navbar-nav .nav-item.hamburger-menu {
-            display: none !important;
-        }
-        .content-wrapper {
-            margin-left: 250px !important; /* Sesuaikan dengan lebar sidebar */
-            transition: margin-left 0.3s ease-in-out;
-        }
+/* Tampilkan fas fa-bars pada rentang 769px hingga 991px */
+@media (min-width: 769px) and (max-width: 991px) {
+    .main-header .navbar-nav .nav-item .nav-link .fas.fa-bars {
+        display: inline-block !important; /* Atau display: block sesuai kebutuhan */
     }
+}
 
-    /* Pastikan hamburger menu terlihat dan sidebar collapsed pada layar kecil (< 768px) */
-    @media (max-width: 767.98px) {
-        .navbar-nav .nav-item.hamburger-menu {
-            display: block !important;
-        }
-        .content-wrapper {
-            margin-left: 0 !important;
-        }
-        .sidebar-mini.sidebar-collapse .main-sidebar {
-            transform: translateX(-100%);
-        }
-        .sidebar-mini.sidebar-collapse .content-wrapper {
-            margin-left: 0 !important;
-        }
+/* Pastikan sidebar muncul 100% pada layar >= 991px */
+@media (min-width: 991px) {
+    .main-sidebar {
+        transform: translateX(0) !important;
+        width: 250px !important; /* Lebar maksimum sidebar */
+        display: block !important;
     }
+    .content-wrapper {
+        margin-left: 250px !important; /* Sesuaikan dengan lebar sidebar */
+    }
+}
+
+
 </style>
-@endsection
-
-@section('scripts')
-<script>
-    $(document).ready(function() {
-        // Pastikan jQuery dimuat
-        if (typeof jQuery === 'undefined') {
-            console.error('jQuery tidak dimuat!');
-        } else {
-            // Atur status sidebar berdasarkan lebar layar
-            function adjustSidebar() {
-                if ($(window).width() >= 768) {
-                    $('body').removeClass('sidebar-collapse'); // Sidebar terbuka pada layar besar
-                } else {
-                    $('body').addClass('sidebar-collapse'); // Sidebar collapsed pada layar kecil
-                }
-            }
-
-            // Jalankan saat halaman dimuat
-            adjustSidebar();
-
-            // Jalankan saat ukuran layar berubah
-            $(window).resize(function() {
-                adjustSidebar();
-            });
-
-            // Toggle sidebar saat hamburger menu diklik
-            $('[data-widget="pushmenu"]').on('click', function() {
-                $('body').toggleClass('sidebar-collapse');
-            });
-        }
-    });
-</script>
-@endsection

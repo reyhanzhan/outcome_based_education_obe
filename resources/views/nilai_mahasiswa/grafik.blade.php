@@ -92,7 +92,7 @@
                             <thead>
                                 <tr>
                                     <th>Kode CPMK</th>
-                                    <th>Deskripsi</th>
+                                    <th class="text-center">Deskripsi</th>
                                     <th>Nilai Asli</th>
                                     <th>Bobot (%)</th>
                                     <th>Nilai Akhir (Setelah Bobot)</th>
@@ -162,7 +162,7 @@
                         data: Array(labels.length).fill(minStandard),
                         fill: chartType === 'radar' ? true : false,
                         backgroundColor: chartType === 'radar' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderColor: 'rgba(258, 99, 132, 1)',
                         borderWidth: 2,
                         pointRadius: 0,
                         pointHoverRadius: 0

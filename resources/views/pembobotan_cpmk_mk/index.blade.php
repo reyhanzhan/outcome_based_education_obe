@@ -7,7 +7,8 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header bg-primary">
-                    <h3 class="card-title">Pembobotan CPMK - MK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
+                    <h3 class="card-title">Pembobotan CPMK - MK -
+                        {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
@@ -74,7 +75,8 @@
                                                     </tbody>
                                                 </table>
                                                 <p class="total-bobot-teknik-p"><strong>Total Bobot Teknik
-                                                        ({{ $cpmk->kode_cpmk }}): <span class="total-bobot-teknik"
+                                                        ({{ $cpmk->kode_cpmk }})
+                                                        : <span class="total-bobot-teknik"
                                                             data-cpmk="{{ $cpmk->id }}">0</span>%</strong></p>
                                             </td>
                                         </tr>
@@ -132,7 +134,8 @@
                 var mk_id = $(this).val();
                 if (mk_id) {
                     $.ajax({
-                        url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id', mk_id),
+                        url: '{{ route('pembobotan.get-cpmks', ':mk_id') }}'.replace(':mk_id',
+                            mk_id),
                         type: 'GET',
                         dataType: 'json',
                         success: function(response) {
@@ -192,7 +195,8 @@
                                 `;
                                 });
                             } else {
-                                html = '<tr><td colspan="2" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
+                                html =
+                                    '<tr><td colspan="2" class="text-center">Tidak ada data CPMK untuk MK ini</td></tr>';
                             }
                             $('#cpmkTableBody').html(html);
                             updateTotalBobot();
@@ -268,7 +272,8 @@
                             $('#mkSelect').trigger('change'); // Reload data setelah simpan
                         },
                         error: function(xhr) {
-                            toastr.error('Gagal menyimpan data! ' + (xhr.responseJSON?.error || ''));
+                            toastr.error('Gagal menyimpan data! ' + (xhr.responseJSON?.error ||
+                                ''));
                         }
                     });
                 }
@@ -277,6 +282,18 @@
     </script>
 
     <style>
+        /* hapus panah atas bawah */
+        .teknik-bobot-input[type="number"] {
+            -moz-appearance: textfield;
+            /* Firefox */
+        }
+
+        .teknik-bobot-input[type="number"]::-webkit-inner-spin-button,
+        .teknik-bobot-input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* hapus panah atas bawah */
         .form-group .select2-container {
             width: 100% !important;
         }

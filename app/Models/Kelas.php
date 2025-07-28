@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Kelas extends Model
 {
     protected $table = 'kelas';
-    protected $fillable = ['kode_prodi', 'tahun_kurikulum', 'kode_mk', 'periode','nip_dosen'];
+    protected $fillable = [
+        'kode_prodi',
+        'kurikulum_id',
+        'tahun',
+        'kode_mk',
+        'periode',
+        'nip_dosen',
+    ];
     
     public function user()
     {

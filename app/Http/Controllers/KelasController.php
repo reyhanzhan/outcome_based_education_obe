@@ -73,7 +73,7 @@ class KelasController extends Controller
             }
 
             $request->validate([
-                'tahun_kurikulum' => 'required|date_format:Y',
+                'tahun' => 'required|date_format:Y',
                 'kode_mk' => 'required|exists:mk,kode_mk',
                 'periode' => 'required',
                 'nip_dosen' => 'required|exists:users,nip',
@@ -81,7 +81,7 @@ class KelasController extends Controller
 
             $data = [
                 'kode_prodi' => $kodeProdi,
-                'tahun_kurikulum' => $request->tahun_kurikulum,
+                'tahun' => $request->tahun,
                 'kode_mk' => $request->kode_mk,
                 'periode' => $request->periode,
                 'nip_dosen' => $request->nip_dosen,
@@ -135,7 +135,7 @@ class KelasController extends Controller
             }
 
             $request->validate([
-                'tahun_kurikulum' => 'required|date_format:Y',
+                'tahun' => 'required|date_format:Y',
                 'kode_mk' => 'required|exists:mk,kode_mk',
                 'periode' => 'required',
                 'nip_dosen' => 'required|exists:users,nip',
@@ -143,7 +143,7 @@ class KelasController extends Controller
 
             $kelas = Kelas::where('kode_prodi', $kodeProdi)->findOrFail($id);
             $kelas->update([
-                'tahun_kurikulum' => $request->tahun_kurikulum,
+                'tahun' => $request->tahun,
                 'kode_mk' => $request->kode_mk,
                 'periode' => $request->periode,
                 'nip_dosen' => $request->nip_dosen,
@@ -217,19 +217,15 @@ class KelasController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'tahun_kurikulum');
+        $sheet->setCellValue('A1', 'tahun');
         $sheet->setCellValue('B1', 'kode_mk');
         $sheet->setCellValue('C1', 'periode');
         $sheet->setCellValue('D1', 'nip_dosen');
 
         $sheet->setCellValueExplicit('A2', '2025', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit('B2', 'MK001', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit('C2', '20251', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit('D2', '201114101', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-
-        $sheet->getStyle('D2:D1000')->getNumberFormat()->setFormatCode('@');
-
-        $sheet->setCellValue('A3', 'Catatan: Masukkan NIP tanpa tanda `, kolom ini otomatis diformat sebagai teks.');
+        $sheet->setCellValueExplicit('B2', '00A001', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit('C2', '2024', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit('D2', '0724067103', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
         $sheet->getStyle('A1:D1')->getFont()->setBold(true);
         $sheet->getStyle('A1:D1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);

@@ -54,7 +54,7 @@
                                 @forelse ($kelas as $index => $k)
                                     <tr>
                                         <td class="text-center">{{ $index + 1 }}</td>
-                                        <td>{{ $k->tahun_kurikulum }}</td>
+                                        <td>{{ $k->tahun }}</td>
                                         <td>{{ $k->kode_mk }}</td>
                                         <td>{{ $k->periode }}</td>
                                         <td>{{ $k->nip_dosen }}</td>
@@ -118,7 +118,7 @@
                     { "orderable": true, "targets": 0 },
                     { "orderable": false, "targets": "_all" }
                 ],
-                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
                     "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",

@@ -10,6 +10,7 @@ use App\Imports\PlImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\Log;
 
 
 class PlController extends Controller
@@ -188,4 +189,22 @@ class PlController extends Controller
 
         return response()->download($tempFile, 'template_pl.xlsx')->deleteFileAfterSend(true);
     }
+
+    public function bulkDestroy(Request $request)
+{
+    $request->validate([
+        'ids' => 'required|array',
+        'ids.*' => 'exists:pls,id'
+    ]);
+
+    try {
+        Pl::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => 'Data terpilih berhasil dihapus.']);
+    } catch (\Exception $e) {
+        Log::error('Bulk destroy failed: ' . $e->getMessage());
+        return response()->json(['error' => 'Terjadi kesalahan saat menghapus data.'], 500);
+    }
+}
+
+
 }

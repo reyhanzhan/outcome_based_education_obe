@@ -1,57 +1,75 @@
+
 @extends('layouts_adminlte.app')
 
 @section('title', 'Pemetaan CPL - BK')
 
 @section('content')
-<section class="content">
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header bg-primary">
-                <h3 class="card-title">Pemetaan CPL - BK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
-            </div>
-            <div class="card-body">
-                @if ($cpls->isEmpty() || $bks->isEmpty())
-                    <div class="alert alert-warning">
-                        Tidak ada data CPL atau BK untuk dipetakan. Silakan tambahkan data terlebih dahulu.
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
+                    {{-- <h3 class="card-title flex-grow-1">Pemetaan CPL - BK</h3> --}}
+                    <div class="mx-3">
+                        <a href="{{ route('cpl_bk.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data pemetaan">
+                            <i class="fas fa-download"></i> Download Template
+                        </a>
                     </div>
-                @else
-                    <div class="table-responsive">
-                        <table id="pemetaanTable" class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" class="align-middle text-center">No</th>
-                                    <th rowspan="2" class="align-middle text-center">Kode BK</th>
-                                    <th colspan="{{ count($cpls) }}" class="text-center">Capaian Profil Lulusan (CPL)</th>
-                                </tr>
-                                <tr>
-                                    @foreach ($cpls as $cpl)
-                                        <th class="text-center">{{ $cpl->kode_cpl }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($bks as $index => $bk)
+                    <div class="mx-3">
+                        <form action="{{ route('cpl_bk.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
+                            @csrf
+                            <div class="custom-file" style="width: 200px;">
+                                <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
+                                <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip" title="Impor data pemetaan dari file Excel">
+                                <i class="fas fa-upload"></i> Impor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if ($cpls->isEmpty() || $bks->isEmpty())
+                        <div class="alert alert-warning">
+                            Tidak ada data CPL atau BK untuk dipetakan. Silakan tambahkan data terlebih dahulu.
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table id="pemetaanTable" class="table table-bordered table-hover">
+                                <thead>
                                     <tr>
-                                        <td class="text-center">{{ $index + 1 }}</td>
-                                        <td>{{ $bk->kode_bk }}</td>
+                                        <th rowspan="2" class="align-middle text-center">No</th>
+                                        <th rowspan="2" class="align-middle text-center">Kode BK</th>
+                                        <th colspan="{{ count($cpls) }}" class="text-center">Capaian Pembelajaran Lulusan (CPL)</th>
+                                    </tr>
+                                    <tr>
                                         @foreach ($cpls as $cpl)
-                                            <td class="text-center">
-                                                <input type="checkbox" class="update-mapping"
-                                                       data-cpl="{{ $cpl->id }}"
-                                                       data-bk="{{ $bk->id }}"
-                                                       @if (isset($pemetaan[$cpl->id . '-' . $bk->id])) checked @endif>
-                                            </td>
+                                            <th class="text-center">{{ $cpl->kode_cpl }}</th>
                                         @endforeach
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                                </thead>
+                                <tbody>
+                                    @foreach ($bks as $index => $bk)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td>{{ $bk->kode_bk }}</td>
+                                            @foreach ($cpls as $cpl)
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="update-mapping"
+                                                           data-cpl="{{ $cpl->id }}"
+                                                           data-bk="{{ $bk->id }}"
+                                                           @if (isset($pemetaan[$cpl->id . '-' . $bk->id])) checked @endif>
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 @endsection
 
 @section('scripts')
@@ -86,11 +104,11 @@
                 var cpl_id = $(this).data("cpl");
                 var bk_id = $(this).data("bk");
                 var checked = $(this).is(":checked");
-                var checkedValue = checked ? 1 : 0;
+                var checkedValue = checked ? 1 : 0; // Konversi ke 1 atau 0
                 console.log("Sending data: ", { cpl_id, bk_id, checked: checkedValue });
 
                 $.ajax({
-                    url: "{{ route('Cpl_Bk.update') }}",
+                    url: "{{ route('cpl_bk.update') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
@@ -115,6 +133,15 @@
                     }
                 });
             });
+
+            // Custom file input label
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
+            });
+
+            // Aktifkan tooltip
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 

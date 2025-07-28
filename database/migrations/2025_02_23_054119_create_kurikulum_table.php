@@ -24,8 +24,7 @@ return new class extends Migration {
                 ->on('program_studi')
                 ->onDelete('cascade');
         
-            // 🔥 Pastikan kombinasi tahun, prodi, dan mk unik
-            // $table->unique(['tahun', 'kode_prodi', 'kode_mk']);
+                $table->unique(['tahun', 'kode_prodi', 'kode_mk']);
         });
         
     }

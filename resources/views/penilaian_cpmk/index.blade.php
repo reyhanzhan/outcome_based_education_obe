@@ -76,7 +76,10 @@
                     <strong>Periode:</strong> {{ $periode }} <br>
                     <strong>Kelas:</strong> {{ $kelasInput }} <br>
                     <div class="calculation-note">
-                        *Catatan: Nilai akhir setiap CPMK dihitung dengan rumus: (Nilai Input × Bobot) / 100. Nilai total mata kuliah adalah jumlah nilai akhir semua CPMK. Nilai input di bawah standar minimum ({{ $minStandard }}) ditandai merah.
+                        *Catatan: Nilai setiap CPMK didapat dari: (Nilai Mahasiswa × Bobot) / 100. <br>
+                        Nilai total mata kuliah adalah jumlah nilai akhir semua CPMK. <br>
+                        Nilai mahasiswa di bawah standar minimum ({{ $minStandard }}) ditandai dengan warna merah.
+                        
                     </div>
                 </div>
 
@@ -134,7 +137,7 @@
                                 $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
                                 $nilaiAkhir = ($nilaiInput * $bobot) / 100;
                             @endphp
-                            {{ $cpmk->kode_cpmk }}: Nilai Input = {{ $nilaiInput }}, Bobot = {{ $bobot }}%, Kontribusi = {{ number_format($nilaiAkhir, 2) }}<br>
+                            {{ $cpmk->kode_cpmk }}: Nilai Mahasiswa = {{ $nilaiInput }}, Bobot = {{ $bobot }}%, Kontribusi Dalam 100% = {{ number_format($nilaiAkhir, 2) }}<br>
                         @endforeach
                         <strong>Total Nilai MK: {{ number_format($totalScore, 0) }}</strong>
                     </div>

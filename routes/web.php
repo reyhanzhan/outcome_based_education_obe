@@ -24,6 +24,7 @@ use App\Http\Controllers\KurikulumController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KrsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 // Rute untuk login (akses tanpa autentikasi)
 Route::middleware('guest')->group(function () {
@@ -33,6 +34,13 @@ Route::middleware('guest')->group(function () {
 
 // Logout (akses setelah autentikasi)
 Route::middleware('auth')->post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/change-password', [ProfileController::class, 'showChangePasswordForm'])->name('change.password');
+    Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('change.password.update');
+});
 
 // Rute utama setelah login (pengalihan berdasarkan role)
 Route::get('/', function () {
@@ -72,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{id}', [PlController::class, 'destroy'])->name('pl.destroy');
             Route::post('/import', [PlController::class, 'import'])->name('pl.import');
             Route::get('/template', [PlController::class, 'downloadTemplate'])->name('pl.template');
+            Route::post('/pl/bulk-destroy', [PlController::class, 'bulkDestroy'])->name('pl.bulkDestroy');
+            Route::post('/pl/delete-all', [PlController::class, 'deleteAll'])->name('pl.deleteAll');
         });
     });
 });
@@ -129,16 +139,33 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
 // Rute untuk Pemetaan (hanya untuk KPS)
 Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::get('/CPL-PL', [Cpl_PlController::class, 'index'])->name('Cpl_Pl.index');
+    Route::get('/cpl-pl/template', [Cpl_PlController::class, 'downloadTemplate'])->name('cpl_pl.template');
+    Route::post('/cpl-pl/import', [Cpl_PlController::class, 'import'])->name('cpl_pl.import');
     Route::post('/CPL-PL/update', [Cpl_PlController::class, 'update'])->name('Cpl_Pl.update');
+
     Route::get('/CPL-MK', [Cpl_MkController::class, 'index'])->name('Cpl_Mk.index');
     Route::post('/CPL-MK/update', [Cpl_MkController::class, 'update'])->name('Cpl_Mk.update');
+    Route::get('/cpl-mk/template', [Cpl_MkController::class, 'downloadTemplate'])->name('cpl_mk.template');
+    Route::post('/cpl-mk/import', [Cpl_MkController::class, 'import'])->name('cpl_mk.import');
+
     Route::get('/CPMK-CPL', [Cpmk_CplController::class, 'index'])->name('Cpmk_Cpl.index');
     Route::post('/CPMK-CPL/update', [Cpmk_CplController::class, 'update'])->name('Cpmk_Cpl.update');
+    Route::get('/CPMK-CPL/template', [Cpmk_CplController::class, 'downloadTemplate'])->name('cpmk_cpl.template');
+    Route::post('/CPMK-CPL/import', [Cpmk_CplController::class, 'import'])->name('cpmk_cpl.import');
+    
+
     Route::get('/CPMK-MK', [Cpmk_MkController::class, 'index'])->name('Cpmk_Mk.index');
     Route::post('/CPMK-MK/update', [Cpmk_MkController::class, 'update'])->name('Cpmk_Mk.update');
+    Route::get('/cpmk-mk/template', [Cpmk_MkController::class, 'downloadTemplate'])->name('cpmk_mk.template');
+    Route::post('/cpmk-mk/import', [Cpmk_MkController::class, 'import'])->name('cpmk_mk.import');
     Route::get('/total-bobot', [Cpmk_MkController::class, 'getTotalBobot'])->name('Cpmk_Mk.totalBobot');
-    Route::get('/CPL-BK', [Cpl_BKController::class, 'index'])->name('Cpl_Bk.index');
-    Route::post('/CPL-BK/update', [Cpl_BKController::class, 'update'])->name('Cpl_Bk.update');
+
+Route::get('/CPL-BK', [Cpl_BkController::class, 'index'])->name('Cpl_Bk.index');
+Route::post('/CPL-BK/update', [Cpl_BkController::class, 'update'])->name('cpl_bk.update');
+Route::get('/CPL-BK/template', [Cpl_BkController::class, 'downloadTemplate'])->name('cpl_bk.template');
+Route::post('/CPL-BK/import', [Cpl_BkController::class, 'import'])->name('cpl_bk.import');
+
+
     Route::get('/cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('CplCpmkMk.index');
     Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-CPL.index');
     Route::post('/pemetaan_cpmkpl/update', [PemetaancpmkplController::class, 'update'])->name('pemetaan_CPMK-CPL.update');

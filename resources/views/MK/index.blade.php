@@ -106,7 +106,7 @@
                         "targets": "_all"
                     }
                 ],
-                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
                     "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",

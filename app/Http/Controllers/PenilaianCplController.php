@@ -68,7 +68,7 @@ class PenilaianCplController extends Controller
             $cplData = [];
             $labels = [];
             $data = [];
-            $minStandard = 55;
+            $minStandard = 65;
 
             Log::info('Memproses CPL untuk Mahasiswa: ' . $mahasiswa->nama . ', ID: ' . $mahasiswa_id . ', Periode: ' . $periode . ', Scope: ' . $scope);
 

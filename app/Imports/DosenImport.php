@@ -40,7 +40,6 @@ class DosenImport implements ToModel, WithHeadingRow, WithValidation, WithStartR
             'name' => 'required|string|max:255',
             'nip' => [
                 'required',
-                'string',
                 'max:255',
                 \Illuminate\Validation\Rule::unique('users', 'nip')->where(function ($query) {
                     return $query->where('kode_prodi', $this->kodeProdi);

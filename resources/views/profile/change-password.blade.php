@@ -1,13 +1,13 @@
 @extends('layouts_adminlte.app')
 
-@section('title', 'Edit Profil')
+@section('title', 'Ganti Password')
 
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card mt-4">
-                    <div class="card-header">Edit Profil</div>
+                    <div class="card-header">Ganti Password</div>
 
                     <div class="card-body">
                         @if (session('success'))
@@ -26,28 +26,32 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('profile.update') }}">
+                        <form method="POST" action="{{ route('change.password.update') }}">
                             @csrf
-                            @method('PUT')
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">Nama</label>
-                                <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required>
-                                @error('name')
+                                <label for="current_password" class="form-label">Password Lama</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                @error('current_password')
                                     <div class="text-danger">{{ $error }}</div>
                                 @endif
                             </div>
 
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>
-                                @error('email')
+                                <label for="new_password" class="form-label">Password Baru</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                @error('new_password')
                                     <div class="text-danger">{{ $error }}</div>
                                 @endif
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                            <a href="{{ route('change.password') }}" class="btn btn-info ms-2">Ganti Password</a>
+                            <div class="mb-3">
+                                <label for="new_password_confirmation" class="form-label">Konfirmasi Password Baru</label>
+                                <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Ganti Password</button>
+                            <a href="{{ route('profile.edit') }}" class="btn btn-secondary ms-2">Kembali</a>
                         </form>
                     </div>
                 </div>

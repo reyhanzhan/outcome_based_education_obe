@@ -88,53 +88,53 @@
 @endsection
 
 @section('scripts')
-    <script>
-        $(document).ready(function() {
-            $("#dosenTable").DataTable({
-                "responsive": true,
-                "autoWidth": false,
-                "paging": true,
-                "lengthMenu": [10, 25, 50, 100],
-                "pageLength": 10,
-                "searching": true,
-                "info": true,
-                "ordering": true,
-                "columnDefs": [
-                    { "orderable": true, "targets": 0 },
-                    { "orderable": false, "targets": "_all" }
-                ],
-                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
-                "language": {
-                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
-                    "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Tidak ada data tersedia",
-                    "infoFiltered": "(Disaring dari _MAX_ total data)",
-                    "searchPlaceholder": "Cari Dosen...",
-                    "search": "",
-                    "paginate": {
-                        "first": "Awal",
-                        "last": "Akhir",
-                        "next": "Berikutnya",
-                        "previous": "Sebelumnya"
-                    }
-                },
-                "footerCallback": function(row, data, start, end, display) {
-                    var api = this.api();
-                    $(api.table().footer()).find('th').each(function(index) {
-                        $(this).text($(api.column(index).header()).text());
-                    });
+<script>
+    $(document).ready(function() {
+        $("#example1").DataTable({
+            "responsive": true,
+            "autoWidth": false,
+            "paging": true,
+            "lengthMenu": [10, 25, 50, 100],
+            "pageLength": 10,
+            "searching": true,
+            "info": true,
+            "ordering": true,
+            "columnDefs": [
+                { "orderable": true, "targets": 0 },
+                { "orderable": false, "targets": "_all" }
+            ],
+            // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+            "language": {
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "zeroRecords": "Tidak ada data, Mohon buat atau import data terlebih dahulu",
+                "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
+                "infoEmpty": "Tidak ada data tersedia",
+                "infoFiltered": "(Disaring dari _MAX_ total data)",
+                "searchPlaceholder": "Cari Capaian Profil Lulusan...",
+                "search": "",
+                "paginate": {
+                    "first": "Awal",
+                    "last": "Akhir",
+                    "next": "Berikutnya",
+                    "previous": "Sebelumnya"
                 }
-            }).buttons().container().appendTo('#dosenTable_wrapper .col-md-6:eq(0)');
+            },
+            "footerCallback": function(row, data, start, end, display) {
+                var api = this.api();
+                $(api.table().footer()).find('th').each(function(index) {
+                    $(this).text($(api.column(index).header()).text());
+                });
+            }
+        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
 
-            // Custom file input label
-            $('.custom-file-input').on('change', function() {
-                let fileName = $(this).val().split('\\').pop();
-                $(this).next('.custom-file-label').addClass("selected").html(fileName);
-            });
-
-            // Aktifkan tooltip
-            $('[data-toggle="tooltip"]').tooltip();
+        // Custom file input label
+        $('.custom-file-input').on('change', function() {
+            let fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
         });
-    </script>
+
+        // Aktifkan tooltip
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
 @endsection

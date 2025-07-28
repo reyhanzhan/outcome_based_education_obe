@@ -6,8 +6,24 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header bg-primary">
-                    <h3 class="card-title">Pemetaan CPL - PL - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3>
+                <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
+                    <div class="mx-3">
+                        <a href="{{ route('cpl_pl.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data pemetaan">
+                            <i class="fas fa-download"></i> Download Template
+                        </a>
+                    </div>
+                    <div class="mx-3">
+                        <form action="{{ route('cpl_pl.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
+                            @csrf
+                            <div class="custom-file" style="width: 200px;">
+                                <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
+                                <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary ml-2" data-toggle="tooltip" title="Impor data pemetaan dari file Excel">
+                                <i class="fas fa-upload"></i> Impor
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if ($cpls->isEmpty() || $pls->isEmpty())
@@ -115,6 +131,15 @@
                     }
                 });
             });
+
+            // Custom file input label
+            $('.custom-file-input').on('change', function() {
+                let fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').addClass("selected").html(fileName);
+            });
+
+            // Aktifkan tooltip
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 
