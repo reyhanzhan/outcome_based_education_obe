@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use App\Imports\CpmkMkImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Kurikulum;
 
 class Cpmk_MkController extends Controller
 {
@@ -35,13 +36,29 @@ class Cpmk_MkController extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if ($tahunFilter) {
+                session(['selected_year' => $tahunFilter]);
+            } else {
+                $tahunFilter = session('selected_year', '');
+            }
+            Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+            Log::info("Index - kurikulumId: {$kurikulumId}");
+
             $cpmks = Cpmk::where('kode_prodi', $kodeProdi)->get();
             $mks = Mk::where('kode_prodi', $kodeProdi)->get();
 
-            $pemetaan = DB::table('cpmk_mk')
+            $query = DB::table('cpmk_mk')
                 ->whereIn('cpmk_id', $cpmks->pluck('id'))
-                ->whereIn('mk_id', $mks->pluck('id'))
-                ->get()
+                ->whereIn('mk_id', $mks->pluck('id'));
+            if ($kurikulumId) {
+                $query->where('kurikulum_id', $kurikulumId);
+            } else {
+                $query->whereNull('kurikulum_id'); // Fallback untuk data tanpa kurikulum_id
+            }
+            $pemetaan = $query->get()
                 ->mapWithKeys(function ($item) {
                     return [
                         $item->cpmk_id . '-' . $item->mk_id => [
@@ -51,9 +68,9 @@ class Cpmk_MkController extends Controller
                     ];
                 });
 
-            Log::info("Successfully loaded pemetaan CPMK-MK for kode_prodi: {$kodeProdi}, CPMK count: {$cpmks->count()}, MK count: {$mks->count()}");
+            Log::info("Successfully loaded pemetaan CPMK-MK for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, pemetaan count: " . count($pemetaan));
 
-            return view('pemetaan_CPMK-MK.index', compact('cpmks', 'mks', 'pemetaan'));
+            return view('pemetaan_CPMK-MK.index', compact('cpmks', 'mks', 'pemetaan', 'tahunFilter'));
         } catch (\Exception $e) {
             Log::error('Error loading pemetaan CPMK-MK: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
@@ -256,12 +273,10 @@ class Cpmk_MkController extends Controller
     public function import(Request $request)
     {
         try {
-            // Validasi file
             $request->validate([
                 'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
             ]);
 
-            // Periksa apakah file ada dan valid
             if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
                 Log::error('Invalid or missing file uploaded.');
                 return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('cpmk_mk.template') . '">Download template</a>.');
@@ -275,14 +290,26 @@ class Cpmk_MkController extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
-            // Log informasi impor
-            Log::info('Starting CPMK-MK import for kode_prodi: ' . $kodeProdi);
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if (!$tahunFilter) {
+                Log::error("Tahun tidak ditemukan di session atau request untuk kode_prodi {$kodeProdi}.");
+                return redirect()->back()->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
+            }
+            Log::info("Import - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
 
-            // Impor file menggunakan CpmkMkImport
-            Excel::import(new CpmkMkImport($kodeProdi), $file);
+            $kurikulum = Kurikulum::firstOrCreate(
+                ['tahun' => $tahunFilter, 'kode_prodi' => $kodeProdi],
+                ['kode_mk' => 'MK001', 'semester' => 1]
+            );
+            $kurikulumId = $kurikulum->id;
+            Log::info("Import - kurikulumId from firstOrCreate: {$kurikulumId}");
 
-            Log::info('CPMK-MK import completed successfully for kode_prodi: ' . $kodeProdi);
-            return redirect()->route('Cpmk_Mk.index')->with('success', 'Data pemetaan CPMK-MK berhasil diimpor.');
+            Log::info('Starting CPMK-MK import for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter . ', kurikulum_id: ' . $kurikulumId);
+
+            Excel::import(new CpmkMkImport($kodeProdi, $kurikulumId), $file);
+
+            Log::info('CPMK-MK import completed successfully for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter);
+            return redirect()->route('Cpmk_Mk.index', ['tahun' => $tahunFilter])->with('success', 'Data pemetaan CPMK-MK berhasil diimpor.');
         } catch (\Exception $e) {
             Log::error('Import failed: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());

@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Kelas;
+use App\Models\Kurikulum;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -11,26 +12,54 @@ use Maatwebsite\Excel\Validators\Failure;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\BeforeImport;
+use Illuminate\Support\Facades\Log;
 
 class KelasImport implements ToModel, WithHeadingRow, WithValidation, WithStartRow, WithEvents
 {
     use Importable;
 
     private $kodeProdi;
+    private $tahunFilter;
 
-    public function __construct($kodeProdi)
+    public function __construct($kodeProdi, $tahunFilter)
     {
         $this->kodeProdi = $kodeProdi;
+        $this->tahunFilter = $tahunFilter;
+        Log::info("KelasImport initialized with kodeProdi: {$this->kodeProdi}, tahunFilter: {$this->tahunFilter}");
     }
 
     public function model(array $row)
     {
+        Log::debug('Processing row: ' . json_encode($row));
+
+        $tahun = trim($row['tahun'] ?? '');
+        if (empty($tahun)) {
+            Log::warning("Skipping row due to empty tahun, row: " . json_encode($row));
+            return null;
+        }
+
+        if ($tahun !== $this->tahunFilter) {
+            Log::warning("Skipping row with tahun {$tahun}, expected {$this->tahunFilter}, row: " . json_encode($row));
+            return null;
+        }
+
+        // Cari kurikulum_id berdasarkan tahun dan kode_prodi
+        $kurikulumId = Kurikulum::where('kode_prodi', $this->kodeProdi)
+                              ->where('tahun', $this->tahunFilter)
+                              ->value('id');
+
+        if (!$kurikulumId) {
+            Log::warning("No kurikulum found for kodeProdi: {$this->kodeProdi}, tahunFilter: {$this->tahunFilter}");
+            $kurikulumId = null; // Atau buat kurikulum baru jika diperlukan
+        }
+
         return new Kelas([
-            'tahun' => $row['tahun'],
-            'kode_mk' => $row['kode_mk'],
-            'periode' => $row['periode'],
-            'nip_dosen' => $row['nip_dosen'],
+            'tahun' => $tahun,
+            'kode_mk' => trim($row['kode_mk'] ?? ''),
+            'periode' => trim($row['periode'] ?? ''),
+            'nip_dosen' => trim($row['nip_dosen'] ?? ''),
             'kode_prodi' => $this->kodeProdi,
+            'kurikulum_id' => $kurikulumId,
         ]);
     }
 
@@ -47,14 +76,14 @@ class KelasImport implements ToModel, WithHeadingRow, WithValidation, WithStartR
     public function customValidationMessages()
     {
         return [
-            'tahun_kurikulum.required' => 'Baris :row: Kolom tahun kurikulum wajib diisi.',
-            'tahun_kurikulum.numeric' => 'Baris :row: Tahun kurikulum harus berupa angka.',
-            'tahun_kurikulum.min' => 'Baris :row: Tahun kurikulum harus minimal 2000.',
-            'tahun_kurikulum.max' => 'Baris :row: Tahun kurikulum tidak boleh lebih dari 2025.',
+            'tahun.required' => 'Baris :row: Kolom tahun wajib diisi.',
+            'tahun.numeric' => 'Baris :row: Tahun harus berupa angka.',
+            'tahun.min' => 'Baris :row: Tahun harus minimal 2000.',
+            'tahun.max' => 'Baris :row: Tahun tidak boleh lebih dari 2025.',
             'kode_mk.required' => 'Baris :row: Kolom kode mata kuliah wajib diisi.',
-            'kode_mk.exists' => 'Baris :row: Kode mata kuliah :input tidak valid. Periksa tabel mk untuk nilai yang benar.',
+            'kode_mk.exists' => 'Baris :row: Kode mata kuliah :input tidak valid.',
             'nip_dosen.required' => 'Baris :row: Kolom NIP dosen wajib diisi.',
-            'nip_dosen.exists' => 'Baris :row: NIP dosen :input tidak valid. Periksa tabel users untuk nilai yang benar.',
+            'nip_dosen.exists' => 'Baris :row: NIP dosen :input tidak valid.',
         ];
     }
 
@@ -67,6 +96,7 @@ class KelasImport implements ToModel, WithHeadingRow, WithValidation, WithStartR
     {
         $failure = $failures[0];
         $message = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
+        Log::error($message);
         throw new \Exception($message);
     }
 

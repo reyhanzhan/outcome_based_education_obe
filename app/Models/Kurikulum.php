@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Kurikulum extends Model
 {
     protected $table = 'kurikulum';
-    protected $fillable = ['tahun', 'kode_prodi', 'kode_mk', 'semester'];
+    protected $fillable = ['tahun', 'kode_prodi', 'kode_mk', 'semester', 'kurikulum_id',];
 
-    // Relasi ke Program Studi
+
+
     public function programStudi()
     {
         return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
@@ -27,5 +28,10 @@ class Kurikulum extends Model
         return $this->hasMany(Krs::class, 'tahun', 'tahun')
                     ->where('kode_prodi', $this->kode_prodi)
                     ->where('kode_mk', $this->kode_mk);
+    }
+
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class, 'kurikulum_id', 'id');
     }
 }

@@ -15,9 +15,15 @@ class CpmkCpl extends Model
         'cpmk_id',
         'cpl_id',
         'kode_prodi',
+        'kurikulum_id',
     ];
 
     public $timestamps = false; // Jika tabel pivot tidak memiliki timestamps
+
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
+    }
 
     public function programStudi()
     {

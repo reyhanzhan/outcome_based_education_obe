@@ -1,17 +1,21 @@
 <aside class="main-sidebar sidebar-light elevation-4">
     <!-- Brand Logo -->
     <a href="#" class="brand-link" style="background: url('{{ asset('img/pat_04.png') }}') #004680 !important;">
-        <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid" style="width: 20rem; height: auto;">
+        <img src="{{ asset('img/logo_obe_crop.png') }}" alt="Logo" class="img-fluid"
+            style="width: 20rem; height: auto;">
     </a>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <nav class="mt-0">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                data-accordion="false">
                 <!-- Manajemen Data -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['bk', 'mk', 'cpmk', 'subcpmk', 'pl', 'cpl']) ? 'active' : '' }}">
                             <i class="nav-icon fas fa-folder"></i>
                             <p>Manajemen Data</p>
                             <i class="right fas fa-angle-left"></i>
@@ -19,31 +23,31 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('pl.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'pl' ? 'active' : '' }}">
                                     <p>Profil Lulusan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('cpl.list') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl' ? 'active' : '' }}">
                                     <p>Capaian Profil Lulusan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('bk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'bk' ? 'active' : '' }}">
                                     <p>Bahan Kajian</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('cpmk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk' ? 'active' : '' }}">
                                     <p>Capaian Pembelajaran Mata Kuliah</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('mk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'mk' ? 'active' : '' }}">
                                     <p>Mata Kuliah</p>
                                 </a>
                             </li>
@@ -62,13 +66,13 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('dosen.create') }}"
-                                   class="nav-link {{ request()->routeIs('dosen.create') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('dosen.create') ? 'active' : '' }}">
                                     <p>Tambah Dosen</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('dosen.index') }}"
-                                   class="nav-link {{ request()->routeIs('dosen.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('dosen.index') ? 'active' : '' }}">
                                     <p>Daftar Dosen</p>
                                 </a>
                             </li>
@@ -78,8 +82,10 @@
 
                 <!-- Pengelolaan Mahasiswa -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li class="nav-item has-treeview {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('mahasiswa*') && !request()->is('nilai/mahasiswa*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user-graduate"></i>
                             <p>Mahasiswa</p>
                             <i class="right fas fa-angle-left"></i>
@@ -87,13 +93,13 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('mahasiswa.create') }}"
-                                   class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}">
                                     <p>Tambah Mahasiswa</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('mahasiswa.index') }}"
-                                   class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                     <p>Daftar Mahasiswa</p>
                                 </a>
                             </li>
@@ -103,8 +109,10 @@
 
                 <!-- Kurikulum & Kelas -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li class="nav-item has-treeview {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('kurikulum*') || request()->is('kelas*') || request()->is('krs*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book"></i>
                             <p>Kurikulum & Kelas</p>
                             <i class="right fas fa-angle-left"></i>
@@ -112,19 +120,19 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('kurikulum.index') }}"
-                                   class="nav-link {{ request()->is('kurikulum*') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->is('kurikulum*') ? 'active' : '' }}">
                                     <p>Kurikulum</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('kelas.index') }}"
-                                   class="nav-link {{ request()->is('kelas*') ? 'active' : '' }}">
+                                <a href="{{ route('kelas.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ request()->is('kelas*') ? 'active' : '' }}">
                                     <p>Kelas</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('krs.index') }}"
-                                   class="nav-link {{ request()->is('krs*') ? 'active' : '' }}">
+                                <a href="{{ route('krs.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ request()->is('krs*') ? 'active' : '' }}">
                                     <p>KRS</p>
                                 </a>
                             </li>
@@ -134,46 +142,48 @@
 
                 <!-- Pemetaan -->
                 @if (Auth::check() && Auth::user()->role === 'kps')
-                    <li class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ in_array(strtolower(request()->segment(1)), ['cpl-pl', 'cpl-mk', 'cpl-bk', 'cpmk-cpl', 'cpmk-mk', 'cpl-cpmk-mk']) ? 'active' : '' }}">
                             <i class="nav-icon fas fa-sitemap"></i>
                             <p>Pemetaan</p>
                             <i class="right fas fa-angle-left"></i>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('Cpl_Pl.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-pl' ? 'active' : '' }}">
+                                <a href="{{ route('Cpl_Pl.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-pl' ? 'active' : '' }}">
                                     <p>PL - CPL</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('Cpl_Bk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-bk' ? 'active' : '' }}">
+                                <a href="{{ route('Cpl_Bk.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-bk' ? 'active' : '' }}">
                                     <p>CPL - BK</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('Cpmk_Cpl.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl' ? 'active' : '' }}">
+                                <a href="{{ route('Cpmk_Cpl.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-cpl' ? 'active' : '' }}">
                                     <p>CPL - CPMK</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('Cpmk_Mk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-mk' ? 'active' : '' }}">
+                                <a href="{{ route('Cpmk_Mk.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpmk-mk' ? 'active' : '' }}">
                                     <p>CPMK - MK</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('Cpl_Mk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-mk' ? 'active' : '' }}">
+                                <a href="{{ route('Cpl_Mk.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-mk' ? 'active' : '' }}">
                                     <p>MK - CPL</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('CplCpmkMk.index') }}"
-                                   class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-cpmk-mk' ? 'active' : '' }}">
+                                <a href="{{ route('Cpmk_Cpl_Mk.index', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ strtolower(request()->segment(1)) == 'cpl-cpmk-mk' ? 'active' : '' }}">
                                     <p>CPL - CPMK - MK</p>
                                 </a>
                             </li>
@@ -183,22 +193,24 @@
 
                 <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
-                    <li class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-bar"></i>
                             <p>Penilaian</p>
                             <i class="right fas fa-angle-left"></i>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi]) }}"
-                                   class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">
+                                <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi, 'tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">
                                     <p>Pembobotan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}"
-                                   class="nav-link {{ request()->is('nilai/mahasiswa*') || request()->is('penilaian/cpl/*') || request()->is('penilaian/cpmk/*') || request()->routeIs('nilai.mahasiswa.choose_mata_kuliah') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                                <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah', ['tahun' => session('selected_year', '')]) }}"
+                                    class="nav-link {{ request()->is('nilai/mahasiswa*') || request()->is('penilaian/cpl/*') || request()->is('penilaian/cpmk/*') || request()->routeIs('nilai.mahasiswa.choose_mata_kuliah') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                                     <p>Nilai Mahasiswa</p>
                                 </a>
                             </li>
@@ -245,7 +257,7 @@
     }
 
     /* .sidebar-collapse .nav-link p {
-        display: none !important; 
+        display: none !important;
         opacity: 0;
         transition: opacity 0.2s ease;
         z-index: 1031 !important;
@@ -266,7 +278,7 @@
     } */
 
     /* Submenu Aktif Saat Diklik */
-    .sidebar-collapse .nav-item.has-treeview.active > .nav-treeview {
+    .sidebar-collapse .nav-item.has-treeview.active>.nav-treeview {
         display: block !important;
         animation: slideIn 0.3s ease-out;
     }
@@ -276,6 +288,7 @@
             opacity: 0;
             transform: translateX(-10px);
         }
+
         to {
             opacity: 1;
             transform: translateX(0);
@@ -318,7 +331,7 @@
         margin: 0 auto !important;
         filter: none !important;
         transition: transform 0.3s ease !important;
-        
+
     }
 
     .brand-link img {
@@ -341,15 +354,15 @@
         height: auto !important;
         width: auto !important;
         /* max-height: 80px !important; */
-        
+
 
         height: auto !important;
         display: block !important;
         margin: 0 auto !important;
         filter: none !important;
         transition: transform 0.3s ease !important;
-        
-        
+
+
     }
 
     /* Sidebar Content */
@@ -391,7 +404,7 @@
     .nav-sidebar .nav-item {
         margin: 0.5rem 0.75rem !important;
         position: relative !important;
-    } 
+    }
 
     /* Main Navigation Links */
     .sidebar-light .nav-sidebar .nav-link {
@@ -469,7 +482,7 @@
     }
 
     /* Dropdown Arrow */
-    .nav-item.has-treeview > .nav-link::after {
+    .nav-item.has-treeview>.nav-link::after {
         font-family: 'Font Awesome 6 Free' !important;
         font-weight: 900 !important;
         position: absolute !important;
@@ -480,7 +493,7 @@
         color: #1e293b !important;
     }
 
-    .nav-item.has-treeview.menu-open > .nav-link::after {
+    .nav-item.has-treeview.menu-open>.nav-link::after {
         transform: translateY(-50%) rotate(90deg) !important;
     }
 
@@ -490,7 +503,7 @@
     }
 
     /* Remove default AdminLTE arrow styling */
-    .nav-item.has-treeview > .nav-link::before {
+    .nav-item.has-treeview>.nav-link::before {
         display: none !important;
     }
 
@@ -642,8 +655,13 @@
     }
 
     @keyframes spin {
-        0% { transform: translateY(-50%) rotate(0deg); }
-        100% { transform: translateY(-50%) rotate(360deg); }
+        0% {
+            transform: translateY(-50%) rotate(0deg);
+        }
+
+        100% {
+            transform: translateY(-50%) rotate(360deg);
+        }
     }
 
     /* Tooltip for truncated text */
@@ -666,7 +684,9 @@
     }
 
     @keyframes fadeIn {
-        to { opacity: 1; }
+        to {
+            opacity: 1;
+        }
     }
 
     /* Badge/Counter Support */
@@ -728,6 +748,7 @@
 
     /* Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
+
         .sidebar-light .nav-sidebar .nav-link,
         .nav-treeview,
         .nav-item {

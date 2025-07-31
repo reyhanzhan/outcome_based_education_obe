@@ -29,6 +29,18 @@
                             </button>
                         </form>
                     </div>
+                    <div class="mx-3">
+                        <form action="{{ route('kurikulum.index') }}" method="GET" class="d-inline-block">
+                            <select name="tahun" class="form-control" onchange="this.form.submit()">
+                                <option value="">Semua Tahun</option>
+                                @foreach ($availableYears as $year)
+                                    <option value="{{ $year }}" {{ old('tahun', request('tahun', session('selected_year'))) == $year ? 'selected' : '' }}>
+                                        {{ $year }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -100,10 +112,10 @@
                 "ordering": true,
                 "columnDefs": [{
                         "orderable": true,
-                        "targets": 0
+                        "targets": [0, 1, 2, 3] // Kolom 0-4 bisa diurutkan
                     }, {
                         "orderable": false,
-                        "targets": "_all"
+                        "targets": 4 // Hanya kolom Aksi tidak diurutkan
                     }],
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
@@ -111,7 +123,7 @@
                     "info": "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(Disaring dari _MAX_ total data)",
-                    "searchPlaceholder": "Cari Kurikulum...",
+                    "searchPlaceholder": "Cari KRS...",
                     "search": "",
                     "paginate": {
                         "first": "Awal",
@@ -125,13 +137,6 @@
                     $(api.table().footer()).find('th').each(function(index) {
                         $(this).text($(api.column(index).header()).text());
                     });
-                },
-                // Penanganan tabel kosong
-                "initComplete": function(settings, json) {
-                    var api = this.api();
-                    if (api.data().length === 0) {
-                        api.clear().draw(); // Hapus data jika kosong
-                    }
                 }
             });
 

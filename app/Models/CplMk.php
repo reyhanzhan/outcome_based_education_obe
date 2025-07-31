@@ -16,7 +16,14 @@ class CplMk extends Model
         'mk_id',
         'created_at',
         'updated_at',
+        'bobot',
+        'kurikulum_id',
     ];
+
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
+    }
 
     public function cpl()
     {

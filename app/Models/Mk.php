@@ -25,9 +25,27 @@ class Mk extends Model
         'wptwp',
         'jenis_mk',
         'kode_prodi',
+        'kurikulum_id', // Tambahkan kolom kurikulum_id jika diperlukan
     ];
 
-     public function programStudi()
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id', 'id');
+    }
+
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class, 'kode_mk', 'kode_mk'); // Asumsi hubungan via kode_mk
+    }
+
+    public function cpmkMks()
+    {
+        return $this->belongsToMany(Cpmk::class, 'cpmk_mk', 'mk_id', 'cpmk_id')
+            ->withPivot('kurikulum_id', 'bobot', 'min_standard')
+            ->withTimestamps();
+    }
+
+    public function programStudi()
     {
         return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
     }

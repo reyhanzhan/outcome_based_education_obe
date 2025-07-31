@@ -2,12 +2,18 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
 
 class Krs extends Model
 {
     protected $table = 'krs';
-    protected $fillable = ['periode', 'kode_prodi', 'kode_mk', 'tahun', 'nama_kelas', 'nim'];
+    protected $fillable = ['periode', 'kode_prodi', 'kode_mk', 'tahun', 'nama_kelas', 'nim','kurikulum_id'];
+
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id', 'id');
+    }
 
     // Relasi ke Program Studi
     public function programStudi()
@@ -34,12 +40,4 @@ class Krs extends Model
                     ->where('periode', $this->periode);
     }
     
-
-    // Relasi ke Kurikulum
-    public function kurikulum()
-    {
-        return $this->belongsTo(Kurikulum::class, 'tahun', 'tahun')
-                    ->where('kode_prodi', $this->kode_prodi)
-                    ->where('kode_mk', $this->kode_mk);
-    }
 }

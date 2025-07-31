@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Cpl;
 use App\Models\Mk;
+use App\Models\Kurikulum;
+use App\Models\CplMk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,20 +40,36 @@ class Cpl_MkController extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if ($tahunFilter) {
+                session(['selected_year' => $tahunFilter]);
+            } else {
+                $tahunFilter = session('selected_year', '');
+            }
+            Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+            Log::info("Index - kurikulumId: {$kurikulumId}");
+
             $cpls = Cpl::where('kode_prodi', $kodeProdi)->get();
             $mks = Mk::where('kode_prodi', $kodeProdi)->get();
 
-            $pemetaan = DB::table('cpl_mk')
+            $query = DB::table('cpl_mk')
                 ->whereIn('cpl_id', $cpls->pluck('id'))
-                ->whereIn('mk_id', $mks->pluck('id'))
-                ->get()
+                ->whereIn('mk_id', $mks->pluck('id'));
+            if ($kurikulumId) {
+                $query->where('kurikulum_id', $kurikulumId);
+            } else {
+                $query->whereNull('kurikulum_id'); // Fallback untuk data tanpa kurikulum_id
+            }
+            $pemetaan = $query->get()
                 ->mapWithKeys(function ($item) {
                     return [$item->cpl_id . '-' . $item->mk_id => true];
                 });
 
-            Log::info("Successfully loaded pemetaan CPL-MK for kode_prodi: {$kodeProdi}, CPL count: {$cpls->count()}, MK count: {$mks->count()}");
+            Log::info("Successfully loaded pemetaan CPL-MK for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, pemetaan count: " . count($pemetaan));
 
-            return view('pemetaan_CPL-MK.index', compact('cpls', 'mks', 'pemetaan'));
+            return view('pemetaan_CPL-MK.index', compact('cpls', 'mks', 'pemetaan', 'tahunFilter'));
         } catch (\Exception $e) {
             Log::error('Error loading pemetaan CPL-MK: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
@@ -200,26 +218,38 @@ class Cpl_MkController extends Controller
 
     public function import(Request $request)
     {
-        // Validasi file yang diunggah
         $request->validate([
-            'file' => 'required|file|mimes:xls,xlsx,csv|max:2048', // Maksimum 2MB
+            'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
         ]);
 
         try {
-            // Ambil kode prodi dari user yang sedang login
             $kodeProdi = Auth::user()->kode_prodi;
             if (!$kodeProdi) {
                 throw new \Exception('Kode prodi tidak ditemukan untuk user ini.');
             }
 
-            // Proses impor file menggunakan CplMkImport
-            Excel::import(new CplMkImport($kodeProdi), $request->file('file'));
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if (!$tahunFilter) {
+                Log::error("Tahun tidak ditemukan di session atau request untuk kode_prodi {$kodeProdi}.");
+                return redirect()->back()->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
+            }
+            Log::info("Import - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
 
-            // Berikan pesan sukses
-            return redirect()->back()->with('success', 'Data pemetaan CPL-MK berhasil diimpor.');
+            $kurikulum = Kurikulum::firstOrCreate(
+                ['tahun' => $tahunFilter, 'kode_prodi' => $kodeProdi],
+                ['kode_mk' => 'MK001', 'semester' => 1]
+            );
+            $kurikulumId = $kurikulum->id;
+            Log::info("Import - kurikulumId from firstOrCreate: {$kurikulumId}");
+
+            Log::info('Starting CPL-MK import for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter . ', kurikulum_id: ' . $kurikulumId);
+
+            Excel::import(new CplMkImport($kodeProdi, $kurikulumId), $request->file('file'));
+
+            Log::info('CPL-MK import completed successfully for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter);
+            return redirect()->route('Cpl_Mk.index', ['tahun' => $tahunFilter])->with('success', 'Data pemetaan CPL-MK berhasil diimpor.');
         } catch (\Exception $e) {
-            // Log error untuk debugging
-            Log::error('Import failed: ' . $e->getMessage());
+            Log::error('Import failed: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
         }
     }

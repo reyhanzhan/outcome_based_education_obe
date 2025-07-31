@@ -18,11 +18,14 @@ class CpmkMkImport implements ToModel, WithStartRow, SkipsEmptyRows, WithEvents
 {
     private $kodeProdi;
     private $mks;
+    private $kurikulumId;
 
-    public function __construct($kodeProdi)
+    public function __construct($kodeProdi, $kurikulumId)
     {
         $this->kodeProdi = $kodeProdi;
+        $this->kurikulumId = $kurikulumId;
         $this->mks = Mk::where('kode_prodi', $kodeProdi)->pluck('id', 'kode_mk')->toArray();
+        Log::info("CpmkMkImport initialized with kurikulumId: {$this->kurikulumId}");
     }
 
     public function model(array $row)
@@ -63,6 +66,7 @@ class CpmkMkImport implements ToModel, WithStartRow, SkipsEmptyRows, WithEvents
                     $mappings[] = new \App\Models\CpmkMk([
                         'cpmk_id' => $cpmk->id,
                         'mk_id' => $mkId,
+                        'kurikulum_id' => $this->kurikulumId,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);

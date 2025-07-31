@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); // Relasi ke CPL
             $table->foreignId('bk_id')->constrained('bk')->onDelete('cascade');   // Relasi ke BK
             $table->timestamps();
+            $table->unsignedBigInteger('kurikulum_id')->nullable();
+            $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
         });
     }
 

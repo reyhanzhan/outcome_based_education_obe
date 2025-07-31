@@ -15,6 +15,11 @@ class Kelas extends Model
         'periode',
         'nip_dosen',
     ];
+
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id', 'id');
+    }
     
     public function user()
     {

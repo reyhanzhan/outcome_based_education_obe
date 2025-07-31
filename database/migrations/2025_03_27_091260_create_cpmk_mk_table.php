@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -17,6 +18,8 @@ return new class extends Migration {
             $table->integer('bobot')->default(0); // Tambahkan kolom bobot
             $table->decimal('min_standard', 5, 2)->default(0);
             $table->timestamps();
+            $table->unsignedBigInteger('kurikulum_id')->nullable();
+            $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
         });
     }
 

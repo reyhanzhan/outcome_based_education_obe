@@ -31,8 +31,35 @@ class KrsController extends Controller
     {
         try {
             $kodeProdi = Auth::user()->kode_prodi;
-            $krs = Krs::where('kode_prodi', $kodeProdi)->with('mahasiswa', 'mk')->get();
-            return view('krs.index', compact('krs'));
+            if (is_null($kodeProdi)) {
+                Log::warning('Kode prodi is null for user: ' . Auth::user()->email);
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
+            }
+
+            $tahunFilter = request('tahun', session('selected_year'));
+
+            // Simpan tahun yang dipilih ke session
+            if (request()->has('tahun')) {
+                session(['selected_year' => request('tahun')]);
+            } elseif (!session('selected_year')) {
+                session(['selected_year' => '']); // Default ke "Semua Tahun" jika belum ada
+            }
+
+            // Ambil daftar tahun unik dari KRS untuk dropdown
+            $availableYears = Krs::where('kode_prodi', $kodeProdi)
+                ->distinct()
+                ->pluck('tahun')
+                ->sortDesc()
+                ->values();
+
+            // Query KRS berdasarkan filter tahun
+            $query = Krs::where('kode_prodi', $kodeProdi)->with('mahasiswa', 'mk');
+            if ($tahunFilter) {
+                $query->where('tahun', $tahunFilter);
+            }
+            $krs = $query->get();
+
+            return view('krs.index', compact('krs', 'availableYears'));
         } catch (\Exception $e) {
             Log::error('Error fetching KRS: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data KRS.');
@@ -170,30 +197,40 @@ class KrsController extends Controller
     }
 
     public function import(Request $request)
-    {
-        try {
-            // Validasi file
-            $request->validate([
-                'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
-            ]);
+{
+    try {
+        // Validasi file
+        $request->validate([
+            'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
+        ]);
 
-            // Periksa apakah file ada dan valid
-            if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
-                return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('krs.template') . '">Download template</a>.');
-            }
-
-            $file = $request->file('file');
-            $kodeProdi = Auth::user()->kode_prodi;
-
-            // Impor file menggunakan KrsImport
-            Excel::import(new KrsImport($kodeProdi), $file);
-
-            return redirect()->route('krs.index')->with('success', 'Data KRS berhasil diimpor.');
-        } catch (\Exception $e) {
-            Log::error('Error importing KRS: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        // Periksa apakah file ada dan valid
+        if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+            return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('krs.template') . '">Download template</a>.');
         }
+
+        $file = $request->file('file');
+        $kodeProdi = Auth::user()->kode_prodi;
+
+        // Ambil tahunFilter dari session atau request
+        $tahunFilter = request('tahun', session('selected_year', ''));
+        if (!$tahunFilter) {
+            Log::error("Tahun tidak ditemukan di session atau request untuk kode_prodi {$kodeProdi}.");
+            return redirect()->back()->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
+        }
+
+        Log::info("Starting import for kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}, file: {$file->getClientOriginalName()}");
+
+        // Impor file dengan tahunFilter
+        Excel::import(new KrsImport($kodeProdi, $tahunFilter), $file);
+
+        Log::info("Import completed for kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+        return redirect()->route('krs.index', ['tahun' => $tahunFilter])->with('success', 'Data KRS berhasil diimpor.');
+    } catch (\Exception $e) {
+        Log::error('Error importing KRS: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
     }
+}
 
     public function template()
     {

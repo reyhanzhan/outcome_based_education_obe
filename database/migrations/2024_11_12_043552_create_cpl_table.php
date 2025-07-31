@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cpl', function (Blueprint $table) {
+       Schema::create('cpl', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->string('kode_cpl');
@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('kategori');
             $table->string('kode_prodi', 50)->nullable();
             $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
+            $table->unsignedBigInteger('kurikulum_id')->nullable();
+            $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
         });
     }
 

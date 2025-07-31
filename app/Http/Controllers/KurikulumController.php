@@ -29,8 +29,30 @@ class KurikulumController extends Controller
     {
         try {
             $kodeProdi = Auth::user()->kode_prodi;
-            $kurikulum = Kurikulum::where('kode_prodi', $kodeProdi)->with('mk')->get();
-            return view('kurikulum.index', compact('kurikulum'));
+            $tahunFilter = request('tahun', session('selected_year'));
+
+            // Simpan tahun yang dipilih ke session
+            if (request()->has('tahun')) {
+                session(['selected_year' => request('tahun')]);
+            } elseif (!session('selected_year')) {
+                session(['selected_year' => '']); // Default ke "Semua Tahun" jika belum ada
+            }
+
+            // Ambil daftar tahun unik dari kurikulum untuk dropdown
+            $availableYears = Kurikulum::where('kode_prodi', $kodeProdi)
+                ->distinct()
+                ->pluck('tahun')
+                ->sortDesc()
+                ->values();
+
+            // Query kurikulum berdasarkan filter tahun
+            $query = Kurikulum::where('kode_prodi', $kodeProdi)->with('mk');
+            if ($tahunFilter) {
+                $query->where('tahun', $tahunFilter);
+            }
+            $kurikulum = $query->get();
+
+            return view('kurikulum.index', compact('kurikulum', 'availableYears'));
         } catch (\Exception $e) {
             Log::error('Error fetching kurikulum: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data kurikulum.');

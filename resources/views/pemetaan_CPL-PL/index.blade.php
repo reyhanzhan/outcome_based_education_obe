@@ -15,6 +15,7 @@
                     <div class="mx-3">
                         <form action="{{ route('cpl_pl.import') }}" method="POST" enctype="multipart/form-data" class="d-inline-block">
                             @csrf
+                            <input type="hidden" name="tahun" value="{{ request('tahun', session('selected_year', '')) }}">
                             <div class="custom-file" style="width: 200px;">
                                 <input type="file" class="custom-file-input" id="file" name="file" accept=".xls,.xlsx,.csv" required>
                                 <label class="custom-file-label" for="file"><i class="fas fa-folder-open fa-sm mr-1"></i> Pilih File</label>

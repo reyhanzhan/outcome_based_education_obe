@@ -110,18 +110,7 @@
                                                                 class="btn btn-info btn-sm {{ request()->routeIs('penilaian.cpmk.index') && (string) request()->segment(3) === (string) $mhs->id && (string) request()->segment(4) === (string) $selectedKelas->id ? 'active' : '' }}">
                                                                 <i class="fas fa-chart-bar"></i> Penilaian CPMK
                                                             </a>
-                                                            <!-- Tambahkan tombol Penilaian CPL -->
-                                                            @if (request()->routeIs('penilaian.cpl.index'))
-                                                                <div style="color: red;">
-                                                                    Debug CPL: Segment 3 = {{ request()->segment(3) }},
-                                                                    $mhs->id = {{ $mhs->id }}
-                                                                    ({{ gettype($mhs->id) }})
-                                                                </div>
-                                                            @endif
-                                                            <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
-                                                                class="btn btn-warning btn-sm {{ request()->routeIs('penilaian.cpl.index') && (string) request()->segment(3) === (string) $mhs->id ? 'active' : '' }}">
-                                                                <i class="fas fa-chart-pie"></i> Capaian Profil Lulusan
-                                                            </a>
+                                         
                                                             <!-- Tombol Grafik -->
                                                             @if (request()->routeIs('nilai.mahasiswa.grafik'))
                                                                 <div style="color: red;">
@@ -136,6 +125,19 @@
                                                             <a href="{{ route('nilai.mahasiswa.grafik', ['nim' => $mhs->nim ?? '', 'kode_mk' => $selectedKelas->kode_mk]) }}"
                                                                 class="btn btn-success btn-sm {{ request()->routeIs('nilai.mahasiswa.grafik') && (string) request()->segment(2) === (string) ($mhs->nim ?? '') && (string) request()->segment(4) === (string) $selectedKelas->kode_mk ? 'active' : '' }}">
                                                                 <i class="fas fa-chart-line"></i> Grafik Cpmk
+                                                            </a>
+
+                                                             <!-- Tambahkan tombol Penilaian CPL -->
+                                                            @if (request()->routeIs('penilaian.cpl.index'))
+                                                                <div style="color: red;">
+                                                                    Debug CPL: Segment 3 = {{ request()->segment(3) }},
+                                                                    $mhs->id = {{ $mhs->id }}
+                                                                    ({{ gettype($mhs->id) }})
+                                                                </div>
+                                                            @endif
+                                                            <a href="{{ route('penilaian.cpl.index', $mhs->id) }}"
+                                                                class="btn btn-warning btn-sm {{ request()->routeIs('penilaian.cpl.index') && (string) request()->segment(3) === (string) $mhs->id ? 'active' : '' }}">
+                                                                <i class="fas fa-chart-pie"></i> Capaian Profil Lulusan
                                                             </a>
                                                         @else
                                                             <button class="btn btn-info btn-sm" disabled>

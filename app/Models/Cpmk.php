@@ -16,9 +16,24 @@ class Cpmk extends Model
         'deskripsi',
         'min_standard',
         'kode_prodi',
+        'cpl_id',
+        'kurikulum_id',
     ];
 
-     public function programStudi()
+public function mks()
+{
+    return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id')
+        ->withPivot('kurikulum_id', 'bobot', 'min_standard')
+        ->withTimestamps();
+}
+public function cplCpmks()
+{
+    return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id')
+        ->withPivot('kurikulum_id', 'bobot')
+        ->withTimestamps();
+}
+
+    public function programStudi()
     {
         return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');
     }
@@ -33,10 +48,7 @@ class Cpmk extends Model
         return $this->belongsTo(Cpl::class, 'cpl_id');
     }
 
-    public function mks()
-    {
-        return $this->belongsToMany(Mk::class, 'cpmk_mk')->withPivot('bobot', 'min_standard')->withTimestamps();
-    }
+
 
     public function nilaiCpmks()
     {

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Cpmk;
 use App\Models\Mk;
 use Illuminate\Support\Facades\DB;
+use App\Models\Kurikulum;
 
 class Cpmk_Cpl_Mk_Controller extends Controller
 {
@@ -31,27 +32,58 @@ class Cpmk_Cpl_Mk_Controller extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if ($tahunFilter) {
+                session(['selected_year' => $tahunFilter]);
+            } else {
+                $tahunFilter = session('selected_year', '');
+            }
+            Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+            Log::info("Index - kurikulumId: {$kurikulumId}");
+
             $cpls = Cpl::where('kode_prodi', $kodeProdi)
-                ->whereHas('cpmks', function ($query) use ($kodeProdi) {
+                ->whereHas('cpmks', function ($query) use ($kodeProdi, $kurikulumId) {
                     $query->where('kode_prodi', $kodeProdi)
-                        ->whereHas('mks', function ($subQuery) use ($kodeProdi) {
+                        ->whereHas('mks', function ($subQuery) use ($kodeProdi, $kurikulumId) {
                             $subQuery->where('kode_prodi', $kodeProdi);
+                            if ($kurikulumId) {
+                                $subQuery->whereHas('cpmkMks', function ($q) use ($kurikulumId) {
+                                    $q->where('cpmk_mk.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                                });
+                            }
+                        })
+                        ->whereHas('cplCpmks', function ($q) use ($kurikulumId) {
+                            if ($kurikulumId) {
+                                $q->where('cpmk_cpl.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                            }
                         });
                 })
                 ->with([
-                    'cpmks' => function ($query) use ($kodeProdi) {
+                    'cpmks' => function ($query) use ($kodeProdi, $kurikulumId) {
                         $query->where('kode_prodi', $kodeProdi)
                             ->whereHas('mks')
-                            ->with(['mks' => function ($subQuery) use ($kodeProdi) {
+                            ->with(['mks' => function ($subQuery) use ($kodeProdi, $kurikulumId) {
                                 $subQuery->where('kode_prodi', $kodeProdi)->distinct();
-                            }]);
+                                if ($kurikulumId) {
+                                    $subQuery->whereHas('cpmkMks', function ($q) use ($kurikulumId) {
+                                        $q->where('cpmk_mk.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                                    });
+                                }
+                            }])
+                            ->whereHas('cplCpmks', function ($q) use ($kurikulumId) {
+                                if ($kurikulumId) {
+                                    $q->where('cpmk_cpl.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                                }
+                            });
                     },
                 ])
                 ->get();
 
-            Log::info("Successfully loaded pemetaan CPMK-CPL-MK for kode_prodi: {$kodeProdi}, CPL count: {$cpls->count()}");
+            Log::info("Successfully loaded pemetaan CPMK-CPL-MK for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, CPL count: {$cpls->count()}");
 
-            return view('pemetaan_CPMK-CPL-MK.index', compact('cpls'));
+            return view('pemetaan_CPMK-CPL-MK.index', compact('cpls', 'tahunFilter'));
         } catch (\Exception $e) {
             Log::error('Error loading pemetaan CPMK-CPL-MK: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
@@ -66,6 +98,9 @@ class Cpmk_Cpl_Mk_Controller extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
             }
 
+            $tahunFilter = session('selected_year', '');
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+
             $mappings = $request->input('mappings', []);
 
             foreach ($mappings as $mapping) {
@@ -78,12 +113,16 @@ class Cpmk_Cpl_Mk_Controller extends Controller
                 if ($cpl && $cpmk && $mk) {
                     DB::table('cpmk_cpl_mk')->updateOrInsert(
                         ['cpl_id' => $cplId, 'cpmk_id' => $cpmkId, 'mk_id' => $mkId],
-                        ['created_at' => now(), 'updated_at' => now()]
+                        [
+                            'kurikulum_id' => $kurikulumId,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
                     );
                 }
             }
 
-            Log::info("Pemetaan CPMK-CPL-MK stored for kode_prodi: {$kodeProdi}, mappings count: " . count($mappings));
+            Log::info("Pemetaan CPMK-CPL-MK stored for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, mappings count: " . count($mappings));
             return redirect()->route('teknik_penilaian.index')->with('success', 'Pemetaan berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error('Error storing pemetaan CPMK-CPL-MK: ' . $e->getMessage());

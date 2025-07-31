@@ -27,23 +27,47 @@ class KelasController extends Controller
     }
 
     public function index()
-    {
-        try {
-            $kodeProdi = Auth::user()->kode_prodi;
-            if (is_null($kodeProdi)) {
-                Log::warning('Kode prodi is null for user: ' . Auth::user()->email);
-                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
-            }
-
-            $kelas = Kelas::where('kode_prodi', $kodeProdi)->with('user', 'mk')->get();
-            Log::info('Fetched kelas data count: ' . $kelas->count() . ', Data: ', $kelas->toArray());
-
-            return view('kelas.index', compact('kelas'));
-        } catch (\Exception $e) {
-            Log::error('Error fetching kelas: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data kelas: ' . $e->getMessage());
+{
+    try {
+        $kodeProdi = Auth::user()->kode_prodi;
+        if (is_null($kodeProdi)) {
+            Log::warning('Kode prodi is null for user: ' . Auth::user()->email);
+            return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
         }
+
+        $tahunFilter = request('tahun', session('selected_year', ''));
+        if ($tahunFilter) {
+            session(['selected_year' => $tahunFilter]);
+        } else if (!session('selected_year')) {
+            session(['selected_year' => '']); // Default ke "Semua Tahun" jika belum ada
+        }
+        Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+        // Ambil daftar tahun unik dari kelas untuk dropdown
+        $availableYears = Kelas::where('kode_prodi', $kodeProdi)
+            ->distinct()
+            ->pluck('tahun')
+            ->sortDesc()
+            ->values();
+
+        // Query kelas berdasarkan filter tahun
+        $query = Kelas::where('kode_prodi', $kodeProdi)->with('user', 'mk');
+        if ($tahunFilter) {
+            $query->where('tahun', $tahunFilter);
+        } else {
+            // Jika tidak ada tahunFilter, tetap menampilkan data tanpa filter (opsional, bisa diubah)
+            Log::info("No tahunFilter set, showing all years for kode_prodi: {$kodeProdi}");
+        }
+        $kelas = $query->get();
+
+        Log::info('Fetched kelas data count: ' . $kelas->count() . ', Data: ', $kelas->toArray());
+
+        return view('kelas.index', compact('kelas', 'availableYears', 'tahunFilter'));
+    } catch (\Exception $e) {
+        Log::error('Error fetching kelas: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data kelas: ' . $e->getMessage());
     }
+}
 
     public function create()
     {
@@ -190,27 +214,37 @@ class KelasController extends Controller
     }
 
     public function import(Request $request)
-    {
-        try {
-            $request->validate([
-                'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
-            ]);
+{
+    try {
+        $request->validate([
+            'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
+        ]);
 
-            if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
-                return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('kelas.template') . '">Download template</a>.');
-            }
-
-            $file = $request->file('file');
-            $kodeProdi = Auth::user()->kode_prodi;
-
-            Excel::import(new KelasImport($kodeProdi), $file);
-
-            return redirect()->route('kelas.index')->with('success', 'Data kelas berhasil diimpor.');
-        } catch (\Exception $e) {
-            Log::error('Error importing kelas: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+            return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('kelas.template') . '">Download template</a>.');
         }
+
+        $file = $request->file('file');
+        $kodeProdi = Auth::user()->kode_prodi;
+
+        $tahunFilter = request('tahun', session('selected_year', ''));
+        if (!$tahunFilter) {
+            Log::error("Tahun tidak ditemukan di session atau request untuk kode_prodi {$kodeProdi}.");
+            return redirect()->back()->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
+        }
+
+        // Tambahkan logging sebelum impor
+        Log::info("Starting import for kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+        Excel::import(new KelasImport($kodeProdi, $tahunFilter), $file);
+
+        Log::info("Import completed for kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+        return redirect()->route('kelas.index', ['tahun' => $tahunFilter])->with('success', 'Data kelas berhasil diimpor.');
+    } catch (\Exception $e) {
+        Log::error('Error importing kelas: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
     }
+}
 
     public function template()
     {

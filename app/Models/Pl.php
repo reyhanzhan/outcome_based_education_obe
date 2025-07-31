@@ -16,7 +16,13 @@ class Pl extends Model
         'deskripsi',
         'kategori',
         'kode_prodi',
+        'kurikulum_id',
     ];
+
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id');
+    }
 
     public function programStudi()
     {

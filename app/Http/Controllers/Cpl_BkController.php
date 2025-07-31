@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Kurikulum;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -35,20 +36,36 @@ class Cpl_BkController extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if ($tahunFilter) {
+                session(['selected_year' => $tahunFilter]);
+            } else {
+                $tahunFilter = session('selected_year', '');
+            }
+            Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
+
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+            Log::info("Index - kurikulumId: {$kurikulumId}");
+
             $cpls = Cpl::where('kode_prodi', $kodeProdi)->get();
             $bks = Bk::where('kode_prodi', $kodeProdi)->get();
 
-            $pemetaan = DB::table('cpl_bk')
+            $query = DB::table('cpl_bk')
                 ->whereIn('cpl_id', $cpls->pluck('id'))
-                ->whereIn('bk_id', $bks->pluck('id'))
-                ->get()
+                ->whereIn('bk_id', $bks->pluck('id'));
+            if ($kurikulumId) {
+                $query->where('kurikulum_id', $kurikulumId);
+            } else {
+                $query->whereNull('kurikulum_id'); // Fallback untuk data tanpa kurikulum_id
+            }
+            $pemetaan = $query->get()
                 ->mapWithKeys(function ($item) {
                     return [$item->cpl_id . '-' . $item->bk_id => true];
                 });
 
-            Log::info("Successfully loaded pemetaan CPL-BK for kode_prodi: {$kodeProdi}, CPL count: {$cpls->count()}, BK count: {$bks->count()}");
+            Log::info("Successfully loaded pemetaan CPL-BK for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, pemetaan count: " . count($pemetaan));
 
-            return view('pemetaan_CPL-BK.index', compact('cpls', 'bks', 'pemetaan'));
+            return view('pemetaan_CPL-BK.index', compact('cpls', 'bks', 'pemetaan', 'tahunFilter'));
         } catch (\Exception $e) {
             Log::error('Error loading pemetaan CPL-BK: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
@@ -107,92 +124,6 @@ class Cpl_BkController extends Controller
         }
     }
 
-    // public function downloadTemplate()
-    // {
-    //     try {
-    //         $kodeProdi = Auth::user()->kode_prodi;
-    //         if (!$kodeProdi) {
-    //             throw new \Exception('Kode prodi tidak ditemukan untuk user ini.');
-    //         }
-
-    //         $spreadsheet = new Spreadsheet();
-    //         $sheet = $spreadsheet->getActiveSheet();
-
-    //         // Set header utama
-    //         $sheet->setCellValue('A1', 'No');
-    //         $sheet->setCellValue('B1', 'Kode CPL');
-    //         $bks = Bk::where('kode_prodi', $kodeProdi)->distinct()->get(); // Pastikan data unik
-    //         if ($bks->isEmpty()) {
-    //             throw new \Exception('Tidak ada data BK untuk prodi ini.');
-    //         }
-    //         $bkCount = $bks->count();
-    //         $endCol = Coordinate::stringFromColumnIndex(2 + $bkCount); // 2 = A and B, then add BK columns
-    //         $sheet->mergeCells('C1:' . $endCol . '1');
-    //         $sheet->setCellValue('C1', 'BK');
-
-    //         // Debug: Tampilkan data BK yang diambil
-    //         Log::info("BK data retrieved for kode_prodi {$kodeProdi}: " . $bks->pluck('kode_bk')->toJson());
-
-    //         // Set header BK di baris kedua
-    //         $colIndex = 3; // Start at column C (index 3)
-    //         $uniqueBks = $bks->unique('kode_bk'); // Pastikan tidak ada duplikat berdasarkan kode_bk
-    //         foreach ($uniqueBks as $bk) {
-    //             $colLetter = Coordinate::stringFromColumnIndex($colIndex);
-    //             $sheet->setCellValue($colLetter . '2', $bk->kode_bk ?? 'BK' . $bk->id);
-    //             $colIndex++;
-    //         }
-
-    //         // Set header style
-    //         $sheet->getStyle('A1:' . $endCol . '1')->getFont()->setBold(true);
-    //         $sheet->getStyle('A1:' . $endCol . '1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-    //         $sheet->getStyle('A2:' . $endCol . '2')->getFont()->setBold(true);
-    //         $sheet->getStyle('A2:' . $endCol . '2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-    //         // Ambil data CPL dan BK dari database
-    //         $cpls = Cpl::where('kode_prodi', $kodeProdi)->get();
-    //         if ($cpls->isEmpty()) {
-    //             throw new \Exception('Tidak ada data CPL untuk prodi ini.');
-    //         }
-    //         $pemetaan = DB::table('cpl_bk')
-    //             ->whereIn('cpl_id', $cpls->pluck('id'))
-    //             ->whereIn('bk_id', $bks->pluck('id'))
-    //             ->get()
-    //             ->mapWithKeys(function ($item) {
-    //                 return [$item->cpl_id . '-' . $item->bk_id => true];
-    //             });
-
-    //         // Isi data berdasarkan kombinasi CPL dan BK
-    //         $row = 3;
-    //         foreach ($cpls as $index => $cpl) {
-    //             $sheet->setCellValue('A' . $row, $index + 1); // No
-    //             $sheet->setCellValue('B' . $row, $cpl->kode_cpl); // Kode CPL
-    //             $colIndex = 3; // Start at column C
-    //             foreach ($uniqueBks as $bk) {
-    //                 $colLetter = Coordinate::stringFromColumnIndex($colIndex);
-    //                 $sheet->setCellValue($colLetter . $row, isset($pemetaan[$cpl->id . '-' . $bk->id]) ? 'V' : '');
-    //                 $colIndex++;
-    //             }
-    //             $row++;
-    //         }
-
-    //         // Auto-size columns
-    //         $maxColIndex = 2 + $uniqueBks->count(); // A=1, B=2, C+ = 3+
-    //         for ($i = 1; $i <= $maxColIndex; $i++) {
-    //             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($i))->setAutoSize(true);
-    //         }
-
-    //         // Simpan file sementara
-    //         $writer = new Xlsx($spreadsheet);
-    //         $tempFile = tempnam(sys_get_temp_dir(), 'cpl_bk_template');
-    //         $writer->save($tempFile);
-
-    //         Log::info("Template CPL-BK downloaded for kode_prodi: {$kodeProdi} with {$bkCount} BK columns");
-    //         return response()->download($tempFile, 'template_cpl_bk.xlsx')->deleteFileAfterSend(true);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error generating template: ' . $e->getMessage());
-    //         return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh template: ' . $e->getMessage());
-    //     }
-    // }
     public function downloadTemplate()
 {
     try {
@@ -290,12 +221,10 @@ class Cpl_BkController extends Controller
     public function import(Request $request)
     {
         try {
-            // Validasi file
             $request->validate([
                 'file' => 'required|file|mimes:xls,xlsx,csv|max:2048',
             ]);
 
-            // Periksa apakah file ada dan valid
             if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
                 Log::error('Invalid or missing file uploaded.');
                 return redirect()->back()->with('error', 'File yang diunggah tidak valid atau rusak. Harap unggah file Excel/CSV yang benar. <a href="' . route('cpl_bk.template') . '">Download template</a>.');
@@ -309,14 +238,26 @@ class Cpl_BkController extends Controller
                 return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
 
-            // Log informasi impor
-            Log::info('Starting CPL-BK import for kode_prodi: ' . $kodeProdi);
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if (!$tahunFilter) {
+                Log::error("Tahun tidak ditemukan di session atau request untuk kode_prodi {$kodeProdi}.");
+                return redirect()->back()->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
+            }
+            Log::info("Import - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
 
-            // Impor file menggunakan CplBkImport
-            Excel::import(new CplBkImport($kodeProdi), $file);
+            $kurikulum = Kurikulum::firstOrCreate(
+                ['tahun' => $tahunFilter, 'kode_prodi' => $kodeProdi],
+                ['kode_mk' => 'MK001', 'semester' => 1]
+            );
+            $kurikulumId = $kurikulum->id;
+            Log::info("Import - kurikulumId from firstOrCreate: {$kurikulumId}");
 
-            Log::info('CPL-BK import completed successfully for kode_prodi: ' . $kodeProdi);
-            return redirect()->route('Cpl_Bk.index')->with('success', 'Data pemetaan CPL-BK berhasil diimpor.');
+            Log::info('Starting CPL-BK import for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter . ', kurikulum_id: ' . $kurikulumId);
+
+            Excel::import(new CplBkImport($kodeProdi, $kurikulumId), $file);
+
+            Log::info('CPL-BK import completed successfully for kode_prodi: ' . $kodeProdi . ', tahun: ' . $tahunFilter);
+            return redirect()->route('Cpl_Bk.index', ['tahun' => $tahunFilter])->with('success', 'Data pemetaan CPL-BK berhasil diimpor.');
         } catch (\Exception $e) {
             Log::error('Import failed: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());

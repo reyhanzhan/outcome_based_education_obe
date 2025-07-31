@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cpmk_cpl_mk', function (Blueprint $table) {
+        Schema::create('cpmk_cpl', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade'); // Relasi ke CPMK
-            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); 
-            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');
+            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade');   // Relasi ke CPL
+            $table->integer('bobot')->default(0);
             $table->timestamps();
+            $table->unsignedBigInteger('kurikulum_id')->nullable();
+            $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cpmk_cpl_mk');
+        Schema::dropIfExists('cpmk_cpl');
     }
 };
