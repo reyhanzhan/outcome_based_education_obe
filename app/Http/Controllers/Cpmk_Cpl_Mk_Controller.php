@@ -44,42 +44,48 @@ class Cpmk_Cpl_Mk_Controller extends Controller
             Log::info("Index - kurikulumId: {$kurikulumId}");
 
             $cpls = Cpl::where('kode_prodi', $kodeProdi)
+                ->with([
+                    'cpmks' => function ($query) use ($kodeProdi, $kurikulumId) {
+                        $query->where('kode_prodi', $kodeProdi)
+                            ->with(['mks' => function ($subQuery) use ($kodeProdi, $kurikulumId) {
+                                $subQuery->where('kode_prodi', $kodeProdi);
+                                if ($kurikulumId) {
+                                    $subQuery->whereHas('cpmkMks', function ($q) use ($kurikulumId) {
+                                        $q->where('cpmk_mk.kurikulum_id', $kurikulumId);
+                                    });
+                                }
+                            }])
+                            ->whereHas('cplCpmks', function ($q) use ($kurikulumId) {
+                                if ($kurikulumId) {
+                                    $q->where('cpmk_cpl.kurikulum_id', $kurikulumId);
+                                }
+                            });
+                    },
+                ])
                 ->whereHas('cpmks', function ($query) use ($kodeProdi, $kurikulumId) {
                     $query->where('kode_prodi', $kodeProdi)
                         ->whereHas('mks', function ($subQuery) use ($kodeProdi, $kurikulumId) {
                             $subQuery->where('kode_prodi', $kodeProdi);
                             if ($kurikulumId) {
                                 $subQuery->whereHas('cpmkMks', function ($q) use ($kurikulumId) {
-                                    $q->where('cpmk_mk.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                                    $q->where('cpmk_mk.kurikulum_id', $kurikulumId);
                                 });
                             }
                         })
                         ->whereHas('cplCpmks', function ($q) use ($kurikulumId) {
                             if ($kurikulumId) {
-                                $q->where('cpmk_cpl.kurikulum_id', $kurikulumId); // Kualifikasi tabel
+                                $q->where('cpmk_cpl.kurikulum_id', $kurikulumId);
                             }
                         });
                 })
-                ->with([
-                    'cpmks' => function ($query) use ($kodeProdi, $kurikulumId) {
-                        $query->where('kode_prodi', $kodeProdi)
-                            ->whereHas('mks')
-                            ->with(['mks' => function ($subQuery) use ($kodeProdi, $kurikulumId) {
-                                $subQuery->where('kode_prodi', $kodeProdi)->distinct();
-                                if ($kurikulumId) {
-                                    $subQuery->whereHas('cpmkMks', function ($q) use ($kurikulumId) {
-                                        $q->where('cpmk_mk.kurikulum_id', $kurikulumId); // Kualifikasi tabel
-                                    });
-                                }
-                            }])
-                            ->whereHas('cplCpmks', function ($q) use ($kurikulumId) {
-                                if ($kurikulumId) {
-                                    $q->where('cpmk_cpl.kurikulum_id', $kurikulumId); // Kualifikasi tabel
-                                }
-                            });
-                    },
-                ])
-                ->get();
+                ->get()
+                ->map(function ($cpl) {
+                    $cpl->cpmks = $cpl->cpmks->unique('id')->values()->map(function ($cpmk) {
+                        $cpmk->mks = $cpmk->mks->unique('id')->values();
+                        return $cpmk;
+                    });
+                    return $cpl;
+                });
 
             Log::info("Successfully loaded pemetaan CPMK-CPL-MK for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, CPL count: {$cpls->count()}");
 
@@ -111,13 +117,14 @@ class Cpmk_Cpl_Mk_Controller extends Controller
                 $mk = Mk::where('id', $mkId)->where('kode_prodi', $kodeProdi)->first();
 
                 if ($cpl && $cpmk && $mk) {
-                    DB::table('cpmk_cpl_mk')->updateOrInsert(
-                        ['cpl_id' => $cplId, 'cpmk_id' => $cpmkId, 'mk_id' => $mkId],
-                        [
-                            'kurikulum_id' => $kurikulumId,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]
+                    // Simpan ke tabel pivot cpmk_cpl dan cpmk_mk
+                    DB::table('cpmk_cpl')->updateOrInsert(
+                        ['cpmk_id' => $cpmkId, 'cpl_id' => $cplId, 'kurikulum_id' => $kurikulumId],
+                        ['kurikulum_id' => $kurikulumId, 'created_at' => now(), 'updated_at' => now()]
+                    );
+                    DB::table('cpmk_mk')->updateOrInsert(
+                        ['cpmk_id' => $cpmkId, 'mk_id' => $mkId, 'kurikulum_id' => $kurikulumId],
+                        ['kurikulum_id' => $kurikulumId, 'bobot' => 0, 'min_standard' => 50, 'created_at' => now(), 'updated_at' => now()]
                     );
                 }
             }

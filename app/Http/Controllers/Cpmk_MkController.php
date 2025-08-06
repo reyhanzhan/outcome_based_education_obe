@@ -102,6 +102,9 @@ class Cpmk_MkController extends Controller
                 return response()->json(['error' => 'MK atau CPMK tidak ditemukan atau tidak sesuai dengan prodi Anda.'], 403);
             }
 
+            $tahunFilter = session('selected_year', '');
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+
             $bobot = $request->bobot ?? 0;
             $min_standard = $request->min_standard ?? 50;
             $checked = (bool) $request->checked;
@@ -111,8 +114,10 @@ class Cpmk_MkController extends Controller
                     [
                         'mk_id' => $request->mk_id,
                         'cpmk_id' => $request->cpmk_id,
+                        'kurikulum_id' => $kurikulumId, // Tambahkan kurikulum_id ke kunci utama
                     ],
                     [
+                        'kurikulum_id' => $kurikulumId,
                         'bobot' => $bobot,
                         'min_standard' => $min_standard,
                         'created_at' => now(),
@@ -126,15 +131,18 @@ class Cpmk_MkController extends Controller
                     $cpmk->save();
                 }
 
-                Log::info("Pemetaan CPMK-MK tersimpan: CPMK ID {$request->cpmk_id} - MK ID {$request->mk_id}, Bobot: {$bobot}, Min Standard: {$min_standard}");
+                Log::info("Pemetaan CPMK-MK tersimpan: CPMK ID {$request->cpmk_id} - MK ID {$request->mk_id}, Bobot: {$bobot}, Min Standard: {$min_standard}, kurikulum_id: {$kurikulumId}");
                 return response()->json(['success' => '✅ Data pemetaan tersimpan!']);
             } else {
                 DB::table('cpmk_mk')
                     ->where('mk_id', $request->mk_id)
                     ->where('cpmk_id', $request->cpmk_id)
+                    ->when($kurikulumId, function ($query) use ($kurikulumId) {
+                        $query->where('kurikulum_id', $kurikulumId);
+                    })
                     ->delete();
 
-                Log::info("Pemetaan CPMK-MK dihapus: CPMK ID {$request->cpmk_id} - MK ID {$request->mk_id}");
+                Log::info("Pemetaan CPMK-MK dihapus: CPMK ID {$request->cpmk_id} - MK ID {$request->mk_id}, kurikulum_id: {$kurikulumId}");
                 return response()->json(['success' => '❌ Data pemetaan dihapus!']);
             }
         } catch (\Exception $e) {

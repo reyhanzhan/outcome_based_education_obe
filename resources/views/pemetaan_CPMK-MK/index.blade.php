@@ -7,7 +7,6 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-header d-flex justify-content-center align-items-center flex-wrap">
-                    {{-- <h3 class="card-title">Pemetaan CPMK - MK - {{ Auth::user()->programStudi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}</h3> --}}
                     <div class="d-flex flex-wrap">
                         <div class="mx-3">
                             <a href="{{ route('cpmk_mk.template') }}" class="btn btn-info" data-toggle="tooltip" title="Download template Excel untuk impor data pemetaan">
@@ -39,20 +38,20 @@
                             <table id="pemetaanTable" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" class="align-middle text-center">Mata Kuliah (MK)</th>
-                                        <th colspan="{{ count($cpmks) }}" class="text-center">Capaian Pembelajaran Mata Kuliah (CPMK)</th>
+                                        <th rowspan="2" class="align-middle text-center">Capaian Pembelajaran Mata Kuliah (CPMK)</th>
+                                        <th colspan="{{ count($mks) }}" class="text-center">Mata Kuliah (MK)</th>
                                     </tr>
                                     <tr>
-                                        @foreach ($cpmks as $cpmk)
-                                            <th class="text-center">{{ $cpmk->kode_cpmk }}</th>
+                                        @foreach ($mks as $mk)
+                                            <th class="text-center">{{ $mk->kode_mk }} - {{ $mk->deskripsi }}</th>
                                         @endforeach
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($mks as $mk)
+                                    @foreach ($cpmks as $cpmk)
                                         <tr>
-                                            <td class="align-middle">{{ $mk->kode_mk }} - {{ $mk->deskripsi }}</td>
-                                            @foreach ($cpmks as $cpmk)
+                                            <td class="align-middle">{{ $cpmk->kode_cpmk }}</td>
+                                            @foreach ($mks as $mk)
                                                 <td class="text-center">
                                                     <input type="checkbox" class="update-mapping"
                                                            data-cpmk="{{ $cpmk->id }}"

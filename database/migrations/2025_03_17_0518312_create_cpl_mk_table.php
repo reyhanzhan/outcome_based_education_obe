@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('pl', function (Blueprint $table) {
+        Schema::create('cpl_mk', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); // Relasi ke CPL
+            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');   // Relasi ke MK
+            $table->integer('bobot')->default(0); // Bobot CPL-MK, total harus 100% per CPL
             $table->timestamps();
-            $table->string('kode_pl');
-            $table->string('deskripsi');
-            $table->string('kategori');
-            $table->string('kode_prodi', 50);
-            $table->foreign('kode_prodi')->references('kode_prodi')->on('program_studi')->onDelete('cascade');
             $table->unsignedBigInteger('kurikulum_id')->nullable();
             $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
+            $table->unique(['cpl_id', 'mk_id', 'kurikulum_id'], 'cpl_mk_cpl_id_mk_id_kurikulum_id_unique'); // Constraint unik yang mencakup kurikulum_id
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pl');
+        Schema::dropIfExists('cpl_mk');
     }
 };

@@ -26,7 +26,7 @@ class CplMkImport implements ToModel, WithStartRow, SkipsEmptyRows, WithEvents
         $this->kodeProdi = $kodeProdi;
         $this->kurikulumId = $kurikulumId;
         $this->cpls = Cpl::where('kode_prodi', $kodeProdi)->pluck('id', 'kode_cpl')->toArray();
-        Log::info("CplMkImport initialized with kurikulumId: {$this->kurikulumId}");
+        Log::info("CplMkImport initialized with kodeProdi: {$this->kodeProdi}, kurikulumId: {$this->kurikulumId}");
     }
 
     public function model(array $row)
@@ -42,7 +42,7 @@ class CplMkImport implements ToModel, WithStartRow, SkipsEmptyRows, WithEvents
         $mk = Mk::where('kode_prodi', $this->kodeProdi)->where('kode_mk', $kodeMk)->first();
 
         if (!$mk) {
-            Log::warning("Kode MK '{$kodeMk}' tidak ditemukan di database. Abaikan baris.");
+            Log::warning("Kode MK '{$kodeMk}' tidak ditemukan di database untuk kode_prodi '{$this->kodeProdi}'. Abaikan baris.");
             return null;
         }
 
@@ -55,38 +55,49 @@ class CplMkImport implements ToModel, WithStartRow, SkipsEmptyRows, WithEvents
                 $cellValue = trim(strtolower($row[$colIndex]));
                 if (in_array($cellValue, ['v', '✔', '✓', 'x', 'yes'])) {
                     $hasMapping = true;
-                    $mapping = new CplMk([
-                        'cpl_id' => $cplId,
-                        'mk_id' => $mk->id,
-                        'kurikulum_id' => $this->kurikulumId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                    $mapping->save();
-                    $mappings[] = $mapping;
-                    Log::info("Mapping saved: cpl_id={$cplId}, mk_id={$mk->id}, kurikulum_id={$this->kurikulumId}, id=" . ($mapping->id ?? 'not saved'));
+                    // Periksa apakah entri sudah ada
+                    $existingMapping = CplMk::where('cpl_id', $cplId)
+                                          ->where('mk_id', $mk->id)
+                                          ->where('kurikulum_id', $this->kurikulumId)
+                                          ->first();
+
+                    if ($existingMapping) {
+                        // Perbarui entri yang ada
+                        $existingMapping->update([
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        $mappings[] = $existingMapping;
+                        Log::info("Updated existing mapping: cpl_id={$cplId}, mk_id={$mk->id}, kurikulum_id={$this->kurikulumId}, id={$existingMapping->id}");
+                    } else {
+                        // Buat entri baru
+                        $mapping = new CplMk([
+                            'cpl_id' => $cplId,
+                            'mk_id' => $mk->id,
+                            'kurikulum_id' => $this->kurikulumId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        $mapping->save();
+                        $mappings[] = $mapping;
+                        Log::info("Mapping saved: cpl_id={$cplId}, mk_id={$mk->id}, kurikulum_id={$this->kurikulumId}, id=" . ($mapping->id ?? 'not saved'));
+                    }
                 } else {
-                    DB::table('cpl_mk')
-                        ->where('cpl_id', $cplId)
-                        ->where('mk_id', $mk->id)
-                        ->where('kurikulum_id', $this->kurikulumId)
-                        ->delete();
+                    // Hapus entri jika tidak ada mapping
+                    CplMk::where('cpl_id', $cplId)
+                         ->where('mk_id', $mk->id)
+                         ->where('kurikulum_id', $this->kurikulumId)
+                         ->delete();
+                    Log::info("Deleted mapping: cpl_id={$cplId}, mk_id={$mk->id}, kurikulum_id={$this->kurikulumId}");
                 }
-            } else {
-                DB::table('cpl_mk')
-                    ->where('cpl_id', $cplId)
-                    ->where('mk_id', $mk->id)
-                    ->where('kurikulum_id', $this->kurikulumId)
-                    ->delete();
             }
             $colIndex++;
         }
 
         if (!$hasMapping) {
-            DB::table('cpl_mk')
-                ->where('mk_id', $mk->id)
-                ->where('kurikulum_id', $this->kurikulumId)
-                ->delete();
+            CplMk::where('mk_id', $mk->id)
+                 ->where('kurikulum_id', $this->kurikulumId)
+                 ->delete();
             Log::info("No mapping for MK '{$kodeMk}' with kurikulum_id {$this->kurikulumId}. All related mappings deleted.");
             return null;
         }

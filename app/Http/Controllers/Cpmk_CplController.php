@@ -31,58 +31,53 @@ class Cpmk_CplController extends Controller
     }
 
     public function index()
-{
-    try {
-        $kodeProdi = Auth::user()->kode_prodi;
-        if (!$kodeProdi) {
-            return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
-        }
-
-        $tahunFilter = request('tahun', session('selected_year', ''));
-        if ($tahunFilter) {
-            session(['selected_year' => $tahunFilter]);
-        } else {
-            $tahunFilter = session('selected_year', '');
-        }
-        Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
-
-        $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
-        Log::info("Index - kurikulumId: {$kurikulumId}");
-
-        $cpmks = Cpmk::where('kode_prodi', $kodeProdi)->get();
-        $cpls = Cpl::where('kode_prodi', $kodeProdi)->get();
-
-        $query = DB::table('cpmk_cpl')
-            ->whereIn('cpmk_id', $cpmks->pluck('id'))
-            ->whereIn('cpl_id', $cpls->pluck('id'));
-        if ($kurikulumId) {
-            $query->where('kurikulum_id', $kurikulumId); // Hanya data dengan kurikulum_id yang sesuai
-        } else {
-            // Jika tidak ada tahunFilter, tidak menampilkan apa pun kecuali data tanpa kurikulum_id
-            $query->whereNull('kurikulum_id');
-        }
-        // Tambahkan filter tambahan untuk memastikan tidak ada data sisa
-        $query->where(function ($q) use ($kurikulumId) {
-            if ($kurikulumId) {
-                $q->where('kurikulum_id', $kurikulumId);
-            } else {
-                $q->whereNull('kurikulum_id');
+    {
+        try {
+            $kodeProdi = Auth::user()->kode_prodi;
+            if (!$kodeProdi) {
+                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan untuk user ini. Hubungi admin.');
             }
-        });
 
-        $pemetaan = $query->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->cpmk_id . '-' . $item->cpl_id => true];
-            });
+            $tahunFilter = request('tahun', session('selected_year', ''));
+            if ($tahunFilter) {
+                session(['selected_year' => $tahunFilter]);
+            } else {
+                $tahunFilter = session('selected_year', '');
+            }
+            Log::info("Index - kodeProdi: {$kodeProdi}, tahunFilter: {$tahunFilter}");
 
-        Log::info("Successfully loaded pemetaan CPMK-CPL for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, pemetaan count: " . count($pemetaan));
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+            session(['selected_kurikulum_id' => $kurikulumId]); // Simpan kurikulum_id ke session
+            Log::info("Index - kurikulumId: {$kurikulumId}");
 
-        return view('pemetaan_CPMK-CPL.index', compact('cpmks', 'cpls', 'pemetaan', 'tahunFilter'));
-    } catch (\Exception $e) {
-        Log::error('Error loading pemetaan CPMK-CPL: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
+            $cpmks = Cpmk::where('kode_prodi', $kodeProdi)->with(['cpls' => function ($query) use ($kurikulumId) {
+                $query->where('cpmk_cpl.kurikulum_id', $kurikulumId);
+            }])->get();
+
+            $cpls = Cpl::where('kode_prodi', $kodeProdi)->get();
+
+            $query = DB::table('cpmk_cpl')
+                ->whereIn('cpmk_id', $cpmks->pluck('id'))
+                ->whereIn('cpl_id', $cpls->pluck('id'));
+            if ($kurikulumId) {
+                $query->where('kurikulum_id', $kurikulumId);
+            } else {
+                $query->whereNull('kurikulum_id');
+            }
+
+            $pemetaan = $query->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item->cpmk_id . '-' . $item->cpl_id => true];
+                });
+
+            Log::info("Successfully loaded pemetaan CPMK-CPL for kode_prodi: {$kodeProdi}, tahun: {$tahunFilter}, kurikulum_id: {$kurikulumId}, pemetaan count: " . count($pemetaan));
+
+            return view('pemetaan_CPMK-CPL.index', compact('cpmks', 'cpls', 'pemetaan', 'tahunFilter'));
+        } catch (\Exception $e) {
+            Log::error('Error loading pemetaan CPMK-CPL: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pemetaan: ' . $e->getMessage());
+        }
     }
-}
 
     public function update(Request $request)
     {
@@ -107,6 +102,9 @@ class Cpmk_CplController extends Controller
                 return response()->json(['error' => 'CPMK atau CPL tidak ditemukan atau tidak sesuai dengan prodi Anda.'], 403);
             }
 
+            $tahunFilter = session('selected_year', '');
+            $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+
             $checked = (bool) $request->checked;
 
             if ($checked) {
@@ -114,20 +112,25 @@ class Cpmk_CplController extends Controller
                     [
                         'cpmk_id' => $request->cpmk_id,
                         'cpl_id' => $request->cpl_id,
+                        'kurikulum_id' => $kurikulumId, // Tambahkan kurikulum_id ke kunci utama
                     ],
                     [
+                        'kurikulum_id' => $kurikulumId,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]
                 );
-                Log::info("Pemetaan CPMK-CPL tersimpan: CPMK ID {$request->cpmk_id} - CPL ID {$request->cpl_id}");
+                Log::info("Pemetaan CPMK-CPL tersimpan: CPMK ID {$request->cpmk_id} - CPL ID {$request->cpl_id}, kurikulum_id: {$kurikulumId}");
                 return response()->json(['success' => '✅ Data pemetaan tersimpan!']);
             } else {
                 DB::table('cpmk_cpl')
                     ->where('cpmk_id', $request->cpmk_id)
                     ->where('cpl_id', $request->cpl_id)
+                    ->when($kurikulumId, function ($query) use ($kurikulumId) {
+                        $query->where('kurikulum_id', $kurikulumId);
+                    })
                     ->delete();
-                Log::info("Pemetaan CPMK-CPL dihapus: CPMK ID {$request->cpmk_id} - CPL ID {$request->cpl_id}");
+                Log::info("Pemetaan CPMK-CPL dihapus: CPMK ID {$request->cpmk_id} - CPL ID {$request->cpl_id}, kurikulum_id: {$kurikulumId}");
                 return response()->json(['success' => '❌ Data pemetaan dihapus!']);
             }
         } catch (\Exception $e) {

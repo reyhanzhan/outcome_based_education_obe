@@ -35,14 +35,21 @@ class KurikulumImport implements ToModel, WithHeadingRow, WithValidation, WithSt
         $semester = $semesterValue === '' || $semesterValue === null ? null : filter_var($semesterValue, FILTER_VALIDATE_INT);
 
         if ($semester === false) {
-            Log::warning('Invalid semester value detected: ' . $semesterValue);
+            Log::warning("Invalid semester value detected at row: " . json_encode($row) . ", value: {$semesterValue}");
             $semester = null; // Atau lempar exception jika ingin strict
+        }
+
+        // Validasi tambahan sebelum menyimpan
+        $kodeMk = trim($row['kode_mk'] ?? '');
+        if (!Mk::where('kode_mk', $kodeMk)->where('kode_prodi', $this->kodeProdi)->exists()) {
+            Log::error("Kode mata kuliah '{$kodeMk}' tidak ditemukan untuk kode_prodi '{$this->kodeProdi}' at row: " . json_encode($row));
+            // Ini akan ditangkap oleh validasi exists di rules
         }
 
         return new Kurikulum([
             'tahun' => $row['tahun'],
             'kode_prodi' => $this->kodeProdi,
-            'kode_mk' => $row['kode_mk'],
+            'kode_mk' => $kodeMk,
             'semester' => $semester,
         ]);
     }
@@ -51,8 +58,15 @@ class KurikulumImport implements ToModel, WithHeadingRow, WithValidation, WithSt
     {
         return [
             'tahun' => 'required|date_format:Y',
-            'kode_mk' => 'required|exists:mk,kode_mk',
-            'semester' => 'nullable',
+            'kode_mk' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!Mk::where('kode_mk', $value)->where('kode_prodi', $this->kodeProdi)->exists()) {
+                        $fail("Baris :row: Kode mata kuliah '{$value}' tidak ditemukan di database untuk kode_prodi '{$this->kodeProdi}'.");
+                    }
+                },
+            ],
+            'semester' => 'nullable|integer',
         ];
     }
 
@@ -60,10 +74,10 @@ class KurikulumImport implements ToModel, WithHeadingRow, WithValidation, WithSt
     {
         return [
             'tahun.required' => 'Baris :row: Kolom tahun wajib diisi.',
-            'tahun.date_format' => 'Baris :row: Format tahun harus YYYY.',
+            'tahun.date_format' => 'Baris :row: Format tahun harus YYYY (contoh: 2025).',
             'kode_mk.required' => 'Baris :row: Kolom kode mata kuliah wajib diisi.',
-            'kode_mk.exists' => 'Baris :row: Kode mata kuliah tidak valid.',
-           
+            'kode_mk.integer' => 'Baris :row: Kode mata kuliah harus berupa angka.',
+            'semester.integer' => 'Baris :row: Semester harus berupa angka.',
         ];
     }
 
@@ -75,9 +89,12 @@ class KurikulumImport implements ToModel, WithHeadingRow, WithValidation, WithSt
     public function onFailure(Failure ...$failures)
     {
         // Ambil semua error untuk setiap kegagalan
-        $failure = $failures[0];
-        $message = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
-        throw new \Exception($message);
+        foreach ($failures as $failure) {
+            $rowData = $failure->values();
+            $message = "Baris {$failure->row()}: " . implode(', ', $failure->errors()) . " (Data: " . json_encode($rowData) . ")";
+            Log::error($message);
+            throw new \Exception($message);
+        }
     }
 
     public function registerEvents(): array
@@ -95,7 +112,7 @@ class KurikulumImport implements ToModel, WithHeadingRow, WithValidation, WithSt
                 // Ambil header dari baris pertama
                 $headerRow = $worksheet->rangeToArray('A1:C1', null, true, true, true)[1];
                 $headings = array_map(function ($heading) {
-                    return strtolower(str_replace(' ', '_', $heading));
+                    return strtolower(str_replace(' ', '_', trim($heading ?? '')));
                 }, array_values($headerRow));
                 $expectedHeadings = ['tahun', 'kode_mk', 'semester'];
 

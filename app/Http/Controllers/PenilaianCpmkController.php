@@ -7,8 +7,14 @@ use App\Models\Mahasiswa;
 use App\Models\Cpmk;
 use App\Models\Krs;
 use App\Models\NilaiCpmk;
+use App\Models\ObeEvaluation;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Redirect;
 
 class PenilaianCpmkController extends Controller
 {
@@ -29,7 +35,6 @@ class PenilaianCpmkController extends Controller
     {
         Log::info('PenilaianCpmkController::index called', ['mahasiswa_id' => $mahasiswa_id, 'mk_id' => $mk_id]);
 
-        // Ambil periode dan kelas dari session
         $periode = session('previous_periode');
         $kelasInput = session('previous_kelas');
         Log::info('Session Data:', ['periode' => $periode, 'kelas' => $kelasInput]);
@@ -40,18 +45,14 @@ class PenilaianCpmkController extends Controller
                 ->with('error', 'Silakan pilih periode dan kelas terlebih dahulu.');
         }
 
-        // Parse kelasInput (kode_mk|nama_kelas)
         [$kodeMk, $namaKelas] = explode('|', $kelasInput);
 
-        // Ambil data mahasiswa
         $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
         Log::info('Mahasiswa found:', ['id' => $mahasiswa->id, 'nama' => $mahasiswa->nama]);
 
-        // Ambil data mata kuliah
         $mk = Mk::findOrFail($mk_id);
         Log::info('MK found:', ['id' => $mk->id, 'kode_mk' => $mk->kode_mk]);
 
-        // Validasi KRS
         $krs = Krs::where('nim', $mahasiswa->nim)
             ->where('periode', $periode)
             ->where('kode_mk', $kodeMk)
@@ -69,17 +70,16 @@ class PenilaianCpmkController extends Controller
                 ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini.');
         }
 
-        // Ambil CPMK dengan bobot dan nilai
         $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
             $query->where('mk_id', $mk_id);
         })->with([
-            'mks' => function ($query) use ($mk_id) {
-                $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
-            },
-            'nilaiCpmks' => function ($query) use ($mahasiswa_id, $mk_id) {
-                $query->where('mahasiswa_id', $mahasiswa_id)->where('mk_id', $mk_id);
-            }
-        ])->get();
+                    'mks' => function ($query) use ($mk_id) {
+                        $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+                    },
+                    'nilaiCpmks' => function ($query) use ($mahasiswa_id, $mk_id) {
+                        $query->where('mahasiswa_id', $mahasiswa_id)->where('mk_id', $mk_id);
+                    }
+                ])->get();
         Log::info('CPMKs found:', ['count' => $cpmks->count()]);
 
         if ($cpmks->isEmpty()) {
@@ -88,7 +88,6 @@ class PenilaianCpmkController extends Controller
                 ->with('error', 'Tidak ada CPMK yang terkait dengan mata kuliah ini.');
         }
 
-        // Siapkan data nilai CPMK
         $nilaiCpmks = [];
         foreach ($cpmks as $cpmk) {
             $nilai = $cpmk->nilaiCpmks->first();
@@ -107,9 +106,11 @@ class PenilaianCpmkController extends Controller
 
         $nilaiCpmks = NilaiCpmk::where('mk_id', $mk_id)
             ->where('mahasiswa_id', $mahasiswa_id)
-            ->with(['cpmk.mks' => function ($query) use ($mk_id) {
-                $query->where('mk_id', $mk_id);
-            }])
+            ->with([
+                'cpmk.mks' => function ($query) use ($mk_id) {
+                    $query->where('mk_id', $mk_id);
+                }
+            ])
             ->get();
 
         $totalScore = 0;
@@ -127,4 +128,87 @@ class PenilaianCpmkController extends Controller
 
         return $finalScore;
     }
+
+    public function storeEvaluation($mahasiswa_id, $mk_id, Request $request)
+    {
+        Log::info('storeEvaluation called', ['mahasiswa_id' => $mahasiswa_id, 'mk_id' => $mk_id]);
+
+        $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
+        $mk = Mk::findOrFail($mk_id);
+        $periode = session('previous_periode');
+        $kelasInput = session('previous_kelas');
+        [$kodeMk, $namaKelas] = explode('|', $kelasInput);
+
+        $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
+            $query->where('mk_id', $mk_id);
+        })->with([
+                    'mks' => function ($query) use ($mk_id) {
+                        $query->where('mk_id', $mk_id)->withPivot('bobot');
+                    },
+                    'nilaiCpmks' => function ($query) use ($mahasiswa_id, $mk_id) {
+                        $query->where('mahasiswa_id', $mahasiswa_id)->where('mk_id', $mk_id);
+                    }
+                ])->get();
+
+        $nilaiCpmks = [];
+        foreach ($cpmks as $cpmk) {
+            $nilai = $cpmk->nilaiCpmks->first();
+            $nilaiCpmks[$cpmk->id] = $nilai ? $nilai->nilai : 0;
+        }
+
+        $totalScore = 0;
+        foreach ($cpmks as $cpmk) {
+            $nilaiInput = $nilaiCpmks[$cpmk->id] ?? 0;
+            $bobot = $cpmk->mks->first()->pivot->bobot ?? 0;
+            $totalScore += ($nilaiInput * $bobot) / 100;
+        }
+
+        $evaluation = new ObeEvaluation([
+            'mahasiswa_id' => $mahasiswa_id,
+            'mk_id' => $mk_id,
+            'nilai_cpmk' => json_encode($nilaiCpmks),
+            'total_score' => $totalScore,
+            'periode' => $periode,
+            'tahun' => session('selected_year', ''),
+        ]);
+        $evaluation->save();
+
+        Log::info('Evaluation saved', ['evaluation_id' => $evaluation->id, 'total_score' => $totalScore]);
+        return redirect()->back()->with('success', 'Data evaluasi OBE berhasil disimpan!');
+    }
+
+    public function showEvaluationHistory($mahasiswa_id, $mk_id)
+    {
+        $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
+        $mk = Mk::findOrFail($mk_id);
+        $evaluations = ObeEvaluation::where('mahasiswa_id', $mahasiswa_id)
+            ->where('mk_id', $mk_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('penilaian_cpmk.evaluation_history', compact('mahasiswa', 'mk', 'evaluations'));
+    }
+
+   public function showEvaluationDetail($mahasiswa_id, $mk_id, $evaluation_id)
+{
+    $mahasiswa = Mahasiswa::findOrFail($mahasiswa_id);
+    $mk = Mk::findOrFail($mk_id);
+    $evaluation = ObeEvaluation::findOrFail($evaluation_id);
+
+    // Ambil CPMK terkait dengan mk_id dan sertakan min_standard
+    $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id) {
+        $query->where('mk_id', $mk_id);
+    })->with([
+        'mks' => function ($query) use ($mk_id) {
+            $query->where('mk_id', $mk_id)->withPivot('bobot', 'min_standard');
+        }
+    ])->get();
+
+    Log::info('CPMKs fetched for mk_id ' . $mk_id, ['cpmks' => $cpmks->toArray()]);
+
+    // Parse nilai_cpmk dari JSON
+    $nilaiCpmks = json_decode($evaluation->nilai_cpmk, true) ?? [];
+
+    return view('penilaian_cpmk.evaluation_detail', compact('mahasiswa', 'mk', 'evaluation', 'cpmks', 'nilaiCpmks'));
+}
 }

@@ -77,56 +77,64 @@ class Cpl_MkController extends Controller
     }
 
     public function update(Request $request)
-    {
-        try {
-            $kodeProdi = Auth::user()->kode_prodi;
-            if (!$kodeProdi) {
-                return response()->json(['error' => 'Kode prodi tidak ditemukan.'], 403);
-            }
-
-            Log::info('Received data: ' . json_encode($request->all()));
-
-            $request->validate([
-                'cpl_id' => 'required|exists:cpl,id',
-                'mk_id' => 'required|exists:mk,id',
-                'checked' => 'required|boolean',
-            ]);
-
-            $cpl = Cpl::where('id', $request->cpl_id)->where('kode_prodi', $kodeProdi)->first();
-            $mk = Mk::where('id', $request->mk_id)->where('kode_prodi', $kodeProdi)->first();
-
-            if (!$cpl || !$mk) {
-                return response()->json(['error' => 'CPL atau MK tidak ditemukan atau tidak sesuai dengan prodi Anda.'], 403);
-            }
-
-            $checked = (bool) $request->checked;
-
-            if ($checked) {
-                DB::table('cpl_mk')->updateOrInsert(
-                    [
-                        'cpl_id' => $request->cpl_id,
-                        'mk_id' => $request->mk_id,
-                    ],
-                    [
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
-                Log::info("Pemetaan CPL-MK tersimpan: CPL ID {$request->cpl_id} - MK ID {$request->mk_id}");
-                return response()->json(['success' => '✅ Data pemetaan tersimpan!']);
-            } else {
-                DB::table('cpl_mk')
-                    ->where('cpl_id', $request->cpl_id)
-                    ->where('mk_id', $request->mk_id)
-                    ->delete();
-                Log::info("Pemetaan CPL-MK dihapus: CPL ID {$request->cpl_id} - MK ID {$request->mk_id}");
-                return response()->json(['success' => '❌ Data pemetaan dihapus!']);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error updating pemetaan CPL-MK: ' . $e->getMessage());
-            return response()->json(['error' => 'Terjadi kesalahan saat menyimpan pemetaan: ' . $e->getMessage()], 500);
+{
+    try {
+        $kodeProdi = Auth::user()->kode_prodi;
+        if (!$kodeProdi) {
+            return response()->json(['error' => 'Kode prodi tidak ditemukan.'], 403);
         }
+
+        Log::info('Received data: ' . json_encode($request->all()));
+
+        $request->validate([
+            'cpl_id' => 'required|exists:cpl,id',
+            'mk_id' => 'required|exists:mk,id',
+            'checked' => 'required|boolean',
+        ]);
+
+        $cpl = Cpl::where('id', $request->cpl_id)->where('kode_prodi', $kodeProdi)->first();
+        $mk = Mk::where('id', $request->mk_id)->where('kode_prodi', $kodeProdi)->first();
+
+        if (!$cpl || !$mk) {
+            return response()->json(['error' => 'CPL atau MK tidak ditemukan atau tidak sesuai dengan prodi Anda.'], 403);
+        }
+
+        $tahunFilter = session('selected_year', '');
+        $kurikulumId = $tahunFilter ? Kurikulum::where('kode_prodi', $kodeProdi)->where('tahun', $tahunFilter)->value('id') : null;
+
+        $checked = (bool) $request->checked;
+
+        if ($checked) {
+            DB::table('cpl_mk')->updateOrInsert(
+                [
+                    'cpl_id' => $request->cpl_id,
+                    'mk_id' => $request->mk_id,
+                    'kurikulum_id' => $kurikulumId, // Tambahkan kurikulum_id ke kunci utama
+                ],
+                [
+                    'kurikulum_id' => $kurikulumId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            Log::info("Pemetaan CPL-MK tersimpan: CPL ID {$request->cpl_id} - MK ID {$request->mk_id}, kurikulum_id: {$kurikulumId}");
+            return response()->json(['success' => '✅ Data pemetaan tersimpan!']);
+        } else {
+            DB::table('cpl_mk')
+                ->where('cpl_id', $request->cpl_id)
+                ->where('mk_id', $request->mk_id)
+                ->when($kurikulumId, function ($query) use ($kurikulumId) {
+                    $query->where('kurikulum_id', $kurikulumId);
+                })
+                ->delete();
+            Log::info("Pemetaan CPL-MK dihapus: CPL ID {$request->cpl_id} - MK ID {$request->mk_id}, kurikulum_id: {$kurikulumId}");
+            return response()->json(['success' => '❌ Data pemetaan dihapus!']);
+        }
+    } catch (\Exception $e) {
+        Log::error('Error updating pemetaan CPL-MK: ' . $e->getMessage());
+        return response()->json(['error' => 'Terjadi kesalahan saat menyimpan pemetaan: ' . $e->getMessage()], 500);
     }
+}
 
     public function downloadTemplate()
     {

@@ -20,18 +20,23 @@ class Cpmk extends Model
         'kurikulum_id',
     ];
 
-public function mks()
-{
-    return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id')
-        ->withPivot('kurikulum_id', 'bobot', 'min_standard')
-        ->withTimestamps();
-}
-public function cplCpmks()
-{
-    return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id')
-        ->withPivot('kurikulum_id', 'bobot')
-        ->withTimestamps();
-}
+    public function kurikulum()
+    {
+        return $this->belongsTo(Kurikulum::class, 'kurikulum_id', 'id');
+    }
+
+    public function mks()
+    {
+        return $this->belongsToMany(Mk::class, 'cpmk_mk', 'cpmk_id', 'mk_id')
+            ->withPivot('kurikulum_id', 'bobot', 'min_standard')
+            ->withTimestamps();
+    }
+    public function cplCpmks()
+    {
+        return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id')
+            ->withPivot('kurikulum_id', 'bobot')
+            ->withTimestamps();
+    }
 
     public function programStudi()
     {

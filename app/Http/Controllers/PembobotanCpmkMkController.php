@@ -33,14 +33,12 @@ class PembobotanCpmkMkController extends Controller
             return redirect()->route('/pembobotan')->with('error', 'Kode prodi tidak ditemukan untuk user ini.');
         }
 
-        // Ambil selected_year dari request atau session
         $tahunFilter = request('tahun', session('selected_year', ''));
         if (!$tahunFilter) {
             Log::warning('Selected year not found for user: ' . $user->email . ' and kode_prodi: ' . $kodeProdi);
             return redirect()->route('/pembobotan')->with('error', 'Tahun kurikulum tidak ditemukan. Pilih tahun terlebih dahulu.');
         }
 
-        // Simpan selected_year ke session jika ada di request
         if (request()->has('tahun')) {
             session(['selected_year' => $tahunFilter]);
         }
@@ -60,31 +58,28 @@ class PembobotanCpmkMkController extends Controller
 
                 $kelas = Kelas::where('nip_dosen', $nip)
                     ->where('kode_prodi', $kodeProdi)
-                    ->where('tahun', $tahunFilter) // Filter berdasarkan tahunFilter
-                    ->with(['mk' => function ($query) use ($kodeProdi) {
-                        $query->where('kode_prodi', $kodeProdi);
+                    ->where('tahun', $tahunFilter)
+                    ->with(['mk' => function ($query) use ($kodeProdi, $kurikulumId) {
+                        $query->where('kode_prodi', $kodeProdi)
+                            ->whereHas('kurikulum', function ($q) use ($kurikulumId) {
+                                $q->where('id', $kurikulumId);
+                            });
                     }])
                     ->get();
 
                 $mks = $kelas->map(function ($item) {
                     return $item->mk;
                 })->filter()->unique('id');
-
-                if ($mks->isEmpty()) {
-                    Log::warning('No mata kuliah found for NIP: ' . $nip . ', kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter);
-                }
             } elseif ($user->role === 'kps') {
                 $mks = Mk::where('kode_prodi', $kodeProdi)
                     ->whereHas('kelas', function ($query) use ($tahunFilter) {
-                        $query->where('tahun', $tahunFilter); // Filter berdasarkan tahun via Kelas
+                        $query->where('tahun', $tahunFilter);
                     })
-                    ->whereHas('cpmks', function ($query) use ($kodeProdi) {
-                        $query->where('kode_prodi', $kodeProdi);
+                    ->whereHas('cpmks', function ($query) use ($kodeProdi, $kurikulumId) {
+                        $query->where('kode_prodi', $kodeProdi)
+                            ->where('kurikulum_id', $kurikulumId); // Filter berdasarkan kurikulum_id di cpmk
                     })
                     ->get();
-            } else {
-                Log::warning('Unauthorized role for user: ' . $user->email);
-                return redirect()->route('home')->with('error', 'Role tidak diizinkan.');
             }
 
             $defaultMk = $mks->first();
@@ -93,16 +88,24 @@ class PembobotanCpmkMkController extends Controller
             if ($defaultMk) {
                 $cpmks = $defaultMk->cpmks()
                     ->where('kode_prodi', $kodeProdi)
-                    ->withPivot('bobot')
+                    ->where('kurikulum_id', $kurikulumId) // Filter berdasarkan kurikulum_id di cpmk
+                    ->withPivot('bobot', 'kurikulum_id')
                     ->get()
-                    ->map(function ($cpmk) use ($defaultMk, $kodeProdi, $tahunFilter) {
+                    ->map(function ($cpmk) use ($defaultMk, $kodeProdi, $tahunFilter, $kurikulumId) {
                         $teknikPenilaian = DB::table('teknik_penilaian')
                             ->where('mk_id', $defaultMk->id)
                             ->where('cpmk_id', $cpmk->id)
+                            ->whereExists(function ($query) use ($kurikulumId) {
+                                $query->select(DB::raw(1))
+                                    ->from('cpmk_mk')
+                                    ->whereColumn('cpmk_mk.mk_id', 'teknik_penilaian.mk_id')
+                                    ->whereColumn('cpmk_mk.cpmk_id', 'teknik_penilaian.cpmk_id')
+                                    ->where('cpmk_mk.kurikulum_id', $kurikulumId);
+                            })
                             ->pluck('bobot', 'teknik')
                             ->toArray();
 
-                        Log::info('CPMK Data (Index) for kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter . ': ' . json_encode([
+                        Log::info('CPMK Data (Index) for kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter . ', kurikulumId: ' . $kurikulumId . ': ' . json_encode([
                             'id' => $cpmk->id,
                             'kode_cpmk' => $cpmk->kode_cpmk,
                             'deskripsi' => $cpmk->deskripsi ?? 'Deskripsi tidak tersedia',
@@ -122,7 +125,7 @@ class PembobotanCpmkMkController extends Controller
 
             return view('pembobotan_cpmk_mk.index', compact('mks', 'cpmks', 'defaultMk', 'tahunFilter'));
         } catch (\Exception $e) {
-            Log::error('Error loading pembobotan CPMK-MK for kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter . ': ' . $e->getMessage());
+            Log::error('Error loading pembobotan CPMK-MK for kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter . ', kurikulumId: ' . $kurikulumId . ': ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat data pembobotan: ' . $e->getMessage());
         }
     }
@@ -331,7 +334,7 @@ class PembobotanCpmkMkController extends Controller
                             ->where('cpmk_id', $cpmk_id)
                             ->update([
                                 'bobot' => $bobot,
-                                'min_standard' => 50,
+                                'min_standard' => 55,
                                 'updated_at' => now()
                             ]);
                         Log::info('Updated bobot for mk_id: ' . $mk_id . ', cpmk_id: ' . $cpmk_id . ', bobot: ' . $bobot . ' for kode_prodi: ' . $kodeProdi . ', tahunFilter: ' . $tahunFilter);
@@ -340,7 +343,7 @@ class PembobotanCpmkMkController extends Controller
                             'mk_id' => $mk_id,
                             'cpmk_id' => $cpmk_id,
                             'bobot' => $bobot,
-                            'min_standard' => 50,
+                            'min_standard' => 55,
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);

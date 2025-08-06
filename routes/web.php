@@ -152,7 +152,7 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::post('/CPMK-CPL/update', [Cpmk_CplController::class, 'update'])->name('Cpmk_Cpl.update');
     Route::get('/CPMK-CPL/template', [Cpmk_CplController::class, 'downloadTemplate'])->name('cpmk_cpl.template');
     Route::post('/CPMK-CPL/import', [Cpmk_CplController::class, 'import'])->name('cpmk_cpl.import');
-    
+
 
     Route::get('/CPMK-MK', [Cpmk_MkController::class, 'index'])->name('Cpmk_Mk.index');
     Route::post('/CPMK-MK/update', [Cpmk_MkController::class, 'update'])->name('Cpmk_Mk.update');
@@ -160,16 +160,12 @@ Route::middleware(['auth', 'role:kps'])->group(function () {
     Route::post('/cpmk-mk/import', [Cpmk_MkController::class, 'import'])->name('cpmk_mk.import');
     Route::get('/total-bobot', [Cpmk_MkController::class, 'getTotalBobot'])->name('Cpmk_Mk.totalBobot');
 
-Route::get('/CPL-BK', [Cpl_BkController::class, 'index'])->name('Cpl_Bk.index');
-Route::post('/CPL-BK/update', [Cpl_BkController::class, 'update'])->name('cpl_bk.update');
-Route::get('/CPL-BK/template', [Cpl_BkController::class, 'downloadTemplate'])->name('cpl_bk.template');
-Route::post('/CPL-BK/import', [Cpl_BkController::class, 'import'])->name('cpl_bk.import');
+    Route::get('/CPL-BK', [Cpl_BkController::class, 'index'])->name('Cpl_Bk.index');
+    Route::post('/CPL-BK/update', [Cpl_BkController::class, 'update'])->name('cpl_bk.update');
+    Route::get('/CPL-BK/template', [Cpl_BkController::class, 'downloadTemplate'])->name('cpl_bk.template');
+    Route::post('/CPL-BK/import', [Cpl_BkController::class, 'import'])->name('cpl_bk.import');
 
 
-    // Route::get('/cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('Cpmk_Cpl_Mk.index');
-    // Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-CPL.index');
-    // Route::post('/pemetaan_cpmkpl/update', [PemetaancpmkplController::class, 'update'])->name('pemetaan_CPMK-CPL.update');
-    // Route::post('/pemetaan-cpl-cpmk-mk/store', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('cpmk_cpl_mk.store');
     Route::get('/cpl-cpmk-mk', [Cpmk_Cpl_Mk_Controller::class, 'index'])->name('Cpmk_Cpl_Mk.index');
     Route::post('/pemetaan-cpl-cpmk-mk/store', [Cpmk_Cpl_Mk_Controller::class, 'store'])->name('cpmk_cpl_mk.store');
     Route::get('/pemetaan_cpmkpl', [PemetaancpmkplController::class, 'index'])->name('pemetaan_CPMK-CPL.index');
@@ -216,6 +212,11 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::get('/penilaian/cpmk/{mahasiswa_id}/{mk_id}', [PenilaianCpmkController::class, 'index'])->name('penilaian.cpmk.index');
     Route::get('nilai/mahasiswa/get-mata-kuliah', [NilaiMahasiswaController::class, 'getMataKuliah'])
         ->name('nilai.mahasiswa.get_mata_kuliah');
+    
+    // rute untuk evaluasi cpmk
+    Route::post('/penilaian/cpmk/{mahasiswa_id}/{mk_id}/store-evaluation', [PenilaianCpmkController::class, 'storeEvaluation'])->name('penilaian.cpmk.store.evaluation');
+    Route::get('/evaluasi/obe/{mahasiswa_id}/{mk_id}/history', [PenilaianCpmkController::class, 'showEvaluationHistory'])->name('evaluasi.obe.history');
+    Route::get('/evaluasi/obe/{mahasiswa_id}/{mk_id}/evaluation/{evaluation_id}', [PenilaianCpmkController::class, 'showEvaluationDetail'])->name('evaluasi.obe.detail');
 });
 
 // Rute untuk Visualisasi Grafik Radar (hanya untuk Dosen)

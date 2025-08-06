@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cpl_mk', function (Blueprint $table) {
+        Schema::create('cpmk_mk', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cpl_id')->constrained('cpl')->onDelete('cascade'); // Relasi ke CPL
-            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');   // Relasi ke MK
-            $table->integer('bobot')->default(0); // Bobot CPL-MK, total harus 100% per CPL
+            $table->foreignId('cpmk_id')->constrained('cpmk')->onDelete('cascade');
+            $table->foreignId('mk_id')->constrained('mk')->onDelete('cascade');
+            $table->integer('bobot')->default(0); // Tambahkan kolom bobot
+            $table->decimal('min_standard', 5, 2)->default(0);
             $table->timestamps();
-            $table->unique(['cpl_id', 'mk_id']); // Pastikan kombinasi unik
             $table->unsignedBigInteger('kurikulum_id')->nullable();
             $table->foreign('kurikulum_id')->references('id')->on('kurikulum')->onDelete('set null');
+            $table->unique(['cpmk_id', 'mk_id', 'kurikulum_id'], 'cpmk_mk_cpmk_id_mk_id_kurikulum_id_unique'); // Constraint unik yang mencakup kurikulum_id
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cpl_mk');
+        Schema::dropIfExists('cpmk_mk');
     }
 };

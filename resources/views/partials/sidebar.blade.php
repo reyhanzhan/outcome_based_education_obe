@@ -65,15 +65,15 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('dosen.create') }}"
-                                    class="nav-link {{ request()->routeIs('dosen.create') ? 'active' : '' }}">
-                                    <p>Tambah Dosen</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="{{ route('dosen.index') }}"
                                     class="nav-link {{ request()->routeIs('dosen.index') ? 'active' : '' }}">
                                     <p>Daftar Dosen</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('dosen.create') }}"
+                                    class="nav-link {{ request()->routeIs('dosen.create') ? 'active' : '' }}">
+                                    <p>Tambah Dosen</p>
                                 </a>
                             </li>
                         </ul>
@@ -92,17 +92,18 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('mahasiswa.create') }}"
-                                    class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}">
-                                    <p>Tambah Mahasiswa</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="{{ route('mahasiswa.index') }}"
                                     class="nav-link {{ request()->routeIs('mahasiswa.index') ? 'active' : '' }}">
                                     <p>Daftar Mahasiswa</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('mahasiswa.create') }}"
+                                    class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}">
+                                    <p>Tambah Mahasiswa</p>
+                                </a>
+                            </li>
+                            
                         </ul>
                     </li>
                 @endif

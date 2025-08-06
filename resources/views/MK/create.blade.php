@@ -30,18 +30,6 @@
                             @enderror
                         </div>
 
-                        {{-- <div class="form-group">
-                        <label>Jenis MK</label>
-                        <select name="jenis_mk" class="form-control @error('jenis_mk') is-invalid @enderror" required>
-                            <option value="">-- Pilih Jenis MK --</option>
-                            <option value="Kuliah">Kuliah</option>
-                            <option value="Skripsi">Skripsi</option>
-                        </select>
-                        @error('jenis_mk')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div> --}}
-
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -60,8 +48,8 @@
                                     <select name="jenis_mk" class="form-control @error('jenis_mk') is-invalid @enderror"
                                         required>
                                         <option value="">-- Pilih Jenis MK --</option>
-                                        <option value="Kuliah">Kuliah</option>
-                                        <option value="Skripsi">Skripsi</option>
+                                        <option value="Wajib">Wajib</option>
+                                        <option value="Pilihan">Pilihan</option>
                                     </select>
                                     @error('jenis_mk')
                                         <div class="invalid-feedback">{{ $message }}</div>

@@ -282,19 +282,22 @@ class NilaiMahasiswaController extends Controller
             'mks' => function ($query) use ($mk, $tahunFilter, $kodeProdi) {
                 $query->where('mk_id', $mk->id)
                     ->whereHas('kelas', function ($q) use ($tahunFilter) {
-                        $q->where('tahun', $tahunFilter); // Filter berdasarkan tahunFilter seperti di PembobotanCpmkMkController
+                        $q->where('tahun', $tahunFilter);
                     })
                     ->withPivot('bobot', 'min_standard');
             },
             'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
                 $query->where('mahasiswa_id', $mahasiswa->id)->where('mk_id', $mk->id);
             }
-        ])->get();
+        ])->get()->filter(function ($cpmk) use ($mk) {
+            $bobot = $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0;
+            return $bobot > 0;
+        });
 
         if ($cpmks->isEmpty()) {
-            Log::warning('No CPMKs found for MK ID: ' . $mk->id);
+            Log::warning('No CPMKs with valid bobot found for MK ID: ' . $mk->id);
             return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                ->with('error', 'Tidak ada CPMK yang terkait dengan mata kuliah ini.');
+                ->with('error', 'Mohon isi bobot terlebih dahulu untuk CPMK terkait mata kuliah ini.');
         }
 
         $labels = $cpmks->pluck('kode_cpmk')->toArray();
@@ -319,91 +322,99 @@ class NilaiMahasiswaController extends Controller
     }
 
     public function index($nim, $kode_mk)
-    {
-        $periode = session('previous_periode');
-        $kelasInput = session('previous_kelas');
-        $tahunFilter = session('selected_year', '');
-        $user = Auth::user();
-        $kodeProdi = $user->kode_prodi;
+{
+    $periode = session('previous_periode');
+    $kelasInput = session('previous_kelas');
+    $tahunFilter = session('selected_year', '');
+    $user = Auth::user();
+    $kodeProdi = $user->kode_prodi;
 
-        if (!$periode || !$kelasInput || !$tahunFilter) {
-            Log::warning('Periode, kelas, or tahunFilter not found or invalid in session');
-            return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                ->with('error', 'Silakan pilih periode dan kelas yang sesuai dengan tahun terlebih dahulu.');
-        }
-
-        $krsYear = Krs::where('periode', $periode)->where('kode_mk', explode('|', $kelasInput)[0])->value('tahun');
-        if ($krsYear != $tahunFilter) {
-            Log::warning('Tahun from KRS ' . $krsYear . ' does not match tahunFilter ' . $tahunFilter);
-            return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                ->with('error', 'Periode yang dipilih tidak sesuai dengan tahun kurikulum.');
-        }
-
-        $mahasiswa = Mahasiswa::where('nim', $nim)->where('kode_prodi', $kodeProdi)->firstOrFail();
-        $mk = Mk::where('kode_mk', $kode_mk)->where('kode_prodi', $kodeProdi)->firstOrFail();
-
-        $krs = Krs::where('nim', $mahasiswa->nim)
-            ->where('periode', $periode)
-            ->where('kode_mk', explode('|', $kelasInput)[0])
-            ->where('nama_kelas', explode('|', $kelasInput)[1])
-            ->where('tahun', $tahunFilter)
-            ->whereHas('mahasiswa', function ($query) use ($kodeProdi) {
-                $query->where('kode_prodi', $kodeProdi);
-            })
-            ->first();
-
-        if (!$krs) {
-            Log::warning('KRS data not found for mahasiswa', ['nim' => $nim, 'periode' => $periode, 'kode_mk' => $kode_mk]);
-            return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini untuk periode dan kelas yang dipilih.');
-        }
-
-        $kurikulumId = $krs->kurikulum_id; // Ambil kurikulum_id dari krs
-
-        $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk) {
-            $query->where('mk_id', $mk->id);
-        })->with([
-            'mks' => function ($query) use ($mk, $tahunFilter, $kodeProdi) {
-                $query->where('mk_id', $mk->id)
-                    ->whereHas('kelas', function ($q) use ($tahunFilter) {
-                        $q->where('tahun', $tahunFilter); // Filter berdasarkan tahunFilter seperti di PembobotanCpmkMkController
-                    })
-                    ->withPivot('bobot', 'min_standard');
-            },
-            'teknikPenilaian' => function ($query) use ($mk) {
-                $query->where('mk_id', $mk->id);
-            },
-            'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
-                $query->where('mahasiswa_id', $mahasiswa->id)->where('mk_id', $mk->id);
-            }
-        ])->get();
-
-        if ($cpmks->isEmpty()) {
-            Log::warning('No CPMKs found for MK ID: ' . $mk->id);
-            return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
-                ->with('error', 'Tidak ada CPMK yang terkait dengan mata kuliah ini.');
-        }
-
-        $nilaiCpmks = [];
-        foreach ($cpmks as $cpmk) {
-            $nilai = $cpmk->nilaiCpmks->first();
-            $nilaiCpmks[$cpmk->id] = $nilai ? $nilai->nilai : 0;
-        }
-
-        $minStandard = $cpmks->isNotEmpty() ? ($cpmks->first()->mks->first()->pivot->min_standard ?? 55) : 55;
-
-        return view('nilai_mahasiswa.index', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'nilaiCpmks', 'periode', 'kelasInput', 'tahunFilter'));
+    if (!$periode || !$kelasInput || !$tahunFilter) {
+        Log::warning('Periode, kelas, or tahunFilter not found or invalid in session');
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Silakan pilih periode dan kelas yang sesuai dengan tahun terlebih dahulu.');
     }
 
-    public function store(Request $request)
-    {
-        $user = Auth::user();
-        Log::info('Request data: ' . json_encode($request->all()));
+    $krsYear = Krs::where('periode', $periode)->where('kode_mk', explode('|', $kelasInput)[0])->value('tahun');
+    if ($krsYear != $tahunFilter) {
+        Log::warning('Tahun from KRS ' . $krsYear . ' does not match tahunFilter ' . $tahunFilter);
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Periode yang dipilih tidak sesuai dengan tahun kurikulum.');
+    }
 
+    $mahasiswa = Mahasiswa::where('nim', $nim)->where('kode_prodi', $kodeProdi)->firstOrFail();
+    $mk = Mk::where('kode_mk', $kode_mk)->where('kode_prodi', $kodeProdi)->firstOrFail();
+
+    $krs = Krs::where('nim', $mahasiswa->nim)
+        ->where('periode', $periode)
+        ->where('kode_mk', explode('|', $kelasInput)[0])
+        ->where('nama_kelas', explode('|', $kelasInput)[1])
+        ->where('tahun', $tahunFilter)
+        ->whereHas('mahasiswa', function ($query) use ($kodeProdi) {
+            $query->where('kode_prodi', $kodeProdi);
+        })
+        ->first();
+
+    if (!$krs) {
+        Log::warning('KRS data not found for mahasiswa', ['nim' => $nim, 'periode' => $periode, 'kode_mk' => $kode_mk]);
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini untuk periode dan kelas yang dipilih.');
+    }
+
+    $kurikulumId = $krs->kurikulum_id;
+
+    $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk) {
+        $query->where('mk_id', $mk->id);
+    })->with([
+        'mks' => function ($query) use ($mk, $tahunFilter, $kodeProdi) {
+            $query->where('mk_id', $mk->id)
+                ->whereHas('kelas', function ($q) use ($tahunFilter) {
+                    $q->where('tahun', $tahunFilter);
+                })
+                ->withPivot('bobot', 'min_standard');
+        },
+        'teknikPenilaian' => function ($query) use ($mk) {
+            $query->where('mk_id', $mk->id);
+        },
+        'nilaiCpmks' => function ($query) use ($mahasiswa, $mk) {
+            $query->where('mahasiswa_id', $mahasiswa->id)->where('mk_id', $mk->id);
+        }
+    ])->get();
+
+    if ($cpmks->isEmpty()) {
+        Log::warning('No CPMKs found for MK ID: ' . $mk->id);
+        return redirect()->route('nilai.mahasiswa.choose_mata_kuliah')
+            ->with('error', 'Tidak ada CPMK yang terkait dengan mata kuliah ini.');
+    }
+
+    $hasValidBobot = $cpmks->contains(function ($cpmk) use ($mk) {
+        return ($cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0) > 0;
+    });
+
+    $nilaiCpmks = [];
+    foreach ($cpmks as $cpmk) {
+        $nilai = $cpmk->nilaiCpmks->first();
+        $nilaiCpmks[$cpmk->id] = $nilai ? $nilai->nilai : 0;
+    }
+
+    // Pastikan $minStandard adalah 55 kecuali ada nilai lain di pivot
+    $minStandard = $cpmks->isNotEmpty() ? (int)($cpmks->first()->mks->first()->pivot->min_standard ?? 55) : 55;
+    Log::info('Min Standard set to: ' . $minStandard); // Debugging
+
+    return view('nilai_mahasiswa.index', compact('mahasiswa', 'mk', 'cpmks', 'minStandard', 'nilaiCpmks', 'periode', 'kelasInput', 'tahunFilter', 'hasValidBobot'));
+}
+
+    public function store(Request $request)
+{
+    $user = Auth::user();
+    Log::info('Store method called with data: ' . json_encode($request->all()));
+
+    try {
         $request->validate([
             'mk_id' => 'required|exists:mk,id',
             'nim' => 'required|exists:mahasiswa,nim',
-            'min_standard' => 'required|integer|min:0|max:100',
+            // 'min_standard' => 'required|integer|min:0|max:100',
+            'min_standard' => 'required|numeric|min:0|max:100', // Ubah ke numeric untuk handle desimal
             'nilai' => 'required|array',
             'nilai.*' => 'nullable|numeric|min:0|max:100',
         ]);
@@ -424,7 +435,8 @@ class NilaiMahasiswaController extends Controller
         }
 
         $mkId = $request->input('mk_id');
-        $minStandard = $request->input('min_standard');
+        $minStandard = (int)$request->input('min_standard');
+        // $minStandard = $request->input('min_standard');
         $nim = $request->input('nim');
         $nilai = $request->input('nilai');
 
@@ -471,7 +483,12 @@ class NilaiMahasiswaController extends Controller
             );
         }
 
-        return redirect()->route('penilaian.cpmk.index', ['mahasiswa_id' => $mahasiswaId, 'mk_id' => $mkId])
+        Log::info('Nilai saved successfully for mahasiswa_id: ' . $mahasiswaId . ', mk_id: ' . $mkId);
+        return redirect()->route('nilai.mahasiswa.index', ['nim' => $nim, 'kode_mk' => $mk->kode_mk])
             ->with('success', 'Nilai berhasil disimpan!');
+    } catch (\Exception $e) {
+        Log::error('Error in store method: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan nilai. Silakan coba lagi.');
     }
+}
 }

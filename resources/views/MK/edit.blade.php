@@ -40,8 +40,8 @@
                         <label>Jenis MK</label>
                         <select name="jenis_mk" class="form-control @error('jenis_mk') is-invalid @enderror" required>
                             <option value="">-- Pilih Jenis MK --</option>
-                            <option value="Kuliah" {{ $mk->jenis_mk == 'Kuliah' ? 'selected' : '' }}>Kuliah</option>
-                            <option value="Skripsi" {{ $mk->jenis_mk == 'Skripsi' ? 'selected' : '' }}>Skripsi</option>
+                            <option value="Wajib" {{ $mk->jenis_mk == 'Wajib' ? 'selected' : '' }}>Wajib</option>
+                            <option value="Pilihan" {{ $mk->jenis_mk == 'Pilihan' ? 'selected' : '' }}>Pilihan</option>
                         </select>
                         @error('jenis_mk')
                             <div class="invalid-feedback">{{ $message }}</div>
