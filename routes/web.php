@@ -181,6 +181,7 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
     Route::post('/pembobotan/update', [PembobotanCpmkMkController::class, 'update'])->name('pembobotan.update');
     Route::get('/pembobotan/search-mk', [PembobotanCpmkMkController::class, 'searchMk'])->name('pembobotan.search-mk'); // Rute baru untuk pencarian MK
     Route::get('/pembobotan/get-jumlah-penilaian/{mk_id}', [PembobotanCpmkMkController::class, 'getJumlahPenilaian'])->name('pembobotan.get-jumlah-penilaian'); // Route baru
+    Route::post('/pembobotan/update-session-year', [PembobotanCpmkMkController::class, 'updateSessionYear'])->name('pembobotan.update-session-year');
 });
 
 Route::middleware(['auth', 'role:dosen|kps'])->group(function () {

@@ -31,12 +31,16 @@ class Cpmk extends Model
             ->withPivot('kurikulum_id', 'bobot', 'min_standard')
             ->withTimestamps();
     }
+
+    
     public function cplCpmks()
     {
         return $this->belongsToMany(Cpl::class, 'cpmk_cpl', 'cpmk_id', 'cpl_id')
             ->withPivot('kurikulum_id', 'bobot')
             ->withTimestamps();
     }
+
+    
 
     public function programStudi()
     {
@@ -65,6 +69,8 @@ class Cpmk extends Model
     {
         return $this->hasMany(TeknikPenilaian::class, 'cpmk_id');
     }
+
+    
 
     public function nilaiTeknikPenilaian()
     {

@@ -33,6 +33,8 @@ class Mk extends Model
         return $this->belongsTo(Kurikulum::class, 'kurikulum_id', 'id');
     }
 
+    
+
     public function kelas()
     {
         return $this->hasMany(Kelas::class, 'kode_mk', 'kode_mk'); // Asumsi hubungan via kode_mk

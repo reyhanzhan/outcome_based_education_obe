@@ -10,7 +10,12 @@ class Kurikulum extends Model
     protected $fillable = ['tahun', 'kode_prodi', 'kode_mk', 'semester', 'kurikulum_id',];
 
 
-
+    public function TeknikPenilaian()
+    {
+        return $this->hasMany(TeknikPenilaian::class, 'kurikulum_id', 'id');
+    }
+    
+    
     public function programStudi()
     {
         return $this->belongsTo(ProgramStudi::class, 'kode_prodi', 'kode_prodi');

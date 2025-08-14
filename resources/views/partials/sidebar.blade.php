@@ -103,7 +103,7 @@
                                     <p>Tambah Mahasiswa</p>
                                 </a>
                             </li>
-                            
+
                         </ul>
                     </li>
                 @endif
@@ -192,6 +192,8 @@
                     </li>
                 @endif
 
+                
+
                 <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
                     <li
@@ -203,6 +205,7 @@
                             <i class="right fas fa-angle-left"></i>
                         </a>
                         <ul class="nav nav-treeview">
+
                             <li class="nav-item">
                                 <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi, 'tahun' => session('selected_year', '')]) }}"
                                     class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">

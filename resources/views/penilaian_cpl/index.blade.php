@@ -82,13 +82,13 @@
             <div class="card">
                 <div class="card-header bg-primary d-flex justify-content-between align-items-center">
                     <h3 class="card-title">
-                    Penilaian CPL untuk {{ $mahasiswa->nama }}
-                    @if ($scope === 'periode')
-                        (Periode: {{ $periode }})
-                    @else
-                        (Semua Periode hingga {{ $periode }})
-                    @endif
-                </h3>
+                        Penilaian CPL untuk {{ $mahasiswa->nama }}
+                        @if ($scope === 'periode')
+                            (Periode: {{ $periode }})
+                        @else
+                            (Semua Periode hingga {{ $periode }})
+                        @endif
+                    </h3>
                     
                     <div>
                         @if ($scope === 'periode')
@@ -110,10 +110,10 @@
                     @endif
 
                     @if ($scope === 'all' && !empty($periodeList))
-                    <div class="alert alert-info">
-                        Menampilkan data dari periode: {{ implode(', ', $periodeList) }}
-                    </div>
-                @endif
+                        <div class="alert alert-info">
+                            Menampilkan data dari periode: {{ implode(', ', $periodeList) }}
+                        </div>
+                    @endif
 
                     @if (empty($cplData))
                         <div class="alert alert-warning">Tidak ada data CPL untuk mahasiswa ini.</div>
@@ -348,30 +348,35 @@
                     tbody.empty();
                     let totalBobot = 0;
                     let totalKontribusi = 0;
+                    const uniqueContributions = [];
 
                     console.log('Contributions:', cpl.contributions);
 
-                    if (cpl.contributions && Array.isArray(cpl.contributions) && cpl.contributions.length >
-                        0) {
+                    if (cpl.contributions && Array.isArray(cpl.contributions)) {
                         cpl.contributions.forEach(contribution => {
-                            totalBobot += parseFloat(contribution.bobot) || 0;
-                            totalKontribusi += parseFloat(contribution.kontribusi) || 0;
-                            tbody.append(`
-                            <tr>
-                                <td>${contribution.mk_kode || 'N/A'} - ${contribution.mk_deskripsi || 'N/A'}</td>
-                                <td>${contribution.cpmk_kode || 'N/A'}</td>
-                                <td>${contribution.nilai ? parseFloat(contribution.nilai).toFixed(2) : '0.00'}</td>
-                                <td>${contribution.bobot ? parseFloat(contribution.bobot).toFixed(2) : '0.00'}</td>
-                                <td>${contribution.kontribusi ? parseFloat(contribution.kontribusi).toFixed(2) : '0.00'}</td>
-                            </tr>
-                        `);
+                            // Buat kunci unik berdasarkan kombinasi mk_kode dan cpmk_kode
+                            const key = `${contribution.mk_kode}-${contribution.cpmk_kode}-${contribution.nilai}`;
+                            if (!uniqueContributions[key]) {
+                                totalBobot += parseFloat(contribution.bobot) || 0;
+                                totalKontribusi += parseFloat(contribution.kontribusi) || 0;
+                                uniqueContributions[key] = true;
+                                tbody.append(`
+                                    <tr>
+                                        <td>${contribution.mk_kode || 'N/A'} - ${contribution.mk_deskripsi || 'N/A'}</td>
+                                        <td>${contribution.cpmk_kode || 'N/A'}</td>
+                                        <td>${contribution.nilai ? parseFloat(contribution.nilai).toFixed(2) : '0.00'}</td>
+                                        <td>${contribution.bobot ? parseFloat(contribution.bobot).toFixed(2) : '0.00'}</td>
+                                        <td>${contribution.kontribusi ? parseFloat(contribution.kontribusi).toFixed(2) : '0.00'}</td>
+                                    </tr>
+                                `);
+                            }
                         });
                     } else {
                         tbody.append(`
-                        <tr>
-                            <td colspan="5">Tidak ada data kontribusi tersedia.</td>
-                        </tr>
-                    `);
+                            <tr>
+                                <td colspan="5">Tidak ada data kontribusi tersedia.</td>
+                            </tr>
+                        `);
                     }
 
                     $('#total-bobot').text(totalBobot.toFixed(2));
@@ -392,42 +397,41 @@
         });
     </script>
     <script>
-const ctx = document.getElementById('cplRadarChart').getContext('2d');
-const cplRadarChart = new Chart(ctx, {
-    type: 'radar',
-    data: {
-        labels: @json($labels),
-        datasets: @json($datasets),
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        // Ambil nilai dan label dataset
-                        let label = context.dataset.label || '';
-                        let value = context.parsed.r !== undefined ? context.parsed.r : context.parsed;
-                        return `${label}: ${value}%`;
-                    }
-                }
+        const ctx = document.getElementById('cplRadarChart').getContext('2d');
+        const cplRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: @json($labels),
+                datasets: @json($datasets),
             },
-            legend: {
-                display: true
-            }
-        },
-        scales: {
-            r: {
-                min: 0,
-                max: 100,
-                ticks: {
-                    callback: function(value) {
-                        return value + '%';
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let value = context.parsed.r !== undefined ? context.parsed.r : context.parsed;
+                                return `${label}: ${value}%`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-});
-</script>
+        });
+    </script>
 @endsection
