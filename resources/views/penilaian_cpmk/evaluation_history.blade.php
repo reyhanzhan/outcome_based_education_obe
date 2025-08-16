@@ -15,6 +15,7 @@
                         Tidak ada riwayat evaluasi untuk mata kuliah ini.
                     </div>
                 @else
+                <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -43,6 +44,7 @@
                         </tbody>
                     </table>
                 @endif
+                </div>
                 <a href="{{ route('penilaian.cpmk.index', ['mahasiswa_id' => $mahasiswa->id, 'mk_id' => $mk->id]) }}"
                    class="btn btn-secondary mt-3">
                     <i class="fas fa-arrow-left"></i> Kembali

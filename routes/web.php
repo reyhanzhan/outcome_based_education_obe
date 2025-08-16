@@ -228,7 +228,12 @@ Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:dosen|kps'])->group(function () {
+    // rute menu penilaian cpl semua periode 
+    Route::get('/penilaian/cpl/grafik', [PenilaianCplController::class, 'grafik'])->name('penilaian.cpl.grafik');
+
+    // rute penilaian cpl untuk mahasiswa tertentu
     Route::get('/penilaian/cpl/{mahasiswa_id}', [PenilaianCplController::class, 'index'])->name('penilaian.cpl.index');
+    
 });
 
 

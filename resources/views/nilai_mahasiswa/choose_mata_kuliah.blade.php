@@ -170,112 +170,108 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Inisialisasi Select2 untuk periode
-            $('#periode').select2({
-                placeholder: "-- Pilih Periode --",
-                width: '100%',
-                dropdownCssClass: 'custom-select2-dropdown',
-                dropdownAutoWidth: true,
-                minimumResultsForSearch: 3
-            });
+    $(document).ready(function() {
+        // Inisialisasi Select2 untuk periode
+        $('#periode').select2({
+            placeholder: "-- Pilih Periode --",
+            width: '100%',
+            dropdownCssClass: 'custom-select2-dropdown',
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 3
+        });
 
-            // Inisialisasi Select2 untuk kelas
-            $('#kelas').select2({
-                placeholder: "-- Pilih Kelas --",
-                width: '100%',
-                dropdownCssClass: 'custom-select2-dropdown',
-                dropdownAutoWidth: true,
-                minimumResultsForSearch: 3
-            });
+        // Inisialisasi Select2 untuk kelas
+        $('#kelas').select2({
+            placeholder: "-- Pilih Kelas --",
+            width: '100%',
+            dropdownCssClass: 'custom-select2-dropdown',
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 3
+        });
 
-            // Fungsi untuk memuat opsi kelas berdasarkan periode
-            function loadKelasOptions(periode) {
-                if (periode) {
-                    $.ajax({
-                        url: '{{ route('get.kelas.by.periode') }}',
-                        method: 'GET',
-                        data: {
-                            periode: periode
-                        },
-                        success: function(response) {
-                            let kelasSelect = $('#kelas');
-                            let currentValue = kelasSelect.val(); // Simpan nilai saat ini
-                            kelasSelect.empty(); // Kosongkan dropdown
-                            kelasSelect.append(new Option('-- Pilih Kelas --', '', true, true));
+        // Fungsi untuk memuat opsi kelas berdasarkan periode
+        function loadKelasOptions(periode) {
+            if (periode) {
+                $.ajax({
+                    url: '{{ route('get.kelas.by.periode') }}',
+                    method: 'GET',
+                    data: { periode: periode },
+                    success: function(response) {
+                        let kelasSelect = $('#kelas');
+                        let currentValue = kelasSelect.val(); // Simpan nilai saat ini
+                        kelasSelect.empty(); // Kosongkan dropdown
+                        kelasSelect.append(new Option('-- Pilih Kelas --', '', true, true));
 
-                            // Isi dropdown dengan data dari AJAX
+                        if (response.options && response.options.length > 0) {
                             response.options.forEach(function(option) {
-                                let newOption = new Option(option.text, option.id, false,
-                                    false);
+                                let newOption = new Option(option.text, option.id, false, false);
                                 kelasSelect.append(newOption);
                                 if (option.id === currentValue) {
                                     newOption.selected = true;
                                 }
                             });
-                            kelasSelect.trigger('change'); // Perbarui Select2
-                        },
-                        error: function(xhr) {
-                            console.log('Error fetching kelas: ', xhr);
+                            console.log('Loaded options: ', response.options);
+                        } else {
+                            console.log('No options available for periode: ' + periode);
+                            kelasSelect.append(new Option('Tidak ada kelas tersedia', '', true, true));
                         }
-                    });
-                } else {
-                    $('#kelas').empty().append(new Option('-- Pilih Kelas --', '', true, true)).trigger('change');
-                }
-            }
-
-            // Muat opsi kelas saat periode dipilih
-            $('#periode').on('select2:select', function(e) {
-                let periode = $(this).val();
-                console.log('Selected Periode: ' + periode);
-                loadKelasOptions(periode);
-                $('#kelas').val(null).trigger('change'); // Reset kelas saat periode berubah
-            });
-
-            // Submit form saat kelas dipilih
-            $('#kelas').on('select2:select', function(e) {
-                console.log('Selected Kelas: ' + $(this).val());
-                $('#filterForm').submit();
-            });
-
-            // Muat ulang opsi kelas saat halaman dimuat
-            $(document).ready(function() {
-                let periode = $('#periode').val();
-                if (periode) {
-                    loadKelasOptions(periode);
-                }
-
-                // Inisialisasi DataTable dengan pagination dan pencarian
-                $('#mahasiswaTable').DataTable({
-                    paging: true, // Aktifkan pagination
-                    pageLength: 10, // Jumlah baris per halaman
-                    searching: true, // Aktifkan pencarian
-                    responsive: true, // Responsivitas
-                    order: [
-                        [0, 'asc']
-                    ], // Urutkan berdasarkan kolom NIM (indeks 0)
-                    language: {
-                        search: "Cari Nama Mahasiswa:", // Ubah label pencarian
-                        paginate: {
-                            next: "Selanjutnya",
-                            previous: "Sebelumnya"
-                        },
-                        info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri", // Kustomisasi info
-                        infoEmpty: "Tidak ada data", // Info saat kosong
-                        lengthMenu: "Tampilkan _MENU_ entri" // Kustomisasi dropdown jumlah entri
+                        kelasSelect.trigger('change'); // Perbarui Select2
+                    },
+                    error: function(xhr) {
+                        console.log('Error fetching kelas: ', xhr.responseText);
                     }
                 });
-            });
+            } else {
+                $('#kelas').empty().append(new Option('-- Pilih Kelas --', '', true, true)).trigger('change');
+            }
+        }
 
-            // Debugging saat submit
-            $('#filterForm').on('submit', function() {
-                let periode = $('#periode').val();
-                console.log('Form submitted with Periode: ' + periode);
-                console.log('Form submitted with Kelas: ' + $('#kelas').val());
-                loadKelasOptions(periode); // Muat ulang opsi kelas saat submit
+        // Muat opsi kelas saat periode dipilih
+        $('#periode').on('select2:select', function(e) {
+            let periode = $(this).val();
+            console.log('Selected Periode: ' + periode);
+            loadKelasOptions(periode);
+            $('#kelas').val(null).trigger('change'); // Reset kelas saat periode berubah
+        });
+
+        // Submit form saat kelas dipilih
+        $('#kelas').on('select2:select', function(e) {
+            console.log('Selected Kelas: ' + $(this).val());
+            $('#filterForm').submit();
+        });
+
+        // Muat ulang opsi kelas saat halaman dimuat
+        $(document).ready(function() {
+            let periode = $('#periode').val();
+            if (periode) {
+                loadKelasOptions(periode);
+            }
+
+            // Inisialisasi DataTable
+            $('#mahasiswaTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                searching: true,
+                responsive: true,
+                order: [[0, 'asc']],
+                language: {
+                    search: "Cari Nama Mahasiswa:",
+                    paginate: { next: "Selanjutnya", previous: "Sebelumnya" },
+                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri",
+                    infoEmpty: "Tidak ada data",
+                    lengthMenu: "Tampilkan _MENU_ entri"
+                }
             });
         });
-    </script>
+
+        $('#filterForm').on('submit', function() {
+            let periode = $('#periode').val();
+            console.log('Form submitted with Periode: ' + periode);
+            console.log('Form submitted with Kelas: ' + $('#kelas').val());
+            loadKelasOptions(periode);
+        });
+    });
+</script>
 
     <!-- CSS DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">

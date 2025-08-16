@@ -28,43 +28,43 @@ class KrsController extends Controller
     }
 
     public function index()
-    {
-        try {
-            $kodeProdi = Auth::user()->kode_prodi;
-            if (is_null($kodeProdi)) {
-                Log::warning('Kode prodi is null for user: ' . Auth::user()->email);
-                return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
-            }
-
-            $tahunFilter = request('tahun', session('selected_year'));
-
-            // Simpan tahun yang dipilih ke session
-            if (request()->has('tahun')) {
-                session(['selected_year' => request('tahun')]);
-            } elseif (!session('selected_year')) {
-                session(['selected_year' => '']); // Default ke "Semua Tahun" jika belum ada
-            }
-
-            // Ambil daftar tahun unik dari KRS untuk dropdown
-            $availableYears = Krs::where('kode_prodi', $kodeProdi)
-                ->distinct()
-                ->pluck('tahun')
-                ->sortDesc()
-                ->values();
-
-            // Query KRS berdasarkan filter tahun
-            $query = Krs::where('kode_prodi', $kodeProdi)->with('mahasiswa', 'mk');
-            if ($tahunFilter) {
-                $query->where('tahun', $tahunFilter);
-            }
-            $krs = $query->get();
-
-            return view('krs.index', compact('krs', 'availableYears'));
-        } catch (\Exception $e) {
-            Log::error('Error fetching KRS: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data KRS.');
+{
+    try {
+        $kodeProdi = Auth::user()->kode_prodi;
+        if (is_null($kodeProdi)) {
+            Log::warning('Kode prodi is null for user: ' . Auth::user()->email);
+            return redirect()->back()->with('error', 'Kode prodi tidak ditemukan.');
         }
+
+        $tahunFilter = request('tahun', session('selected_year'));
+
+        // Simpan tahun yang dipilih ke session
+        if (request()->has('tahun')) {
+            session(['selected_year' => request('tahun')]);
+        } elseif (!session('selected_year')) {
+            session(['selected_year' => '']); // Default ke "Semua Tahun" jika belum ada
+        }
+
+        // Ambil daftar tahun unik dari KRS untuk dropdown
+        $availableYears = Krs::where('kode_prodi', $kodeProdi)
+            ->distinct()
+            ->pluck('tahun')
+            ->sortDesc()
+            ->values();
+
+        // Query KRS berdasarkan filter tahun
+        $query = Krs::where('kode_prodi', $kodeProdi)->with('mahasiswa', 'mk');
+        if ($tahunFilter) {
+            $query->where('tahun', $tahunFilter);
+        }
+        $krs = $query->get();
+
+        return view('krs.index', compact('krs', 'availableYears'));
+    } catch (\Exception $e) {
+        Log::error('Error fetching KRS: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat mengambil data KRS.');
     }
+}
 
     public function create()
     {

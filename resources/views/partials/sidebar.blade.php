@@ -192,11 +192,9 @@
                     </li>
                 @endif
 
-                
-
                 <!-- Penilaian -->
                 @if (Auth::check() && in_array(Auth::user()->role, ['dosen', 'kps']))
-                    <li
+                    {{-- <li
                         class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
                         <a href="#"
                             class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('nilai/mahasiswa*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
@@ -205,7 +203,6 @@
                             <i class="right fas fa-angle-left"></i>
                         </a>
                         <ul class="nav nav-treeview">
-
                             <li class="nav-item">
                                 <a href="{{ route('pembobotan.index', ['kode_prodi' => Auth::user()->kode_prodi, 'tahun' => session('selected_year', '')]) }}"
                                     class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">
@@ -216,6 +213,43 @@
                                 <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah', ['tahun' => session('selected_year', '')]) }}"
                                     class="nav-link {{ request()->is('nilai/mahasiswa*') || request()->is('penilaian/cpl/*') || request()->is('penilaian/cpmk/*') || request()->routeIs('nilai.mahasiswa.choose_mata_kuliah') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
                                     <p>Nilai Mahasiswa</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('penilaian.cpl.grafik') }}"
+                                    class="nav-link {{ request()->is('penilaian/cpl/grafik*') ? 'active' : '' }}">
+                                    <p>Grafik CPL</p>
+                                </a>
+                            </li>
+                
+                        </ul>
+                    </li> --}}
+
+                    <li
+                        class="nav-item has-treeview {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('get-kelas-by-periode') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ request()->is('pembobotan*') || request()->is('nilai*') || request()->is('penilaian*') || request()->is('visualisasi*') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-chart-bar"></i>
+                            <p>Penilaian</p>
+                            <i class="right fas fa-angle-left"></i>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('pembobotan.index') }}"
+                                    class="nav-link {{ request()->is('pembobotan*') ? 'active' : '' }}">
+                                    <p>Pembobotan</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}"
+                                    class="nav-link {{ request()->is('nilai/mahasiswa*') || request()->routeIs('nilai.mahasiswa.choose_mata_kuliah') || request()->is('get-kelas-by-periode') ? 'active' : '' }}">
+                                    <p>Nilai Mahasiswa</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('penilaian.cpl.grafik') }}"
+                                    class="nav-link {{ request()->is('penilaian/cpl/grafik*') ? 'active' : '' }}">
+                                    <p>Grafik CPL</p>
                                 </a>
                             </li>
                         </ul>

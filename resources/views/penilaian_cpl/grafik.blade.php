@@ -1,6 +1,6 @@
 @extends('layouts_adminlte.app')
 
-@section('title', 'Penilaian CPL')
+@section('title', 'Grafik CPL')
 
 @section('css')
     <style>
@@ -11,13 +11,15 @@
 
         .chart-container {
             position: relative;
-            margin: auto;
-            height: 500px;
-            width: 90%;
-            padding: 20px;
+            margin: 20px auto;
+            padding: 15px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            height: 60vh;
+            min-height: 300px;
         }
 
         .detail-table {
@@ -67,9 +69,102 @@
             z-index: 1040;
         }
 
+        /* Styling untuk form select */
+        .card-header .form-inline {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 400px; /* Batas maksimum form */
+        }
+
+        .card-header .form-group {
+            flex: 1;
+            margin: 0;
+        }
+
+        .card-header .form-control {
+            width: 100%;
+            min-width: 150px; /* Minimum lebar agar tetap fungsional */
+            max-width: 100%; /* Mengikuti lebar form-inline */
+            overflow: hidden; /* Mencegah teks meluber */
+            text-overflow: ellipsis; /* Tambahkan ellipsis jika teks terlalu panjang */
+            white-space: nowrap; /* Pastikan teks tidak pindah baris */
+        }
+
+        .card-header .select2-container .select2-selection--single {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-header .select2-container .select2-dropdown {
+            width: 100% !important;
+            max-width: 400px !important; /* Batas maksimum dropdown */
+            min-width: 150px !important; /* Minimum lebar dropdown */
+        }
+
+        /* Responsivitas untuk card header */
+        @media (max-width: 991px) {
+            .chart-container {
+                height: 50vh;
+                padding: 10px;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .card-header .form-inline {
+                max-width: 300px;
+                margin-top: 10px;
+            }
+            .detail-table th,
+            .detail-table td {
+                padding: 8px;
+            }
+        }
+
         @media (max-width: 768px) {
             .chart-container {
-                height: 300px;
+                height: 40vh;
+                width: 95%;
+                padding: 8px;
+            }
+            .card-header .form-inline {
+                max-width: 250px;
+            }
+            .detail-table th,
+            .detail-table td {
+                padding: 6px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .chart-container {
+                height: 35vh;
+                width: 100%;
+                margin: 10px 0;
+            }
+            .card-header {
+                padding: 10px;
+            }
+            .card-header .form-inline {
+                max-width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .card-header .form-group {
+                margin-bottom: 5px;
+            }
+            .card-header .form-control {
+                width: 100%;
+            }
+            .detail-table th,
+            .detail-table td {
+                padding: 4px;
+                font-size: 12px;
             }
         }
     </style>
@@ -79,39 +174,24 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">
-                        Penilaian CPL untuk {{ $mahasiswa->nama }}
-                        @if ($scope === 'periode')
-                            (Periode: {{ $periode }})
-                        @else
-                            (Semua Periode hingga {{ $periode }})
-                        @endif
-                    </h3>
-                    
-                    <div>
-                        @if ($scope === 'periode')
-                            <a href="{{ route('penilaian.cpl.index', ['mahasiswa_id' => $mahasiswa->id, 'scope' => 'all']) }}"
-                                class="btn btn-info btn-sm mr-2">Lihat Semua Periode</a>
-                        @else
-                            <a href="{{ route('penilaian.cpl.index', ['mahasiswa_id' => $mahasiswa->id, 'scope' => 'periode']) }}"
-                                class="btn btn-info btn-sm mr-2">Lihat Per Periode</a>
-                        @endif
-                        <a href="{{ route('nilai.mahasiswa.choose_mata_kuliah') }}?periode={{ $periode }}&kelas={{ session('previous_kelas') }}"
-                            class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
+                <div class="card-header bg-primary d-flex flex-column flex-md-row justify-content-between align-items-center p-3">
+                    <h3 class="card-title mb-2 mb-md-0" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">Grafik Pencapaian CPL untuk {{ $mahasiswa->nama ?? 'N/A' }} (Semua Periode)</h3>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="mahasiswa_id" class="mr-2">Pilih Mahasiswa:</label>
+                            <select name="mahasiswa_id" id="mahasiswa_id" class="form-control">
+                                @foreach ($mahasiswas as $mhs)
+                                    <option value="{{ $mhs->id }}" {{ $mhs->id == ($mahasiswa->id ?? null) ? 'selected' : '' }}>
+                                        {{ $mhs->nama }} ({{ $mhs->nim }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
                     @if (session('error'))
                         <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-
-                    @if ($scope === 'all' && !empty($periodeList))
-                        <div class="alert alert-info">
-                            Menampilkan data dari periode: {{ implode(', ', $periodeList) }}
-                        </div>
                     @endif
 
                     @if (empty($cplData))
@@ -125,34 +205,34 @@
                         <div class="mt-4">
                             <h4>Ringkasan Pencapaian CPL</h4>
                             <div class="table-responsive">
-                            <table class="detail-table">
-                                <thead>
-                                    <tr>
-                                        <th>Kode CPL</th>
-                                        <th>Deskripsi CPL</th>
-                                        <th>Pencapaian (%)</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($cplData as $index => $cpl)
+                                <table class="detail-table">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $cpl['kode_cpl'] }}</td>
-                                            <td>{{ $cpl['deskripsi'] }}</td>
-                                            <td class="{{ $cpl['pencapaian_cpl'] < $minStandard ? 'below-min' : '' }}">
-                                                {{ number_format($cpl['pencapaian_cpl'], 2) }}%
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-primary btn-sm detail-cpl-btn"
-                                                    data-cpl-id="{{ $index }}"
-                                                    data-cpl='{{ json_encode($cpl, JSON_HEX_QUOT | JSON_HEX_TAG) }}'>
-                                                    Detail
-                                                </button>
-                                            </td>
+                                            <th>Kode CPL</th>
+                                            <th>Deskripsi CPL</th>
+                                            <th>Pencapaian (%)</th>
+                                            <th>Aksi</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($cplData as $index => $cpl)
+                                            <tr>
+                                                <td>{{ $cpl['kode_cpl'] }}</td>
+                                                <td>{{ $cpl['deskripsi'] }}</td>
+                                                <td class="{{ $cpl['pencapaian_cpl'] < $minStandard ? 'below-min' : '' }}">
+                                                    {{ number_format($cpl['pencapaian_cpl'], 2) }}%
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-primary btn-sm detail-cpl-btn"
+                                                        data-cpl-id="{{ $index }}"
+                                                        data-cpl='{{ json_encode($cpl, JSON_HEX_QUOT | JSON_HEX_TAG) }}'>
+                                                        Detail
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     @endif
@@ -213,9 +293,25 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(document).ready(function() {
+            // Inisialisasi Select2 pada dropdown mahasiswa tanpa tombol clear
+            $('#mahasiswa_id').select2({
+                placeholder: "Pilih Mahasiswa",
+                width: '100%',
+                dropdownCssClass: 'custom-select2-dropdown',
+                dropdownAutoWidth: true,
+                minimumResultsForSearch: 3 // Menampilkan pencarian jika ada lebih dari 3 opsi
+            });
+
+            // Submit form saat ada perubahan seleksi
+            $('#mahasiswa_id').on('change', function() {
+                $(this).closest('form').submit();
+            });
+
             // Ambil data labels dari PHP
             const labels = @json($labels);
             const datasets = @json($datasets);
@@ -296,9 +392,7 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                font: {
-                                    size: 14
-                                }
+                                size: 14
                             }
                         },
                         tooltip: {
@@ -355,7 +449,6 @@
 
                     if (cpl.contributions && Array.isArray(cpl.contributions)) {
                         cpl.contributions.forEach(contribution => {
-                            // Buat kunci unik berdasarkan kombinasi mk_kode dan cpmk_kode
                             const key = `${contribution.mk_kode}-${contribution.cpmk_kode}-${contribution.nilai}`;
                             if (!uniqueContributions[key]) {
                                 totalBobot += parseFloat(contribution.bobot) || 0;
@@ -395,44 +488,6 @@
                 console.log('Tombol X diklik');
                 $('#cplDetailModal').modal('hide');
             });
-        });
-    </script>
-    <script>
-        const ctx = document.getElementById('cplRadarChart').getContext('2d');
-        const cplRadarChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: @json($labels),
-                datasets: @json($datasets),
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                let value = context.parsed.r !== undefined ? context.parsed.r : context.parsed;
-                                return `${label}: ${value}%`;
-                            }
-                        }
-                    },
-                    legend: {
-                        display: true
-                    }
-                },
-                scales: {
-                    r: {
-                        min: 0,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        }
-                    }
-                }
-            }
         });
     </script>
 @endsection

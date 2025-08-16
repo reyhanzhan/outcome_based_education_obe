@@ -39,6 +39,7 @@
                                     <th>Periode</th>
                                     <th>NIM</th>
                                     <th>Kode MK</th>
+                                    <th>Deskripsi</th>
                                     <th>Tahun</th>
                                     <th>Nama Kelas</th>
                                     <th>Aksi</th>
@@ -51,6 +52,7 @@
                                         <td>{{ $k->periode ?? 'N/A' }}</td>
                                         <td>{{ $k->mahasiswa ? $k->mahasiswa->nim ?? 'N/A' : 'N/A' }}</td>
                                         <td>{{ $k->kode_mk ?? 'N/A' }}</td>
+                                        <td>{{ $k->mk ? $k->mk->deskripsi ?? 'N/A' : 'N/A' }}</td>
                                         <td>{{ $k->tahun ?? 'N/A' }}</td>
                                         <td>{{ $k->nama_kelas ?? 'N/A' }}</td>
                                         <td class="text-center">
@@ -78,6 +80,7 @@
                                     <th>Periode</th>
                                     <th>NIM</th>
                                     <th>Kode MK</th>
+                                    <th>Deskripsi</th>
                                     <th>Tahun</th>
                                     <th>Nama Kelas</th>
                                     <th>Aksi</th>

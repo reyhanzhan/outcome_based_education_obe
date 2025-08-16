@@ -145,7 +145,8 @@
                             <label for="minStandard">Standar Minimum Nilai CPMK:</label>
                             <p class="form-control-static">{{ $minStandard }}</p>
                             <input type="hidden" name="min_standard" value="{{ $minStandard }}">
-                            <small class="form-text text-muted">Standar minimum untuk semua CPMK di MK ini adalah {{ $minStandard }}. Klik
+                            <small class="form-text text-muted">Standar minimum untuk semua CPMK di MK ini adalah
+                                {{ $minStandard }}. Klik
                                 kode CPMK untuk melihat deskripsi dan teknik penilaian.</small>
                         </div>
 
@@ -160,12 +161,13 @@
                                                     data-content="{{ $cpmk->deskripsi ?? 'Deskripsi tidak tersedia' }}"
                                                     data-teknik="{{ json_encode(
                                                         $cpmk->teknikPenilaian->where('bobot', '>', 0)->map(function ($teknik) {
-                                                            return ['teknik' => $teknik->teknik, 'bobot' => $teknik->bobot];
-                                                        })->values()->toArray(),
+                                                                return ['teknik' => $teknik->teknik, 'bobot' => $teknik->bobot];
+                                                            })->values()->toArray(),
                                                     ) }}"
                                                     style="cursor: pointer;">
                                                     {{ $cpmk->kode_cpmk }}
-                                                    ({{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}%)
+                                                    ({{ $cpmk->teknikPenilaian->sum('bobot') }}%)
+                                                    <!-- Gunakan bobot dari teknikPenilaian -->
                                                 </span>
                                             </th>
                                         @endforeach
@@ -179,9 +181,12 @@
                                                 <div class="input-group">
                                                     <input type="number" name="nilai[{{ $cpmk->id }}]"
                                                         class="form-control nilai-input" data-min="{{ $minStandard }}"
-                                                        data-bobot="{{ $cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0 }}"
-                                                        value="{{ number_format($nilaiCpmks[$cpmk->id] ?? 0, 2) }}"
-                                                        min="0" max="100" step="0.01" @if (($cpmk->mks->where('id', $mk->id)->first()->pivot->bobot ?? 0) == 0) disabled @endif>
+                                                        data-bobot="{{ $cpmk->teknikPenilaian->sum('bobot') }}" 
+                                                    value="{{ number_format($nilaiCpmks[$cpmk->id] ?? 0, 2) }}"
+                                                    min="0" max="100" step="0.01"
+                                                    @if ($cpmk->teknikPenilaian->sum('bobot') == 0)
+                                                        disabled
+                                                    @endif> <!-- Nonaktifkan jika bobot 0 -->
                                                 </div>
                                             </td>
                                         @endforeach
@@ -190,7 +195,8 @@
                             </table>
                         </div>
                         <div class="mt-3 text-right">
-                            <button type="submit" class="btn btn-primary" id="submitButton" @if (!$hasValidBobot) disabled @endif>Simpan Nilai</button>
+                            <button type="submit" class="btn btn-primary" id="submitButton"
+                                @if (!$hasValidBobot) disabled @endif>Simpan Nilai</button>
                         </div>
                     </form>
 
@@ -277,7 +283,8 @@
                     let bobot = parseInt($(this).data('bobot'));
                     if (bobot > 0 && (isNaN(value) || value < 0 || value > 100)) {
                         isValid = false;
-                        toastr.error('Semua nilai harus antara 0 dan 100 untuk CPMK dengan bobot > 0.');
+                        toastr.error(
+                            'Semua nilai harus antara 0 dan 100 untuk CPMK dengan bobot > 0.');
                         return false;
                     }
                 });

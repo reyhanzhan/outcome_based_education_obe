@@ -88,6 +88,7 @@
 
                     <div class="mt-3">
                         <h4>Detail Nilai CPMK:</h4>
+                        <div class="table-responsive">
                         <table class="detail-table">
                             <thead>
                                 <tr>
@@ -117,6 +118,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 @endif
             </div>
