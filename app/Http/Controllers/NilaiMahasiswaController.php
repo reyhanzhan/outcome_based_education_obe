@@ -280,7 +280,7 @@ class NilaiMahasiswaController extends Controller
             ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini.');
     }
 
-    $kurikulumId = $krs->kurikulum_id; // Ambil kurikulum_id dari krs
+    $kurikulumId = $this->resolveKurikulumId($krs, $mk->id, $kodeProdi, $tahunFilter);
 
     // Ambil semua CPMK dengan filter kurikulum_id
     $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk, $kurikulumId) {
@@ -380,7 +380,7 @@ class NilaiMahasiswaController extends Controller
             ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini untuk periode dan kelas yang dipilih.');
     }
 
-    $kurikulumId = $krs->kurikulum_id;
+    $kurikulumId = $this->resolveKurikulumId($krs, $mk->id, $kodeProdi, $tahunFilter);
 
     // Ambil semua CPMK dari cpmk_mk untuk mk_id dan kurikulum_id dengan eager loading mks
     $cpmks = Cpmk::join('cpmk_mk', 'cpmk.id', '=', 'cpmk_mk.cpmk_id')

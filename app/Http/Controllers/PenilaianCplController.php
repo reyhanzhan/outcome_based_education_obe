@@ -61,7 +61,7 @@ class PenilaianCplController extends Controller
                     ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini.');
             }
 
-            $kurikulumId = $krs->kurikulum_id;
+            $kurikulumId = $this->resolveKurikulumId($krs, Mk::where("kode_mk", $kodeMk)->where("kode_prodi", $kodeProdi)->value("id"), $kodeProdi, $tahunFilter);
 
             // Filter CPL berdasarkan kode_prodi dan matakuliah tertentu saat scope 'periode'
             $cpls = Cpl::where('kode_prodi', $kodeProdi)

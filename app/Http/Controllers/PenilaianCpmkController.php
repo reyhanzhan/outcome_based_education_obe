@@ -82,7 +82,7 @@ class PenilaianCpmkController extends Controller
             ->with('error', 'Mahasiswa tidak terdaftar pada mata kuliah ini.');
     }
 
-    $kurikulumId = $krs->kurikulum_id;
+    $kurikulumId = $this->resolveKurikulumId($krs, $mk->id, $kodeProdi, $tahunFilter);
 
     // Ambil data CPMK dengan filter kurikulum_id dan debugging
     $cpmks = Cpmk::whereHas('mks', function ($query) use ($mk_id, $kurikulumId) {
